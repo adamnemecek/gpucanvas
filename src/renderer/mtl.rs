@@ -69,7 +69,7 @@ impl Mtl {
         let device = metal::Device::system_default().unwrap();
         let library = device.new_library_with_file("sha ders.metallib").expect("library not found");
         let command_queue = device.new_command_queue();
-    
+
         let debug = true;
         let antialias = true;
 
@@ -97,7 +97,7 @@ impl Mtl {
             // is_opengles: false,
             view: [0.0, 0.0],
             // program: program,
-            
+
             // vert_arr: 0,
             // vert_buff: 0,
             device,
@@ -156,7 +156,10 @@ impl Mtl {
         }
     }
 
-    fn set_composite_operation(&self, blend_state: CompositeOperationState) {
+    fn set_composite_operation(
+        &self,
+        blend_state: CompositeOperationState
+    ) {
 //         unsafe {
 //             gl::BlendFuncSeparate(
 //                 Self::gl_factor(blend_state.src_rgb),
@@ -167,7 +170,12 @@ impl Mtl {
 //         }
     }
 
-    fn convex_fill(&self, images: &ImageStore<MtlTexture>, cmd: &Command, gpu_paint: Params) {
+    fn convex_fill(
+        &self,
+        images: &ImageStore<MtlTexture>,
+        cmd: &Command,
+        gpu_paint: Params
+    ) {
         self.set_uniforms(images, gpu_paint, cmd.image, cmd.alpha_mask);
 
         for drawable in &cmd.drawables {
@@ -183,7 +191,13 @@ impl Mtl {
 //         self.check_error("convex_fill");
     }
 
-    fn concave_fill(&self, images: &ImageStore<MtlTexture>, cmd: &Command, stencil_paint: Params, fill_paint: Params) {
+    fn concave_fill(
+        &self,
+        images: &ImageStore<MtlTexture>,
+        cmd: &Command,
+        stencil_paint: Params,
+        fill_paint: Params
+    ) {
 //         unsafe {
 //             gl::Enable(gl::STENCIL_TEST);
 //             gl::StencilMask(0xff);
@@ -251,7 +265,12 @@ impl Mtl {
 //         self.check_error("concave_fill");
     }
 
-    fn stroke(&self, images: &ImageStore<MtlTexture>, cmd: &Command, paint: Params) {
+    fn stroke(
+        &self,
+        images: &ImageStore<MtlTexture>,
+        cmd: &Command,
+        paint: Params
+    ) {
         self.set_uniforms(images, paint, cmd.image, cmd.alpha_mask);
 
 //         for drawable in &cmd.drawables {
@@ -263,7 +282,13 @@ impl Mtl {
 //         self.check_error("stroke");
     }
 
-    fn stencil_stroke(&self, images: &ImageStore<MtlTexture>, cmd: &Command, paint1: Params, paint2: Params) {
+    fn stencil_stroke(
+        &self,
+        images: &ImageStore<MtlTexture>,
+        cmd: &Command,
+        paint1: Params,
+        paint2: Params
+    ) {
 //         unsafe {
 //             gl::Enable(gl::STENCIL_TEST);
 //             gl::StencilMask(0xff);
@@ -316,8 +341,14 @@ impl Mtl {
 //         self.check_error("stencil_stroke");
     }
 
-    fn triangles(&self, images: &ImageStore<MtlTexture>, cmd: &Command, paint: Params) {
+    fn triangles(
+        &self,
+        images: &ImageStore<MtlTexture>,
+        cmd: &Command,
+        paint: Params
+    ) {
         self.set_uniforms(images, paint, cmd.image, cmd.alpha_mask);
+        // set render pipeline state
 
         if let Some((start, count)) = cmd.triangles_verts {
             // unsafe { gl::DrawArrays(gl::TRIANGLES, start as i32, count as i32); }
@@ -327,7 +358,13 @@ impl Mtl {
 //         self.check_error("triangles");
     }
 
-    fn set_uniforms(&self, images: &ImageStore<MtlTexture>, paint: Params, image_tex: Option<ImageId>, alpha_tex: Option<ImageId>) {
+    fn set_uniforms(
+        &self,
+        images: &ImageStore<MtlTexture>,
+        paint: Params,
+        image_tex: Option<ImageId>,
+        alpha_tex: Option<ImageId>
+    ) {
 //         let arr = UniformArray::from(paint);
 //         self.program.set_config(UniformArray::size() as i32, arr.as_ptr());
 //         self.check_error("set_uniforms uniforms");
@@ -349,7 +386,13 @@ impl Mtl {
 //         self.check_error("set_uniforms texture");
     }
 
-    fn clear_rect(&mut self, x: u32, y: u32, width: u32, height: u32, color: Color) {
+    fn clear_rect(
+        &mut self,
+        x: u32,
+        y: u32,
+        width: u32,
+        height: u32,
+        color: Color) {
 //         unsafe {
 //             gl::Enable(gl::SCISSOR_TEST);
 //             gl::Scissor(x as i32, self.view[1] as i32 - (height as i32 + y as i32), width as i32, height as i32);
@@ -423,11 +466,21 @@ impl Renderer for Mtl {
             self.set_composite_operation(cmd.composite_operation);
 
             match cmd.cmd_type {
-                CommandType::ConvexFill { params } => self.convex_fill(images, cmd, params),
-                CommandType::ConcaveFill { stencil_params, fill_params } => self.concave_fill(images, cmd, stencil_params, fill_params),
-                CommandType::Stroke { params } => self.stroke(images, cmd, params),
-                CommandType::StencilStroke { params1, params2 } => self.stencil_stroke(images, cmd, params1, params2),
-                CommandType::Triangles { params } => self.triangles(images, cmd, params),
+                CommandType::ConvexFill { params } => {
+                    self.convex_fill(images, cmd, params)
+                },
+                CommandType::ConcaveFill { stencil_params, fill_params } => {
+                    self.concave_fill(images, cmd, stencil_params, fill_params)
+                },
+                CommandType::Stroke { params } => {
+                    self.stroke(images, cmd, params)
+                },
+                CommandType::StencilStroke { params1, params2 } => {
+                    self.stencil_stroke(images, cmd, params1, params2)
+                },
+                CommandType::Triangles { params } => {
+                    self.triangles(images, cmd, params)
+                },
                 CommandType::ClearRect { x, y, width, height, color } => {
                     self.clear_rect(x, y, width, height, color);
                 }
@@ -455,7 +508,7 @@ impl Renderer for Mtl {
 
     fn update_image(&mut self, image: &mut Self::Image, data: &DynamicImage, x: usize, y: usize) -> Result<()> {
         image.update(data, x, y)
-        
+
     }
 
     fn delete_image(&mut self, image: Self::Image) {
