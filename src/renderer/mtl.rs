@@ -45,6 +45,7 @@ use mtl_texture::MtlTexture;
 
 // use gl::types::*;
 
+
 pub struct Mtl {
     debug: bool,
     antialias: bool,
@@ -56,6 +57,9 @@ pub struct Mtl {
     command_queue: metal::CommandQueue,
     frag: metal::Function,
     vert: metal::Function,
+    index_buffer: metal::Buffer,
+    vertex_buffer: metal::Buffer,
+    pipeline_state: metal::RenderPipelineState,
 
     // program: Program,
     // vert_arr: GLuint,
@@ -90,6 +94,8 @@ impl Mtl {
             library.get_function("fragmentShaderAA", None).expect("frag shader not found")
         };
 
+
+
         let mut renderer = Mtl {
             debug,
             antialias,
@@ -103,6 +109,9 @@ impl Mtl {
             command_queue,
             frag,
             vert,
+            index_buffer: todo!(),
+            vertex_buffer: todo!(),
+            pipeline_state: todo!(),
             // render_encoder: None
         };
 
@@ -311,6 +320,11 @@ impl Mtl {
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
                 // unsafe { gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32); }
+                encoder.draw_primitives(
+                    metal::MTLPrimitiveType::TriangleStrip,
+                    start as u64,
+                    count as u64
+                );
             }
         }
 
@@ -358,6 +372,8 @@ impl Mtl {
     ) {
         self.set_uniforms(images, paint, cmd.image, cmd.alpha_mask);
         // set render pipeline state
+        let pipeline_state: metal::RenderPipelineState = todo!();
+        encoder.set_render_pipeline_state(&self.pipeline_state);
 
         if let Some((start, count)) = cmd.triangles_verts {
             // unsafe { gl::DrawArrays(gl::TRIANGLES, start as i32, count as i32); }
