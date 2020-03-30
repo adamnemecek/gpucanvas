@@ -21,7 +21,7 @@ pub struct MtlTexture {
 }
 
 impl MtlTexture {
-    pub fn new(image: &DynamicImage, flags: ImageFlags, opengles: bool) -> Result<Self> {
+    pub fn new(image: &DynamicImage, flags: ImageFlags) -> Result<Self> {
         let size = image.dimensions();
 
 //         let mut texture = Texture {
@@ -156,8 +156,8 @@ impl MtlTexture {
         self.id
     }
 
-//     pub fn update(&mut self, image: &DynamicImage, x: usize, y: usize, opengles: bool) -> Result<()> {
-//         let size = image.dimensions();
+    pub fn update(&mut self, image: &DynamicImage, x: usize, y: usize) -> Result<()> {
+        let size = image.dimensions();
 
 //         if x + size.0 as usize > self.info.width {
 //             return Err(ErrorKind::ImageUpdateOutOfBounds);
@@ -244,14 +244,14 @@ impl MtlTexture {
 //             gl::BindTexture(gl::TEXTURE_2D, 0);
 //         }
 
-//         Ok(())
-//     }
+        Ok(())
+    }
 
-//     pub fn delete(self) {
+    pub fn delete(self) {
 //         unsafe {
 //             gl::DeleteTextures(1, &self.id);
 //         }
-//     }
+    }
 }
 
 impl Image for MtlTexture {

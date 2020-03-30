@@ -321,6 +321,7 @@ impl Mtl {
 
         if let Some((start, count)) = cmd.triangles_verts {
             // unsafe { gl::DrawArrays(gl::TRIANGLES, start as i32, count as i32); }
+            // self.render_encoder
         }
 
 //         self.check_error("triangles");
@@ -449,31 +450,29 @@ impl Renderer for Mtl {
     }
 
     fn create_image(&mut self, data: &DynamicImage, flags: ImageFlags) -> Result<Self::Image> {
-        todo!()
-//         Texture::new(data, flags, self.is_opengles)
+        MtlTexture::new(data, flags)
     }
 
     fn update_image(&mut self, image: &mut Self::Image, data: &DynamicImage, x: usize, y: usize) -> Result<()> {
-        todo!()
-        // image.update(data, x, y, self.is_opengles)
+        image.update(data, x, y)
         
     }
 
     fn delete_image(&mut self, image: Self::Image) {
-//         image.delete();
+        image.delete();
     }
 
     fn screenshot(&mut self) -> Option<DynamicImage> {
-        todo!()
-//         let mut image = image::RgbaImage::new(self.view[0] as u32, self.view[1] as u32);
+        // todo!()
+        let mut image = image::RgbaImage::new(self.view[0] as u32, self.view[1] as u32);
 
-//         unsafe {
+        // unsafe {
 //             gl::ReadPixels(0, 0, self.view[0] as i32, self.view[1] as i32, gl::RGBA, gl::UNSIGNED_BYTE, image.deref_mut().as_ptr() as *mut GLvoid);
 //         }
 
-//         image = image::imageops::flip_vertical(&image);
+        image = image::imageops::flip_vertical(&image);
 
-//         Some(DynamicImage::ImageRgba8(image))
+        Some(DynamicImage::ImageRgba8(image))
     }
 }
 
