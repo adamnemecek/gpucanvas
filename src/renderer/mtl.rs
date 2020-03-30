@@ -66,7 +66,7 @@ impl Mtl {
     // pub fn new<F>(load_fn: F) -> Result<Self>  where F : Copy {
     pub fn new() -> Result<Self> {
         let device = metal::Device::system_default().unwrap();
-        let library = device.new_library_with_file("sha ders.metallib").expect("library not found");
+        let library = device.new_library_with_file("shaders.metallib").expect("library not found");
         let command_queue = device.new_command_queue();
 
         let debug = true;
@@ -91,8 +91,8 @@ impl Mtl {
         };
 
         let mut renderer = Mtl {
-            debug: debug,
-            antialias: antialias,
+            debug,
+            antialias,
             // is_opengles: false,
             view: [0.0, 0.0],
             // program: program,
@@ -275,11 +275,16 @@ impl Mtl {
     ) {
         self.set_uniforms(images, paint, cmd.image, cmd.alpha_mask);
 
-//         for drawable in &cmd.drawables {
-//             if let Some((start, count)) = drawable.stroke_verts {
-//                 unsafe { gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32); }
-//             }
-//         }
+        for drawable in &cmd.drawables {
+            if let Some((start, count)) = drawable.stroke_verts {
+                // unsafe { gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32); }
+                encoder.draw_primitives(
+                    metal::MTLPrimitiveType::TriangleStrip,
+                    start as u64,
+                    count as u64
+                )
+            }
+        }
 
 //         self.check_error("stroke");
     }
@@ -356,7 +361,11 @@ impl Mtl {
 
         if let Some((start, count)) = cmd.triangles_verts {
             // unsafe { gl::DrawArrays(gl::TRIANGLES, start as i32, count as i32); }
-            // self.render_encoder
+            encoder.draw_primitives(
+                metal::MTLPrimitiveType::Triangle,
+                start as u64,
+                count as u64
+            );
         }
 
 //         self.check_error("triangles");
