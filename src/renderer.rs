@@ -15,6 +15,9 @@ use crate::{
 mod opengl;
 pub use opengl::OpenGl;
 
+mod mtl;
+pub use mtl::Mtl;
+
 mod void;
 pub use void::Void;
 

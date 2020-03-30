@@ -345,7 +345,7 @@ impl Renderer for OpenGl {
         }
     }
 
-    fn render(&mut self, images: &ImageStore<Texture>, verts: &[Vertex], commands: &[Command]) {
+    fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         self.program.bind();
 
         unsafe {
