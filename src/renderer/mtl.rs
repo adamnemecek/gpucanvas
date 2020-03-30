@@ -56,7 +56,6 @@ pub struct Mtl {
     command_queue: metal::CommandQueue,
     frag: metal::Function,
     vert: metal::Function,
-    render_encoder: Option<metal::RenderCommandEncoder>
 
     // program: Program,
     // vert_arr: GLuint,
@@ -104,7 +103,7 @@ impl Mtl {
             command_queue,
             frag,
             vert,
-            render_encoder: None
+            // render_encoder: None
         };
 
         // unsafe {
@@ -172,6 +171,7 @@ impl Mtl {
 
     fn convex_fill(
         &self,
+        encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
         gpu_paint: Params
@@ -193,6 +193,7 @@ impl Mtl {
 
     fn concave_fill(
         &self,
+        encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
         stencil_paint: Params,
@@ -267,6 +268,7 @@ impl Mtl {
 
     fn stroke(
         &self,
+        encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
         paint: Params
@@ -284,6 +286,7 @@ impl Mtl {
 
     fn stencil_stroke(
         &self,
+        encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
         paint1: Params,
@@ -343,6 +346,7 @@ impl Mtl {
 
     fn triangles(
         &self,
+        encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
         paint: Params
@@ -387,7 +391,8 @@ impl Mtl {
     }
 
     fn clear_rect(
-        &mut self,
+        &self,
+        encoder: &metal::RenderCommandEncoderRef,
         x: u32,
         y: u32,
         width: u32,
@@ -419,9 +424,10 @@ impl Renderer for Mtl {
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         let command_buffer = self.command_queue.new_command_buffer();
         let render_pass_descriptor = metal::RenderPassDescriptor::new();
-        let render_encoder = command_buffer.new_render_command_encoder(
+        let encoder = command_buffer.new_render_command_encoder(
             &render_pass_descriptor
         );
+
 //         self.program.bind();
 
 //         unsafe {
@@ -467,22 +473,22 @@ impl Renderer for Mtl {
 
             match cmd.cmd_type {
                 CommandType::ConvexFill { params } => {
-                    self.convex_fill(images, cmd, params)
+                    self.convex_fill(&encoder, images, cmd, params)
                 },
                 CommandType::ConcaveFill { stencil_params, fill_params } => {
-                    self.concave_fill(images, cmd, stencil_params, fill_params)
+                    self.concave_fill(&encoder, images, cmd, stencil_params, fill_params)
                 },
                 CommandType::Stroke { params } => {
-                    self.stroke(images, cmd, params)
+                    self.stroke(&encoder, images, cmd, params)
                 },
                 CommandType::StencilStroke { params1, params2 } => {
-                    self.stencil_stroke(images, cmd, params1, params2)
+                    self.stencil_stroke(&encoder, images, cmd, params1, params2)
                 },
                 CommandType::Triangles { params } => {
-                    self.triangles(images, cmd, params)
+                    self.triangles(&encoder, images, cmd, params)
                 },
                 CommandType::ClearRect { x, y, width, height, color } => {
-                    self.clear_rect(x, y, width, height, color);
+                    self.clear_rect(&encoder, x, y, width, height, color);
                 }
             }
         }

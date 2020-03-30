@@ -322,7 +322,7 @@ impl OpenGl {
         self.check_error("set_uniforms texture");
     }
 
-    fn clear_rect(&mut self, x: u32, y: u32, width: u32, height: u32, color: Color) {
+    fn clear_rect(&self, x: u32, y: u32, width: u32, height: u32, color: Color) {
         unsafe {
             gl::Enable(gl::SCISSOR_TEST);
             gl::Scissor(x as i32, self.view[1] as i32 - (height as i32 + y as i32), width as i32, height as i32);
