@@ -16,13 +16,13 @@ use crate::{
 // use super::gl::types::*;
 
 pub struct MtlTexture {
-    // id: GLuint,
+    id: usize,
     info: ImageInfo
 }
 
 impl MtlTexture {
-//     pub fn new(image: &DynamicImage, flags: ImageFlags, opengles: bool) -> Result<Self> {
-//         let size = image.dimensions();
+    pub fn new(image: &DynamicImage, flags: ImageFlags, opengles: bool) -> Result<Self> {
+        let size = image.dimensions();
 
 //         let mut texture = Texture {
 //             id: 0,
@@ -149,11 +149,12 @@ impl MtlTexture {
 //         unsafe { gl::BindTexture(gl::TEXTURE_2D, 0); }
 
 //         Ok(texture)
-//     }
+        todo!()
+    }
 
-//     pub fn id(&self) -> GLuint {
-//         self.id
-//     }
+    pub fn id(&self) -> usize {
+        self.id
+    }
 
 //     pub fn update(&mut self, image: &DynamicImage, x: usize, y: usize, opengles: bool) -> Result<()> {
 //         let size = image.dimensions();

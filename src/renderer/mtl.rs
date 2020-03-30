@@ -192,7 +192,7 @@ impl Mtl {
 //             //gl::DepthMask(gl::FALSE);
 //         }
 
-//         self.set_uniforms(images, stencil_paint, None, None);
+        self.set_uniforms(images, stencil_paint, None, None);
 
 //         unsafe {
 //             gl::StencilOpSeparate(gl::FRONT, gl::KEEP, gl::KEEP, gl::INCR_WRAP);
@@ -200,11 +200,11 @@ impl Mtl {
 //             gl::Disable(gl::CULL_FACE);
 //         }
 
-//         for drawable in &cmd.drawables {
-//             if let Some((start, count)) = drawable.fill_verts {
-//                 unsafe { gl::DrawArrays(gl::TRIANGLE_FAN, start as i32, count as i32); }
-//             }
-//         }
+        for drawable in &cmd.drawables {
+            if let Some((start, count)) = drawable.fill_verts {
+                // unsafe { gl::DrawArrays(gl::TRIANGLE_FAN, start as i32, count as i32); }
+            }
+        }
 
 //         unsafe {
 //             gl::Enable(gl::CULL_FACE);
@@ -273,16 +273,16 @@ impl Mtl {
 //             gl::StencilOp(gl::KEEP, gl::KEEP, gl::INCR);
 //         }
 
-//         self.set_uniforms(images, paint2, cmd.image, cmd.alpha_mask);
+        self.set_uniforms(images, paint2, cmd.image, cmd.alpha_mask);
 
-//         for drawable in &cmd.drawables {
-//             if let Some((start, count)) = drawable.stroke_verts {
-//                 unsafe { gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32); }
-//             }
-//         }
+        for drawable in &cmd.drawables {
+            if let Some((start, count)) = drawable.stroke_verts {
+                // unsafe { gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32); }
+            }
+        }
 
-//         // Draw anti-aliased pixels.
-//         self.set_uniforms(images, paint1, cmd.image, cmd.alpha_mask);
+        // Draw anti-aliased pixels.
+        self.set_uniforms(images, paint1, cmd.image, cmd.alpha_mask);
 
 //         unsafe {
 //             gl::StencilFunc(gl::EQUAL, 0x0, 0xff);
@@ -319,9 +319,9 @@ impl Mtl {
     fn triangles(&self, images: &ImageStore<MtlTexture>, cmd: &Command, paint: Params) {
         self.set_uniforms(images, paint, cmd.image, cmd.alpha_mask);
 
-//         if let Some((start, count)) = cmd.triangles_verts {
-//             unsafe { gl::DrawArrays(gl::TRIANGLES, start as i32, count as i32); }
-//         }
+        if let Some((start, count)) = cmd.triangles_verts {
+            // unsafe { gl::DrawArrays(gl::TRIANGLES, start as i32, count as i32); }
+        }
 
 //         self.check_error("triangles");
     }
@@ -331,7 +331,7 @@ impl Mtl {
 //         self.program.set_config(UniformArray::size() as i32, arr.as_ptr());
 //         self.check_error("set_uniforms uniforms");
 
-//         let tex = image_tex.and_then(|id| images.get(id)).map_or(0, |tex| tex.id());
+        let tex = image_tex.and_then(|id| images.get(id)).map_or(0, |tex| tex.id());
 
 //         unsafe {
 //             gl::ActiveTexture(gl::TEXTURE0);
