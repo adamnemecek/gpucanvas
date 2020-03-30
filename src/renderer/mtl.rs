@@ -56,6 +56,7 @@ pub struct Mtl {
     command_queue: metal::CommandQueue,
     frag: metal::Function,
     vert: metal::Function,
+    render_encoder: Option<metal::RenderCommandEncoder>
 
     // program: Program,
     // vert_arr: GLuint,
@@ -66,7 +67,7 @@ impl Mtl {
     // pub fn new<F>(load_fn: F) -> Result<Self>  where F : Copy {
     pub fn new() -> Result<Self> {
         let device = metal::Device::system_default().unwrap();
-        let library = device.new_library_with_file("shaders.metallib").expect("library not found");
+        let library = device.new_library_with_file("sha ders.metallib").expect("library not found");
         let command_queue = device.new_command_queue();
     
         let debug = true;
@@ -103,6 +104,7 @@ impl Mtl {
             command_queue,
             frag,
             vert,
+            render_encoder: None
         };
 
         // unsafe {
@@ -165,23 +167,23 @@ impl Mtl {
 //         }
     }
 
-    fn convex_fill(&self, images: &ImageStore<Self>, cmd: &Command, gpu_paint: Params) {
+    fn convex_fill(&self, images: &ImageStore<MtlTexture>, cmd: &Command, gpu_paint: Params) {
         self.set_uniforms(images, gpu_paint, cmd.image, cmd.alpha_mask);
 
-//         for drawable in &cmd.drawables {
-//             if let Some((start, count)) = drawable.fill_verts {
-//                 unsafe { gl::DrawArrays(gl::TRIANGLE_FAN, start as i32, count as i32); }
-//             }
+        for drawable in &cmd.drawables {
+            if let Some((start, count)) = drawable.fill_verts {
+                // unsafe { gl::DrawArrays(gl::TRIANGLE_FAN, start as i32, count as i32); }
+            }
 
-//             if let Some((start, count)) = drawable.stroke_verts {
-//                 unsafe { gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32); }
-//             }
-//         }
+            if let Some((start, count)) = drawable.stroke_verts {
+                // unsafe { gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32); }
+            }
+        }
 
 //         self.check_error("convex_fill");
     }
 
-    fn concave_fill(&self, images: &ImageStore<Self>, cmd: &Command, stencil_paint: Params, fill_paint: Params) {
+    fn concave_fill(&self, images: &ImageStore<MtlTexture>, cmd: &Command, stencil_paint: Params, fill_paint: Params) {
 //         unsafe {
 //             gl::Enable(gl::STENCIL_TEST);
 //             gl::StencilMask(0xff);
@@ -249,7 +251,7 @@ impl Mtl {
 //         self.check_error("concave_fill");
     }
 
-    fn stroke(&self, images: &ImageStore<Self>, cmd: &Command, paint: Params) {
+    fn stroke(&self, images: &ImageStore<MtlTexture>, cmd: &Command, paint: Params) {
         self.set_uniforms(images, paint, cmd.image, cmd.alpha_mask);
 
 //         for drawable in &cmd.drawables {
@@ -261,7 +263,7 @@ impl Mtl {
 //         self.check_error("stroke");
     }
 
-    fn stencil_stroke(&self, images: &ImageStore<Self>, cmd: &Command, paint1: Params, paint2: Params) {
+    fn stencil_stroke(&self, images: &ImageStore<MtlTexture>, cmd: &Command, paint1: Params, paint2: Params) {
 //         unsafe {
 //             gl::Enable(gl::STENCIL_TEST);
 //             gl::StencilMask(0xff);
@@ -314,7 +316,7 @@ impl Mtl {
 //         self.check_error("stencil_stroke");
     }
 
-    fn triangles(&self, images: &ImageStore<Self>, cmd: &Command, paint: Params) {
+    fn triangles(&self, images: &ImageStore<MtlTexture>, cmd: &Command, paint: Params) {
         self.set_uniforms(images, paint, cmd.image, cmd.alpha_mask);
 
 //         if let Some((start, count)) = cmd.triangles_verts {
@@ -324,7 +326,7 @@ impl Mtl {
 //         self.check_error("triangles");
     }
 
-    fn set_uniforms(&self, images: &ImageStore<Self>, paint: Params, image_tex: Option<ImageId>, alpha_tex: Option<ImageId>) {
+    fn set_uniforms(&self, images: &ImageStore<MtlTexture>, paint: Params, image_tex: Option<ImageId>, alpha_tex: Option<ImageId>) {
 //         let arr = UniformArray::from(paint);
 //         self.program.set_config(UniformArray::size() as i32, arr.as_ptr());
 //         self.check_error("set_uniforms uniforms");
@@ -369,7 +371,13 @@ impl Renderer for Mtl {
 //         }
     }
 
+    // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+        let command_buffer = self.command_queue.new_command_buffer();
+        let render_pass_descriptor = metal::RenderPassDescriptor::new();
+        let render_encoder = command_buffer.new_render_command_encoder(
+            &render_pass_descriptor
+        );
 //         self.program.bind();
 
 //         unsafe {
@@ -410,20 +418,20 @@ impl Renderer for Mtl {
 
 //         self.check_error("render prepare");
 
-//         for cmd in commands {
-//             self.set_composite_operation(cmd.composite_operation);
+        for cmd in commands {
+            self.set_composite_operation(cmd.composite_operation);
 
-//             match cmd.cmd_type {
-//                 CommandType::ConvexFill { params } => self.convex_fill(images, cmd, params),
-//                 CommandType::ConcaveFill { stencil_params, fill_params } => self.concave_fill(images, cmd, stencil_params, fill_params),
-//                 CommandType::Stroke { params } => self.stroke(images, cmd, params),
-//                 CommandType::StencilStroke { params1, params2 } => self.stencil_stroke(images, cmd, params1, params2),
-//                 CommandType::Triangles { params } => self.triangles(images, cmd, params),
-//                 CommandType::ClearRect { x, y, width, height, color } => {
-//                     self.clear_rect(x, y, width, height, color);
-//                 }
-//             }
-//         }
+            match cmd.cmd_type {
+                CommandType::ConvexFill { params } => self.convex_fill(images, cmd, params),
+                CommandType::ConcaveFill { stencil_params, fill_params } => self.concave_fill(images, cmd, stencil_params, fill_params),
+                CommandType::Stroke { params } => self.stroke(images, cmd, params),
+                CommandType::StencilStroke { params1, params2 } => self.stencil_stroke(images, cmd, params1, params2),
+                CommandType::Triangles { params } => self.triangles(images, cmd, params),
+                CommandType::ClearRect { x, y, width, height, color } => {
+                    self.clear_rect(x, y, width, height, color);
+                }
+            }
+        }
 
 //         unsafe {
 //             gl::DisableVertexAttribArray(0);
