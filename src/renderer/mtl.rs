@@ -106,18 +106,17 @@ pub struct Mtl {
     frag_size: usize,
     index_size: usize,
 
-    vert_desc: metal::VertexDescriptor,
+    vertex_descriptor: metal::VertexDescriptor,
 
     frag: metal::Function,
     vert: metal::Function,
-    index_buffer: metal::Buffer,
-    vertex_buffer: metal::Buffer,
+
     pipeline_state: metal::RenderPipelineState,
     stencil_only_pipeline_state: metal::RenderPipelineState,
     blend: Blend,
     clear_buffer_on_flush: bool,
 
-    /// 
+    ///
     /// fill and stroke have a stencil, anti_alias_stencil and shape_stencil
     ///
     default_stencil_state: metal::DepthStencilState,
@@ -129,8 +128,13 @@ pub struct Mtl {
     stroke_clear_stencil_state: metal::DepthStencilState,
 
 
-    // buffers
-    // stencil_texture: 
+    // MNVGbuffers
+    // command_buffer
+    view_size_buffer: metal::Buffer,
+    stencil_texture: metal::Texture,
+    index_buffer: metal::Buffer,
+    vertex_buffer: metal::Buffer,
+    uniform_buffer: metal::Buffer,
     // program: Program,
     // vert_arr: GLuint,
     // vert_buff: GLuint,
@@ -267,27 +271,44 @@ impl Mtl {
 
         let stroke_clear_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
 
-        todo!();
-        // let mut renderer = Mtl {
-        //     layer,
-        //     debug,
-        //     antialias,
-        //     blend,
-        //     // is_opengles: false,
-        //     view: [0.0, 0.0],
-        //     // program: program,
 
-        //     // vert_arr: 0,
-        //     // vert_buff: 0,
-        //     device,
-        //     command_queue,
-        //     frag,
-        //     vert,
-        //     index_buffer: todo!(),
-        //     vertex_buffer: todo!(),
-        //     pipeline_state: todo!(),
-        //     // render_encoder: None
-        // };
+        let mut renderer = Mtl {
+            layer,
+            debug,
+            antialias,
+            blend,
+            // is_opengles: false,
+            view: [0.0, 0.0],
+            // program: program,
+
+            // vert_arr: 0,
+            // vert_buff: 0,
+            device,
+            command_queue,
+            frag,
+            vert,
+            pipeline_state: todo!(),
+            clear_buffer_on_flush,
+            default_stencil_state,
+            fill_shape_stencil_state,
+            fill_anti_alias_stencil_state,
+            fill_stencil_state,
+            stroke_shape_stencil_state,
+            stroke_anti_alias_stencil_state,
+            stroke_clear_stencil_state,
+            frag_size: todo!(),
+            index_size: todo!(),
+            stencil_only_pipeline_state: todo!(),
+
+            view_size_buffer: todo!(),
+            stencil_texture: todo!(),
+            index_buffer: todo!(),
+            vertex_buffer: todo!(),
+            uniform_buffer: todo!(),
+            vertex_descriptor: vertex_descriptor.to_owned()
+
+            // render_encoder: None
+        };
 
         // unsafe {
         //     let version = CStr::from_ptr(gl::GetString(gl::VERSION) as *mut i8);
@@ -297,8 +318,7 @@ impl Mtl {
         //     gl::GenBuffers(1, &mut opengl.vert_buff);
         // }
 
-        // Ok(opengl)
-        // todo!()
+        Ok(renderer)
     }
 
 //     fn check_error(&self, label: &str) {
@@ -631,7 +651,7 @@ fn new_render_command_encoder<'a>(
     uniform_buffer: &metal::Buffer,
     clear_buffer_on_flush: bool
 ) -> &'a metal::RenderCommandEncoderRef {
-    
+
     let load_action = if clear_buffer_on_flush {
         metal::MTLLoadAction::Clear
     } else {
