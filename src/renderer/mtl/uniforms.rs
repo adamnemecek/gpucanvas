@@ -4,6 +4,7 @@ use super::Params;
 
 const UNIFORMARRAY_SIZE: usize = 12;
 
+#[derive(Clone, Copy)]
 pub struct Uniforms([f32; UNIFORMARRAY_SIZE * 4]);
 
 impl Default for Uniforms {

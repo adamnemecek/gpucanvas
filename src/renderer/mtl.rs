@@ -45,6 +45,14 @@ use mtl_texture::MtlTexture;
 mod uniforms;
 use uniforms::Uniforms;
 
+mod stencil_texture;
+use stencil_texture::StencilTexture;
+
+use metalgear::{
+    GPUVec,
+    GPUVar
+};
+
 // mod uniform_array;
 // use uniform_array::UniformArray;
 
@@ -131,10 +139,13 @@ pub struct Mtl {
     // MNVGbuffers
     // command_buffer
     view_size_buffer: metal::Buffer,
-    stencil_texture: metal::Texture,
-    index_buffer: metal::Buffer,
-    vertex_buffer: metal::Buffer,
-    uniform_buffer: metal::Buffer,
+    stencil_texture: StencilTexture,
+    // index_buffer: metal::Buffer,
+    index_buffer: GPUVec<usize>,
+    // vertex_buffer: metal::Buffer
+    vertex_buffer: GPUVec<Vertex>,
+    // uniform_buffer: metal::Buffer,
+    uniform_buffer: GPUVar<Uniforms>
     // program: Program,
     // vert_arr: GLuint,
     // vert_buff: GLuint,
@@ -306,8 +317,6 @@ impl Mtl {
             vertex_buffer: todo!(),
             uniform_buffer: todo!(),
             vertex_descriptor: vertex_descriptor.to_owned()
-
-            // render_encoder: None
         };
 
         // unsafe {
@@ -392,7 +401,7 @@ impl Mtl {
                     metal::MTLPrimitiveType::Triangle,
                     count as u64,
                     metal::MTLIndexType::UInt32,
-                    &self.index_buffer,
+                    self.index_buffer.as_ref(),
                     index_buffer_offset as u64,
                 );
             }
@@ -405,8 +414,6 @@ impl Mtl {
                 )
             }
         }
-
-//         self.check_error("convex_fill");
     }
 
     fn concave_fill(
