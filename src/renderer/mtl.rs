@@ -115,8 +115,11 @@ pub struct Mtl {
     pipeline_state: metal::RenderPipelineState,
     stencil_only_pipeline_state: metal::RenderPipelineState,
     blend: Blend,
+    clear_buffer_on_flush: bool,
 
     /// 
+    /// fill and stroke have a stencil, anti_alias_stencil and shape_stencil
+    ///
     default_stencil_state: metal::DepthStencilState,
     fill_shape_stencil_state: metal::DepthStencilState,
     fill_anti_alias_stencil_state: metal::DepthStencilState,
@@ -145,19 +148,10 @@ impl Mtl {
 
         let debug = true;
         let antialias = true;
+        let clear_buffer_on_flush = false;
 
-        // gl::load_with(load_fn);
-
-        // let shader_defs = if antialias { "#define EDGE_AA 1" } else { "" };
-        // let vert_shader_src = format!("#version 100\n{}\n{}", shader_defs, include_str!("main-vs.glsl"));
-        // let frag_shader_src = format!("#version 100\n{}\n{}", shader_defs, include_str!("main-fs.glsl"));
-
-        // let vert_shader = Shader::new(&CString::new(vert_shader_src)?, gl::VERTEX_SHADER)?;
-        // let frag_shader = Shader::new(&CString::new(frag_shader_src)?, gl::FRAGMENT_SHADER)?;
-
-        // let program = Program::new(&[vert_shader, frag_shader])?;
         let vert = library.get_function("vertexShader", None).expect("vert shader not found");
-        // let frag = flags.contains(nvg::ImageFlags::)
+
         let frag: metal::Function = if antialias {
             library.get_function("fragmentShader", None).expect("frag shader not found")
         } else {
@@ -237,6 +231,8 @@ impl Mtl {
 
         stencil_descriptor.set_back_face_stencil(None);
         stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
+
+        let stroke_clear_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
 
         todo!();
         // let mut renderer = Mtl {
@@ -337,14 +333,15 @@ impl Mtl {
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
-                // unsafe { gl::DrawArrays(gl::TRIANGLE_FAN, start as i32, count as i32); }
-                // encoder.draw_indexed_primitives(
-                //     metal::MTLPrimitiveType::Triangle,
-                //     count as u64,
-                //     metal::MTLIndexType::UInt32,
-                //     index_buffer,
-                //     index_buffer_offset as u64,
-                // );
+                let index_buffer_offset = start * self.index_size;
+                /// original uses fans
+                encoder.draw_indexed_primitives(
+                    metal::MTLPrimitiveType::Triangle,
+                    count as u64,
+                    metal::MTLIndexType::UInt32,
+                    &self.index_buffer,
+                    index_buffer_offset as u64,
+                );
             }
 
             if let Some((start, count)) = drawable.stroke_verts {
