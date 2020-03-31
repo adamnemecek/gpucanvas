@@ -1,14 +1,11 @@
 
 use std::path::Path as FilePath;
 
-use image::DynamicImage;
-use bitflags::bitflags;
-use generational_arena::{Arena, Index};
+use rgb::RGBA8;
+use imgref::ImgVec;
 
 /*
 TODO:
-    - Use imgref crate instead of the image crate
-    - Move all image related stuff to image module
     - Review geometry module and maybe migrate to euclid
     - Custom shader support
     - Review text functions for:
@@ -45,6 +42,17 @@ use text::{
     RenderStyle,
 };
 
+mod image;
+pub use crate::image::{
+    Image,
+    ImageId,
+    ImageInfo,
+    ImageFlags,
+    ImageStore,
+    ImageFormat,
+    ImageSource,
+};
+
 mod color;
 pub use color::Color;
 
@@ -57,7 +65,6 @@ use renderer::{
     CommandType,
     ShaderType,
     Drawable,
-    Image
 };
 
 pub(crate) mod geometry;
@@ -86,18 +93,6 @@ pub enum FillRule {
 impl Default for FillRule {
     fn default() -> Self {
         Self::NonZero
-    }
-}
-
-// Image flags
-bitflags! {
-    pub struct ImageFlags: u32 {
-        const GENERATE_MIPMAPS = 1;     // Generate mipmaps during creation of the image.
-        const REPEAT_X = 1 << 1;        // Repeat image in X direction.
-        const REPEAT_Y = 1 << 2;        // Repeat image in Y direction.
-        const FLIP_Y = 1 << 3;          // Flips (inverses) image in Y direction when rendered.
-        const PREMULTIPLIED = 1 << 4;   // Image data has premultiplied alpha.
-        const NEAREST = 1 << 5;         // Image interpolation is Nearest instead Linear
     }
 }
 
@@ -211,9 +206,6 @@ impl Default for LineJoin {
     }
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct ImageId(pub Index);
-
 #[derive(Copy, Clone)]
 struct State {
     composite_operation: CompositeOperationState,
@@ -229,52 +221,6 @@ impl Default for State {
             transform: Transform2D::identity(),
             scissor: Default::default(),
             alpha: 1.0,
-        }
-    }
-}
-
-pub struct ImageStore<T>(Arena<T>);
-
-impl<T: Image> Default for ImageStore<T> {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
-impl<T: Image> ImageStore<T> {
-    pub fn new() -> Self {
-        Self(Arena::new())
-    }
-
-    pub fn add<R: Renderer<Image = T>>(&mut self, renderer: &mut R, data: &DynamicImage, flags: ImageFlags) -> Result<ImageId> {
-        let image = renderer.create_image(data, flags)?;
-
-        Ok(ImageId(self.0.insert(image)))
-    }
-
-    pub fn get(&self, id: ImageId) -> Option<&T> {
-        self.0.get(id.0)
-    }
-
-    pub fn update<R: Renderer<Image = T>>(&mut self, renderer: &mut R, id: ImageId, image_src: &DynamicImage, x: usize, y: usize) -> Result<()> {
-        if let Some(image) = self.0.get_mut(id.0) {
-            renderer.update_image(image, image_src, x, y)?;
-        } else {
-            return Err(ErrorKind::ImageIdNotFound);
-        }
-
-        Ok(())
-    }
-
-    pub fn remove<R: Renderer<Image = T>>(&mut self, renderer: &mut R, id: ImageId) {
-        if let Some(image) = self.0.remove(id.0) {
-            renderer.delete_image(image);
-        }
-    }
-
-    pub fn clear<R: Renderer<Image = T>>(&mut self, renderer: &mut R) {
-        for (_idx, image) in self.0.drain() {
-            renderer.delete_image(image);
         }
     }
 }
@@ -361,7 +307,7 @@ impl<T> Canvas<T> where T: Renderer {
         self.verts.clear();
     }
 
-    pub fn screenshot(&mut self) -> Option<DynamicImage> {
+    pub fn screenshot(&mut self) -> Result<ImgVec<RGBA8>> {
         self.renderer.screenshot()
     }
 
@@ -414,28 +360,37 @@ impl<T> Canvas<T> where T: Renderer {
 
     // Images
 
-    /// Creates image by loading it from the disk from specified file name.
+    pub fn create_image<'a, S: Into<ImageSource<'a>>>(&mut self, src: S, flags: ImageFlags) -> Result<ImageId> {
+        self.images.add(&mut self.renderer, src.into(), flags)
+    }
+
+    /// Decode an image from file
+    #[cfg(feature = "image-loading")]
     pub fn create_image_file<P: AsRef<FilePath>>(&mut self, filename: P, flags: ImageFlags) -> Result<ImageId> {
-        let image = image::open(filename)?;
+        let image = ::image::open(filename)?;
 
-        self.create_image(&image, flags)
+        use std::convert::TryFrom;
+
+        let src = ImageSource::try_from(&image)?;
+
+        self.images.add(&mut self.renderer, src, flags)
     }
 
-    /// Creates image by loading it from the specified chunk of memory.
+    /// Decode an image from memory
+    #[cfg(feature = "image-loading")]
     pub fn create_image_mem(&mut self, data: &[u8], flags: ImageFlags) -> Result<ImageId> {
-        let image = image::load_from_memory(data)?;
+        let image = ::image::load_from_memory(data)?;
 
-        self.create_image(&image, flags)
-    }
+        use std::convert::TryFrom;
 
-    /// Creates image by loading it from the specified chunk of memory.
-    pub fn create_image(&mut self, image: &DynamicImage, flags: ImageFlags) -> Result<ImageId> {
-        self.images.add(&mut self.renderer, image, flags)
+        let src = ImageSource::try_from(&image)?;
+
+        self.images.add(&mut self.renderer, src, flags)
     }
 
     /// Updates image data specified by image handle.
-    pub fn update_image(&mut self, id: ImageId, image: &DynamicImage, x: usize, y: usize) -> Result<()> {
-        self.images.update(&mut self.renderer, id, image, x, y)
+    pub fn update_image<'a, S: Into<ImageSource<'a>>>(&mut self, id: ImageId, src: S, x: usize, y: usize) -> Result<()> {
+        self.images.update(&mut self.renderer, id, src.into(), x, y)
     }
 
     /// Deletes created image.

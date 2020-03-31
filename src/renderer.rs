@@ -1,14 +1,17 @@
 //! Module containing renderer implementations
 
-use image::DynamicImage;
+use rgb::RGBA8;
+use imgref::ImgVec;
 
 use crate::{
     Color,
     Result,
     FillRule,
+    Image,
     ImageId,
     ImageFlags,
     ImageStore,
+    ImageSource,
     CompositeOperationState
 };
 
@@ -23,15 +26,6 @@ pub use void::Void;
 
 mod params;
 pub(crate) use params::Params;
-
-// TODO: Move this to it's own image mod
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum ImageFormat {
-    Rgb,
-    Rgba,
-    Alpha
-}
 
 #[derive(Copy, Clone, Default)]
 pub struct Drawable {
@@ -91,16 +85,9 @@ impl Command {
     }
 }
 
-#[derive(Copy, Clone)]
-pub struct ImageInfo {
-    flags: ImageFlags,
-    width: usize,
-    height: usize,
-    format: ImageFormat
-}
-
-pub trait Image {
-    fn info(&self) -> ImageInfo;
+pub enum RenderTarget {
+    Screen,
+    Image(ImageId)
 }
 
 /// This is the main renderer trait that the [Canvas](../struct.Canvas.html) draws to.
@@ -111,11 +98,13 @@ pub trait Renderer {
 
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]);
 
-    fn create_image(&mut self, data: &DynamicImage, flags: ImageFlags) -> Result<Self::Image>;
-    fn update_image(&mut self, image: &mut Self::Image, data: &DynamicImage, x: usize, y: usize) -> Result<()>;
+    fn create_image(&mut self, data: ImageSource, flags: ImageFlags) -> Result<Self::Image>;
+    fn update_image(&mut self, image: &mut Self::Image, data: ImageSource, x: usize, y: usize) -> Result<()>;
     fn delete_image(&mut self, image: Self::Image);
 
-    fn screenshot(&mut self) -> Option<DynamicImage>;
+    fn set_target(&mut self, images: &ImageStore<Self::Image>, target: RenderTarget);
+
+    fn screenshot(&mut self) -> Result<ImgVec<RGBA8>>;
 }
 
 /// Vertex struct for specifying triangle geometry

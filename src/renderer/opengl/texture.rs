@@ -1,15 +1,11 @@
 
-use image::{DynamicImage, GenericImageView};
-
 use crate::{
     Result,
     ErrorKind,
     ImageFlags,
-    renderer::{
-        Image,
-        ImageInfo,
-        ImageFormat
-    }
+    Image,
+    ImageInfo,
+    ImageSource
 };
 
 use super::gl;
@@ -21,83 +17,65 @@ pub struct Texture {
 }
 
 impl Texture {
-    pub fn new(image: &DynamicImage, flags: ImageFlags, opengles: bool) -> Result<Self> {
-        let size = image.dimensions();
+    pub fn new(src: ImageSource, flags: ImageFlags, opengles: bool) -> Result<Self> {
+        let size = src.dimensions();
 
         let mut texture = Texture {
             id: 0,
-            info: ImageInfo {
-                width: size.0 as usize,
-                height: size.1 as usize,
-                flags: flags,
-                format: ImageFormat::Rgba
-            }
+            info: ImageInfo::new(flags, size.0, size.1, src.format())
         };
 
         unsafe {
             gl::GenTextures(1, &mut texture.id);
             gl::BindTexture(gl::TEXTURE_2D, texture.id);
             gl::PixelStorei(gl::UNPACK_ALIGNMENT, 1);
-            gl::PixelStorei(gl::UNPACK_ROW_LENGTH, texture.info.width as i32);
+            gl::PixelStorei(gl::UNPACK_ROW_LENGTH, texture.info.width() as i32);
             gl::PixelStorei(gl::UNPACK_SKIP_PIXELS, 0);
             gl::PixelStorei(gl::UNPACK_SKIP_ROWS, 0);
         }
 
-        match image {
-            DynamicImage::ImageLuma8(gray_image) => unsafe {
+        match src {
+            ImageSource::Gray(data) => unsafe {
                 let format = if opengles { gl::LUMINANCE } else { gl::RED };
 
                 gl::TexImage2D(
                     gl::TEXTURE_2D,
                     0,
                     format as i32,
-                    texture.info.width as i32,
-                    texture.info.height as i32,
+                    texture.info.width() as i32,
+                    texture.info.height() as i32,
                     0,
                     format,
                     gl::UNSIGNED_BYTE,
-                    gray_image.as_ref().as_ptr() as *const GLvoid
+                    data.buf().as_ptr() as *const GLvoid
                 );
-
-                texture.info.format = ImageFormat::Alpha;
             },
-            DynamicImage::ImageRgb8(rgb_image) => unsafe {
+            ImageSource::Rgb(data) => unsafe {
                 gl::TexImage2D(
                     gl::TEXTURE_2D,
                     0,
                     gl::RGB as i32,
-                    texture.info.width as i32,
-                    texture.info.height as i32,
+                    texture.info.width() as i32,
+                    texture.info.height() as i32,
                     0,
                     gl::RGB,
                     gl::UNSIGNED_BYTE,
-                    rgb_image.as_ref().as_ptr() as *const GLvoid
+                    data.buf().as_ptr() as *const GLvoid
                 );
-
-                texture.info.format = ImageFormat::Rgb;
             },
-            DynamicImage::ImageRgba8(rgba_image) => unsafe {
+            ImageSource::Rgba(data) => unsafe {
                 gl::TexImage2D(
                     gl::TEXTURE_2D,
                     0,
                     gl::RGBA as i32,
-                    texture.info.width as i32,
-                    texture.info.height as i32,
+                    texture.info.width() as i32,
+                    texture.info.height() as i32,
                     0,
                     gl::RGBA,
                     gl::UNSIGNED_BYTE,
-                    rgba_image.as_ref().as_ptr() as *const GLvoid
+                    data.buf().as_ptr() as *const GLvoid
                 );
-
-                texture.info.format = ImageFormat::Rgba;
             },
-            DynamicImage::ImageLumaA8(_) =>
-                return Err(ErrorKind::UnsuportedImageFromat(String::from("ImageLumaA8"))),
-            DynamicImage::ImageBgr8(_) =>
-                return Err(ErrorKind::UnsuportedImageFromat(String::from("ImageBgr8"))),
-            DynamicImage::ImageBgra8(_) =>
-                return Err(ErrorKind::UnsuportedImageFromat(String::from("ImageBgra8"))),
-            _ => return Err(ErrorKind::UnsuportedImageFromat(String::from("Unknown image format"))),
         }
 
         if flags.contains(ImageFlags::GENERATE_MIPMAPS) {
@@ -155,15 +133,19 @@ impl Texture {
         self.id
     }
 
-    pub fn update(&mut self, image: &DynamicImage, x: usize, y: usize, opengles: bool) -> Result<()> {
-        let size = image.dimensions();
+    pub fn update(&mut self, src: ImageSource, x: usize, y: usize, opengles: bool) -> Result<()> {
+        let size = src.dimensions();
 
-        if x + size.0 as usize > self.info.width {
+        if x + size.0 > self.info.width() {
             return Err(ErrorKind::ImageUpdateOutOfBounds);
         }
 
-        if y + size.1 as usize > self.info.height {
+        if y + size.1 > self.info.height() {
             return Err(ErrorKind::ImageUpdateOutOfBounds);
+        }
+
+        if self.info.format() != src.format() {
+            return Err(ErrorKind::ImageUpdateWithDifferentFormat);
         }
 
         unsafe {
@@ -172,13 +154,9 @@ impl Texture {
             gl::PixelStorei(gl::UNPACK_ROW_LENGTH, size.0 as i32);
         }
 
-        match image {
-            DynamicImage::ImageLuma8(gray_image) => unsafe {
+        match src {
+            ImageSource::Gray(data) => unsafe {
                 let format = if opengles { gl::LUMINANCE } else { gl::RED };
-
-                if self.info.format != ImageFormat::Alpha {
-                    return Err(ErrorKind::ImageUpdateWithDifferentFormat);
-                }
 
                 gl::TexSubImage2D(
                     gl::TEXTURE_2D,
@@ -189,14 +167,10 @@ impl Texture {
                     size.1 as i32,
                     format,
                     gl::UNSIGNED_BYTE,
-                    gray_image.as_ref().as_ptr() as *const GLvoid
+                    data.buf().as_ptr() as *const GLvoid
                 );
             }
-            DynamicImage::ImageRgb8(rgb_image) => unsafe {
-                if self.info.format != ImageFormat::Rgb {
-                    return Err(ErrorKind::ImageUpdateWithDifferentFormat);
-                }
-
+            ImageSource::Rgb(data) => unsafe {
                 gl::TexSubImage2D(
                     gl::TEXTURE_2D,
                     0,
@@ -206,14 +180,10 @@ impl Texture {
                     size.1 as i32,
                     gl::RGB,
                     gl::UNSIGNED_BYTE,
-                    rgb_image.as_ref().as_ptr() as *const GLvoid
+                    data.buf().as_ptr() as *const GLvoid
                 );
             }
-            DynamicImage::ImageRgba8(rgba_image) => unsafe {
-                if self.info.format != ImageFormat::Rgba {
-                    return Err(ErrorKind::ImageUpdateWithDifferentFormat);
-                }
-
+            ImageSource::Rgba(data) => unsafe {
                 gl::TexSubImage2D(
                     gl::TEXTURE_2D,
                     0,
@@ -223,16 +193,9 @@ impl Texture {
                     size.1 as i32,
                     gl::RGBA,
                     gl::UNSIGNED_BYTE,
-                    rgba_image.as_ref().as_ptr() as *const GLvoid
+                    data.buf().as_ptr() as *const GLvoid
                 );
             }
-            DynamicImage::ImageLumaA8(_) =>
-                return Err(ErrorKind::UnsuportedImageFromat(String::from("ImageLumaA8"))),
-            DynamicImage::ImageBgr8(_) =>
-                return Err(ErrorKind::UnsuportedImageFromat(String::from("ImageBgr8"))),
-            DynamicImage::ImageBgra8(_) =>
-                return Err(ErrorKind::UnsuportedImageFromat(String::from("ImageBgra8"))),
-            _ => return Err(ErrorKind::UnsuportedImageFromat(String::from("Unknown image format"))),
         }
 
         unsafe {
