@@ -136,6 +136,22 @@ pub struct Mtl {
     // vert_buff: GLuint,
 }
 
+
+pub struct VertexOffsets {
+    x: usize,
+    u: usize,
+}
+
+impl VertexOffsets {
+    pub fn new() -> Self {
+        use Vertex;
+        let x = offset_of!(Vertex, x);
+        let u = offset_of!(Vertex, u);
+        Self { x, u }
+    }
+}
+
+
 impl Mtl {
     // pub fn new<F>(load_fn: F) -> Result<Self>  where F : Copy {
     pub fn new(
@@ -148,7 +164,6 @@ impl Mtl {
 
         let debug = true;
         let antialias = true;
-        let clear_buffer_on_flush = false;
 
         let vert = library.get_function("vertexShader", None).expect("vert shader not found");
 
@@ -163,6 +178,24 @@ impl Mtl {
             dst_rgb: metal::MTLBlendFactor::OneMinusSourceAlpha,
             src_alpha: metal::MTLBlendFactor::One,
             dst_alpha: metal::MTLBlendFactor::OneMinusSourceAlpha,
+        };
+
+        let clear_buffer_on_flush = false;
+
+        let vertex_descriptor = {
+            let desc = metal::VertexDescriptor::new();
+            let offsets = VertexOffsets::new();
+            desc.attributes().object_at(0).unwrap().set_format(metal::MTLVertexFormat::Float2);
+            desc.attributes().object_at(0).unwrap().set_buffer_index(0);
+            desc.attributes().object_at(0).unwrap().set_offset(offsets.x as u64);
+
+            desc.attributes().object_at(1).unwrap().set_format(metal::MTLVertexFormat::Float2);
+            desc.attributes().object_at(1).unwrap().set_buffer_index(0);
+            desc.attributes().object_at(1).unwrap().set_offset(offsets.u as u64);
+
+            desc.layouts().object_at(0).unwrap().set_stride(std::mem::size_of::<Vertex>() as u64);
+            desc.layouts().object_at(0).unwrap().set_step_function(metal::MTLVertexStepFunction::PerVertex);
+            desc
         };
 
         // // Initializes stencil states.

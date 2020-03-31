@@ -25,6 +25,9 @@ mod text;
 mod error;
 pub use error::ErrorKind;
 
+#[macro_use]
+extern crate memoffset;
+
 pub use text::{
     Weight,
     WidthClass,
