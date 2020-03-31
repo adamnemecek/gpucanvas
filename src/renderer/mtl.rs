@@ -46,6 +46,43 @@ use mtl_texture::MtlTexture;
 // use gl::types::*;
 
 
+#[derive(PartialEq, Eq, Copy, Clone)]
+pub struct Blend {
+    pub src_rgb: metal::MTLBlendFactor,
+    pub dst_rgb: metal::MTLBlendFactor,
+    pub src_alpha: metal::MTLBlendFactor,
+    pub dst_alpha: metal::MTLBlendFactor,
+}
+
+
+fn convert_blend_factor(factor: BlendFactor) -> metal::MTLBlendFactor {
+    match factor {
+        BlendFactor::Zero => metal::MTLBlendFactor::Zero,
+        BlendFactor::One => metal::MTLBlendFactor::One,
+        BlendFactor::SrcColor => metal::MTLBlendFactor::SourceColor,
+        BlendFactor::OneMinusSrcColor => metal::MTLBlendFactor::OneMinusSourceColor,
+        BlendFactor::DstColor => metal::MTLBlendFactor::DestinationColor,
+        BlendFactor::OneMinusDstColor => metal::MTLBlendFactor::OneMinusDestinationColor,
+        BlendFactor::SrcAlpha => metal::MTLBlendFactor::SourceAlpha,
+        BlendFactor::OneMinusSrcAlpha => metal::MTLBlendFactor::OneMinusSourceAlpha,
+        BlendFactor::DstAlpha => metal::MTLBlendFactor::DestinationAlpha,
+        BlendFactor::OneMinusDstAlpha => metal::MTLBlendFactor::OneMinusDestinationAlpha,
+        BlendFactor::SrcAlphaSaturate => metal::MTLBlendFactor::SourceAlphaSaturated,
+    }
+}
+
+
+impl From<CompositeOperationState> for Blend {
+    fn from(v: CompositeOperationState) -> Self {
+        Self {
+            src_rgb: convert_blend_factor(v.src_rgb),
+            dst_rgb: convert_blend_factor(v.dst_rgb),
+            src_alpha: convert_blend_factor(v.src_alpha),
+            dst_alpha: convert_blend_factor(v.dst_alpha),
+        }
+    }
+}
+
 pub struct Mtl {
     debug: bool,
     antialias: bool,
@@ -60,6 +97,8 @@ pub struct Mtl {
     index_buffer: metal::Buffer,
     vertex_buffer: metal::Buffer,
     pipeline_state: metal::RenderPipelineState,
+    blend: Blend,
+    layer: metal::CoreAnimationLayer,
 
     // program: Program,
     // vert_arr: GLuint,
@@ -68,7 +107,10 @@ pub struct Mtl {
 
 impl Mtl {
     // pub fn new<F>(load_fn: F) -> Result<Self>  where F : Copy {
-    pub fn new() -> Result<Self> {
+    pub fn new(
+        layer: metal::CoreAnimationLayer,
+
+    ) -> Result<Self> {
         let device = metal::Device::system_default().unwrap();
         let library = device.new_library_with_file("shaders.metallib").expect("library not found");
         let command_queue = device.new_command_queue();
@@ -94,11 +136,18 @@ impl Mtl {
             library.get_function("fragmentShaderAA", None).expect("frag shader not found")
         };
 
-
+        let blend = Blend {
+            src_rgb: metal::MTLBlendFactor::One,
+            dst_rgb: metal::MTLBlendFactor::OneMinusSourceAlpha,
+            src_alpha: metal::MTLBlendFactor::One,
+            dst_alpha: metal::MTLBlendFactor::OneMinusSourceAlpha,
+        };
 
         let mut renderer = Mtl {
+            layer,
             debug,
             antialias,
+            blend,
             // is_opengles: false,
             view: [0.0, 0.0],
             // program: program,
@@ -164,9 +213,11 @@ impl Mtl {
         }
     }
 
+    /// updaterenderpipelinstateforblend
     fn set_composite_operation(
         &self,
-        blend_state: CompositeOperationState
+        blend_state: CompositeOperationState,
+        // pixel_format: metal::MTLPixelFormat
     ) {
 //         unsafe {
 //             gl::BlendFuncSeparate(
@@ -371,10 +422,7 @@ impl Mtl {
         paint: Params
     ) {
         self.set_uniforms(images, paint, cmd.image, cmd.alpha_mask);
-        // set render pipeline state
-        let pipeline_state: metal::RenderPipelineState = todo!();
         encoder.set_render_pipeline_state(&self.pipeline_state);
-
         if let Some((start, count)) = cmd.triangles_verts {
             // unsafe { gl::DrawArrays(gl::TRIANGLES, start as i32, count as i32); }
             encoder.draw_primitives(
@@ -384,7 +432,6 @@ impl Mtl {
             );
         }
 
-//         self.check_error("triangles");
     }
 
     fn set_uniforms(
@@ -431,6 +478,58 @@ impl Mtl {
 //             gl::Disable(gl::SCISSOR_TEST);
 //         }
     }
+}
+
+fn new_render_command_encoder<'a>(
+    command_buffer: &'a metal::CommandBufferRef,
+    color_texture: &metal::TextureRef,
+    // buffer: crate::Buffer<'_>,
+    stencil_texture: &metal::TextureRef,
+    drawable: metal::Texture,
+    view_size: (f32, f32),
+    clear_color: metal::MTLClearColor,
+    vertex_buffer: &metal::Buffer,
+    index_buffer: &metal::Buffer,
+    uniform_buffer: &metal::Buffer,
+    clear_buffer_on_flush: bool
+) -> &'a metal::RenderCommandEncoderRef {
+    
+    let load_action = if clear_buffer_on_flush {
+        metal::MTLLoadAction::Clear
+    } else {
+        metal::MTLLoadAction::Load
+    };
+    let desc = metal::RenderPassDescriptor::new();
+
+    // desc.color_attachments().object_at(0).unwrap().set_clear_color(self.clear_color);
+    desc.color_attachments().object_at(0).unwrap().set_load_action(load_action);
+    desc.color_attachments().object_at(0).unwrap().set_store_action(metal::MTLStoreAction::Store);
+    desc.color_attachments().object_at(0).unwrap().set_texture(Some(&color_texture));
+
+    desc.stencil_attachment().unwrap().set_clear_stencil(0);
+    desc.stencil_attachment().unwrap().set_load_action(metal::MTLLoadAction::Clear);
+    desc.stencil_attachment().unwrap().set_store_action(metal::MTLStoreAction::DontCare);
+    desc.stencil_attachment().unwrap().set_texture(Some(&stencil_texture));
+
+    let encoder = command_buffer.new_render_command_encoder(&desc);
+
+    encoder.set_cull_mode(metal::MTLCullMode::Back);
+    encoder.set_front_facing_winding(metal::MTLWinding::Clockwise);
+    encoder.set_stencil_reference_value(0);
+    encoder.set_viewport(metal::MTLViewport {
+        originX: 0.0,
+        originY: 0.0,
+        width: view_size.0 as f64,
+        height: view_size.1 as f64,
+        znear: 0.0,
+        zfar: 0.0,
+    });
+
+    encoder.set_vertex_buffer(0, Some(vertex_buffer), 0);
+    encoder.set_vertex_buffer(1, Some(index_buffer), 0);
+    encoder.set_fragment_buffer(0, Some(uniform_buffer), 0);
+
+    encoder
 }
 
 impl Renderer for Mtl {
