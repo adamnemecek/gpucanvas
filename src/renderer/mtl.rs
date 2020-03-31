@@ -10,6 +10,7 @@ use rgb::RGBA8;
 use imgref::ImgVec;
 
 use crate::{
+
     Color,
     Result,
     ImageStore,
@@ -21,6 +22,7 @@ use crate::{
 };
 
 use super::{
+
     Params,
     Renderer,
     Command,
@@ -39,6 +41,9 @@ use super::{
 // use texture::Texture;
 mod mtl_texture;
 use mtl_texture::MtlTexture;
+
+mod uniforms;
+use uniforms::Uniforms;
 
 // mod uniform_array;
 // use uniform_array::UniformArray;
@@ -97,13 +102,28 @@ pub struct Mtl {
     device: metal::Device,
     // library: metal::Library,
     command_queue: metal::CommandQueue,
+    layer: metal::CoreAnimationLayer,
+    frag_size: usize,
+    index_size: usize,
+
+    vert_desc: metal::VertexDescriptor,
+
     frag: metal::Function,
     vert: metal::Function,
     index_buffer: metal::Buffer,
     vertex_buffer: metal::Buffer,
     pipeline_state: metal::RenderPipelineState,
+    stencil_only_pipeline_state: metal::RenderPipelineState,
     blend: Blend,
-    layer: metal::CoreAnimationLayer,
+
+    default_stencil_state: metal::DepthStencilState,
+    fill_shape_stencil_state: metal::DepthStencilState,
+    fill_anti_alias_stencil_state: metal::DepthStencilState,
+    fill_stencil_state: metal::DepthStencilState,
+    stroke_shape_stencil_state: metal::DepthStencilState,
+    stroke_anti_alias_stencil_state: metal::DepthStencilState,
+    stroke_clear_stencil_state: metal::DepthStencilState,
+
 
     // buffers
     // stencil_texture: 
@@ -150,26 +170,27 @@ impl Mtl {
             dst_alpha: metal::MTLBlendFactor::OneMinusSourceAlpha,
         };
 
-        let mut renderer = Mtl {
-            layer,
-            debug,
-            antialias,
-            blend,
-            // is_opengles: false,
-            view: [0.0, 0.0],
-            // program: program,
+        todo!();
+        // let mut renderer = Mtl {
+        //     layer,
+        //     debug,
+        //     antialias,
+        //     blend,
+        //     // is_opengles: false,
+        //     view: [0.0, 0.0],
+        //     // program: program,
 
-            // vert_arr: 0,
-            // vert_buff: 0,
-            device,
-            command_queue,
-            frag,
-            vert,
-            index_buffer: todo!(),
-            vertex_buffer: todo!(),
-            pipeline_state: todo!(),
-            // render_encoder: None
-        };
+        //     // vert_arr: 0,
+        //     // vert_buff: 0,
+        //     device,
+        //     command_queue,
+        //     frag,
+        //     vert,
+        //     index_buffer: todo!(),
+        //     vertex_buffer: todo!(),
+        //     pipeline_state: todo!(),
+        //     // render_encoder: None
+        // };
 
         // unsafe {
         //     let version = CStr::from_ptr(gl::GetString(gl::VERSION) as *mut i8);
@@ -180,7 +201,7 @@ impl Mtl {
         // }
 
         // Ok(opengl)
-        todo!()
+        // todo!()
     }
 
 //     fn check_error(&self, label: &str) {
@@ -248,6 +269,7 @@ impl Mtl {
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
                 // unsafe { gl::DrawArrays(gl::TRIANGLE_FAN, start as i32, count as i32); }
+                
             }
 
             if let Some((start, count)) = drawable.stroke_verts {
@@ -448,7 +470,7 @@ impl Mtl {
         image_tex: Option<ImageId>,
         alpha_tex: Option<ImageId>
     ) {
-//         let arr = UniformArray::from(paint);
+        let arr = Uniforms::from(paint);
 //         self.program.set_config(UniformArray::size() as i32, arr.as_ptr());
 //         self.check_error("set_uniforms uniforms");
 
