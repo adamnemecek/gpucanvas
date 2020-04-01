@@ -804,7 +804,6 @@ impl Renderer for Mtl {
 
     fn update_image(&mut self, image: &mut Self::Image, data: ImageSource, x: usize, y: usize) -> Result<()> {
         image.update(data, x, y)
-
     }
 
     fn delete_image(&mut self, image: Self::Image) {
@@ -824,7 +823,6 @@ impl Renderer for Mtl {
         //     }
         // }
     }
-
 
     fn blur(&mut self, texture: &mut MtlTexture, amount: f32, x: usize, y: usize, width: usize, height: usize) {
         todo!()
