@@ -53,6 +53,10 @@ use metalgear::{
     GPUVar
 };
 
+type VertexBuffer = GPUVec<Vertex>;
+type IndexBuffer = GPUVec<usize>;
+type UniformBuffer = GPUVar<Uniforms>;
+
 // mod uniform_array;
 // use uniform_array::UniformArray;
 
@@ -636,6 +640,8 @@ impl Mtl {
         width: u32,
         height: u32,
         color: Color) {
+            // let viewport: metal::MTLViewport = todo!();
+            // encoder.set_viewport(viewport);
 //         unsafe {
 //             gl::Enable(gl::SCISSOR_TEST);
 //             gl::Scissor(x as i32, self.view[1] as i32 - (height as i32 + y as i32), width as i32, height as i32);
@@ -654,9 +660,11 @@ fn new_render_command_encoder<'a>(
     drawable: metal::Texture,
     view_size: (f32, f32),
     clear_color: metal::MTLClearColor,
-    vertex_buffer: &metal::Buffer,
-    index_buffer: &metal::Buffer,
-    uniform_buffer: &metal::Buffer,
+    vertex_buffer: &VertexBuffer,
+
+    // index_buffer: &metal::Buffer,
+    index_buffer: &IndexBuffer,
+    uniform_buffer: &UniformBuffer,
     clear_buffer_on_flush: bool
 ) -> &'a metal::RenderCommandEncoderRef {
 
@@ -691,9 +699,9 @@ fn new_render_command_encoder<'a>(
         zfar: 0.0,
     });
 
-    encoder.set_vertex_buffer(0, Some(vertex_buffer), 0);
-    encoder.set_vertex_buffer(1, Some(index_buffer), 0);
-    encoder.set_fragment_buffer(0, Some(uniform_buffer), 0);
+    encoder.set_vertex_buffer(0, Some(vertex_buffer.as_ref()), 0);
+    encoder.set_vertex_buffer(1, Some(index_buffer.as_ref()), 0);
+    encoder.set_fragment_buffer(0, Some(uniform_buffer.as_ref()), 0);
 
     encoder
 }
