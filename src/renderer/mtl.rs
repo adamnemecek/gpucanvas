@@ -481,7 +481,6 @@ impl Mtl {
         }
 
         // Draws fill.
-
         if let Some((start, count)) = cmd.triangles_verts {
 
             encoder.draw_primitives(
@@ -492,6 +491,7 @@ impl Mtl {
         }
     }
 
+    /// done
     fn stroke(
         &self,
         encoder: &metal::RenderCommandEncoderRef,
@@ -512,6 +512,7 @@ impl Mtl {
         }
     }
 
+    /// done
     fn stencil_stroke(
         &self,
         encoder: &metal::RenderCommandEncoderRef,
@@ -550,7 +551,7 @@ impl Mtl {
             }
         }
 
-        // Clears stencil buffer.
+        /// Clears stencil buffer.
         encoder.set_depth_stencil_state(&self.stroke_clear_stencil_state);
         encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state);
 
@@ -563,11 +564,10 @@ impl Mtl {
                 );
             }
         }
-
         encoder.set_depth_stencil_state(&self.default_stencil_state);
     }
 
-    // done
+    /// done
     fn triangles(
         &self,
         encoder: &metal::RenderCommandEncoderRef,
@@ -578,14 +578,12 @@ impl Mtl {
         self.set_uniforms(images, paint, cmd.image, cmd.alpha_mask);
         encoder.set_render_pipeline_state(&self.pipeline_state);
         if let Some((start, count)) = cmd.triangles_verts {
-            // unsafe { gl::DrawArrays(gl::TRIANGLES, start as i32, count as i32); }
             encoder.draw_primitives(
                 metal::MTLPrimitiveType::Triangle,
                 start as u64,
                 count as u64
             );
         }
-
     }
 
     fn set_uniforms(

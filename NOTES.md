@@ -16,19 +16,20 @@
         * restore states
         * draw anti-aliased fragments
         * draw fill
-
-* stencil stroke
-    * fill the stroke and base without overlap
-        * set uniform
-        * setdepthstencilstate
-        * setrenderpipelinestate
-        * draw trianglestrip
-    * drawn antialiased fragments
-        * setuniform
-        * setdepthstencilstate
-        * draw trianglestrip
-    * clear stencil buffer
-        * setdepthstencilstate
-        * setrenderpipelinestate
-        * draw trianglestrip
-        * setdepthstencilstate default
+* stroking
+    * gpucanvas, unlike metalnvg, separates stroke and stencil_stroke into two functions
+    * stencil stroke
+        * fill the stroke and base without overlap
+            * set uniform
+            * setdepthstencilstate
+            * setrenderpipelinestate
+            * draw trianglestrip
+        * drawn antialiased fragments
+            * setuniform
+            * setdepthstencilstate
+            * draw trianglestrip
+        * clear stencil buffer
+            * setdepthstencilstate
+            * setrenderpipelinestate
+            * draw trianglestrip
+            * setdepthstencilstate default
