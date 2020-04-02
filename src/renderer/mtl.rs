@@ -410,6 +410,7 @@ impl Mtl {
                 );
             }
 
+             // Draw fringes
             if let Some((start, count)) = drawable.stroke_verts {
                 encoder.draw_primitives(
                     metal::MTLPrimitiveType::TriangleStrip,
@@ -429,6 +430,10 @@ impl Mtl {
         stencil_paint: Params,
         fill_paint: Params
     ) {
+        encoder.set_cull_mode(metal::MTLCullMode::None);
+        encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
+        encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state);
+
 //         unsafe {
 //             gl::Enable(gl::STENCIL_TEST);
 //             gl::StencilMask(0xff);
@@ -504,6 +509,8 @@ impl Mtl {
         paint: Params
     ) {
         self.set_uniforms(images, paint, cmd.image, cmd.alpha_mask);
+
+        //todo if stencil_strokes
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
@@ -632,6 +639,10 @@ impl Mtl {
 //         self.check_error("set_uniforms texture");
     }
 
+    // from warrenmoore
+    // Well, as I think we discussed previously, scissor state doesn’t affect clear load actions in Metal, but you can simulate this by drawing a rect with a solid color with depth read disabled and depth write enabled and forcing the depth to the clear depth value (assuming you’re using a depth buffer)
+    // Looks like in this case the depth buffer is irrelevant. Stencil buffer contents can be cleared similarly to the depth buffer, though 
+
     fn clear_rect(
         &self,
         encoder: &metal::RenderCommandEncoderRef,
@@ -640,7 +651,7 @@ impl Mtl {
         width: u32,
         height: u32,
         color: Color) {
-            // let viewport: metal::MTLViewport = todo!();
+            let viewport: metal::MTLViewport = todo!();
             // encoder.set_viewport(viewport);
 //         unsafe {
 //             gl::Enable(gl::SCISSOR_TEST);
