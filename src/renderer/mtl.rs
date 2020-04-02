@@ -437,12 +437,15 @@ impl Mtl {
         encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
         encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state);
 
+        /// todo metal nanovg doesn't have this
+        self.set_uniforms(images, stencil_paint, cmd.image, cmd.alpha_mask);
+
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
                 /// offset is in bytes
                 let index_buffer_offset = start * self.index_size;
 
-                /// original uses fans
+                /// draw fans
                 encoder.draw_indexed_primitives(
                     metal::MTLPrimitiveType::Triangle,
                     count as u64,
@@ -451,16 +454,34 @@ impl Mtl {
                     index_buffer_offset as u64,
                 );
             }
-
-            //  // Draw fringes
-            // if let Some((start, count)) = drawable.stroke_verts {
-            //     encoder.draw_primitives(
-            //         metal::MTLPrimitiveType::TriangleStrip,
-            //         start as u64,
-            //         count as u64
-            //     )
-            // }
         }
+        // Restores states.
+        encoder.set_cull_mode(metal::MTLCullMode::Back);
+        encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
+        encoder.set_render_pipeline_state(&self.pipeline_state);
+
+        // Draws anti-aliased fragments.
+        self.set_uniforms(images, fill_paint, cmd.image, cmd.alpha_mask);
+        if self.antialias {
+            encoder.set_depth_stencil_state(&self.fill_anti_alias_stencil_state);
+
+            for drawable in &cmd.drawables {
+                if let Some((start, count)) = drawable.stroke_verts {
+                    /// offset is in bytes
+                    let index_buffer_offset = start * self.index_size;
+
+                    /// draw fans
+                    encoder.draw_primitives(
+                        metal::MTLPrimitiveType::TriangleStrip,
+                        start as u64,
+                        count as u64
+                    );
+                }
+            }
+        }
+
+        // Draws fill.
+
 //         unsafe {
 //             gl::Enable(gl::STENCIL_TEST);
 //             gl::StencilMask(0xff);
@@ -469,7 +490,7 @@ impl Mtl {
 //             //gl::DepthMask(gl::FALSE);
 //         }
 
-        self.set_uniforms(images, stencil_paint, None, None);
+
 
 //         unsafe {
 //             gl::StencilOpSeparate(gl::FRONT, gl::KEEP, gl::KEEP, gl::INCR_WRAP);
@@ -477,10 +498,13 @@ impl Mtl {
 //             gl::Disable(gl::CULL_FACE);
 //         }
 
-        for drawable in &cmd.drawables {
-            if let Some((start, count)) = drawable.fill_verts {
-                // unsafe { gl::DrawArrays(gl::TRIANGLE_FAN, start as i32, count as i32); }
-            }
+        if let Some((start, count)) = cmd.triangles_verts {
+
+            encoder.draw_primitives(
+                metal::MTLPrimitiveType::TriangleStrip,
+                start as u64,
+                count as u64
+            );
         }
 
 //         unsafe {

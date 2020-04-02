@@ -1,2 +1,0 @@
-# metal opengl dictionary
-* 
