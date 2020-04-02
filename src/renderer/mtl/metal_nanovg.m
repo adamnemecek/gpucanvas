@@ -849,6 +849,7 @@ enum MNVGTarget mnvgTarget() {
   }
 }
 
+// concave fill
 -(void)fill:(MNVGcall*)call {
   // Draws shapes.
   const int kIndexBufferOffset = call->indexOffset * _indexSize;

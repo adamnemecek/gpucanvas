@@ -387,6 +387,7 @@ impl Mtl {
 //         }
     }
 
+    // done
     fn convex_fill(
         &self,
         encoder: &metal::RenderCommandEncoderRef,
@@ -399,7 +400,9 @@ impl Mtl {
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
+                /// offset is in bytes
                 let index_buffer_offset = start * self.index_size;
+
                 /// original uses fans
                 encoder.draw_indexed_primitives(
                     metal::MTLPrimitiveType::Triangle,
@@ -434,6 +437,30 @@ impl Mtl {
         encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
         encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state);
 
+        for drawable in &cmd.drawables {
+            if let Some((start, count)) = drawable.fill_verts {
+                /// offset is in bytes
+                let index_buffer_offset = start * self.index_size;
+
+                /// original uses fans
+                encoder.draw_indexed_primitives(
+                    metal::MTLPrimitiveType::Triangle,
+                    count as u64,
+                    metal::MTLIndexType::UInt32,
+                    self.index_buffer.as_ref(),
+                    index_buffer_offset as u64,
+                );
+            }
+
+            //  // Draw fringes
+            // if let Some((start, count)) = drawable.stroke_verts {
+            //     encoder.draw_primitives(
+            //         metal::MTLPrimitiveType::TriangleStrip,
+            //         start as u64,
+            //         count as u64
+            //     )
+            // }
+        }
 //         unsafe {
 //             gl::Enable(gl::STENCIL_TEST);
 //             gl::StencilMask(0xff);
@@ -641,7 +668,7 @@ impl Mtl {
 
     // from warrenmoore
     // Well, as I think we discussed previously, scissor state doesn’t affect clear load actions in Metal, but you can simulate this by drawing a rect with a solid color with depth read disabled and depth write enabled and forcing the depth to the clear depth value (assuming you’re using a depth buffer)
-    // Looks like in this case the depth buffer is irrelevant. Stencil buffer contents can be cleared similarly to the depth buffer, though 
+    // Looks like in this case the depth buffer is irrelevant. Stencil buffer contents can be cleared similarly to the depth buffer, though
 
     fn clear_rect(
         &self,
@@ -843,7 +870,7 @@ impl Renderer for Mtl {
         // }
     }
 
-    fn blur(&mut self, texture: &mut MtlTexture, amount: f32, x: usize, y: usize, width: usize, height: usize) {
+    fn blur(&mut self, texture: &mut MtlTexture, amount: u8, x: usize, y: usize, width: usize, height: usize) {
         todo!()
         // let pingpong_fbo = [0; 2];
         // let pingpong_tex = [0; 2];
