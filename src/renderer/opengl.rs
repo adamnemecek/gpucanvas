@@ -1,7 +1,7 @@
 
 use std::ptr;
 use std::mem;
-use std::ffi::{CString, CStr, c_void};
+use std::ffi::{CStr, c_void};
 
 use rgb::RGBA8;
 use imgref::ImgVec;
@@ -30,8 +30,6 @@ use super::{
 
 mod program;
 use program::{
-    Shader,
-    Program,
     MainProgram,
     BlurProgram
 };
@@ -403,6 +401,8 @@ impl Renderer for OpenGl {
             gl::StencilFunc(gl::ALWAYS, 0, 0xffff_ffff);
             gl::ActiveTexture(gl::TEXTURE0);
             gl::BindTexture(gl::TEXTURE_2D, 0);
+            gl::ActiveTexture(gl::TEXTURE0 + 1);
+            gl::BindTexture(gl::TEXTURE_2D, 0);
 
             gl::BindVertexArray(self.vert_arr);
 
@@ -482,11 +482,13 @@ impl Renderer for OpenGl {
         }
     }
 
-    fn blur(&mut self, texture: &mut Texture, amount: f32, x: usize, y: usize, width: usize, height: usize) {
+    fn blur(&mut self, texture: &mut Texture, amount: u8, x: usize, y: usize, width: usize, height: usize) {
         let pingpong_fbo = [0; 2];
         let pingpong_tex = [0; 2];
 
         unsafe {
+            gl::ActiveTexture(gl::TEXTURE0);
+
             gl::GenFramebuffers(2, pingpong_fbo.as_ptr() as *mut GLuint);
             gl::GenTextures(2, pingpong_tex.as_ptr() as *mut GLuint);
 
@@ -532,7 +534,8 @@ impl Renderer for OpenGl {
         self.check_error("blur setup");
 
         let mut horizontal = true;
-        let amount = (amount * 2.0) as usize;
+
+        let passes = amount as u16 * 2;
 
         self.blur_program.bind();
         self.blur_program.set_image(0);
@@ -541,7 +544,7 @@ impl Renderer for OpenGl {
             texture.info().height() as f32
         ]);
 
-        for i in 0..amount {
+        for i in 0..passes {
             unsafe {
                 gl::BindFramebuffer(gl::FRAMEBUFFER, pingpong_fbo[horizontal as usize]);
                 self.blur_program.set_horizontal(horizontal);
@@ -570,7 +573,12 @@ impl Renderer for OpenGl {
                 height as i32
             );
 
+            if texture.info().flags().contains(ImageFlags::GENERATE_MIPMAPS) {
+                gl::GenerateMipmap(gl::TEXTURE_2D);
+            }
+
             gl::BindFramebuffer(gl::FRAMEBUFFER, 0);
+            gl::BindTexture(gl::TEXTURE_2D, 0);
 
             gl::Viewport(0, 0, self.view[0] as i32, self.view[1] as i32);
             gl::Disable(gl::SCISSOR_TEST);
