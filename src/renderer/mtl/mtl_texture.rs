@@ -226,3 +226,178 @@ impl Image for MtlTexture {
         todo!()
     }
 }
+
+
+
+// pub struct Texture {
+//     pub id: crate::ImageId,
+//     pub tex: Option<metal::Texture>,
+//     pub sampler: Option<metal::SamplerState>,
+//     pub texture_type: nvg::renderer::TextureType,
+//     pub flags: nvg::renderer::ImageFlags,
+// }
+
+// impl Texture {
+//     pub fn create_texture(
+//         id: crate::ImageId,
+//         texture_type: nvg::renderer::TextureType,
+//         width: usize,
+//         height: usize,
+//         flags: nvg::renderer::ImageFlags,
+//         data: Option<&[u8]>,
+//     ) -> Self {
+
+//         let pixel_format = match texture_type {
+//             nvg::renderer::TextureType::Alpha => metal::MTLPixelFormat::R8Unorm,
+//             nvg::renderer::TextureType::RGBA => metal::MTLPixelFormat::RGBA8Unorm,
+//         };
+
+//         // let mut tex = self.alloc_texture();
+//         // tex.texture_type = texture_type;
+//         // tex.flags = flags;
+
+//         let tex_desc = {
+//             let desc = metal::TextureDescriptor::new();
+//             desc.set_texture_type(metal::MTLTextureType::D2);
+//             desc.set_width(width as u64);
+//             desc.set_height(height as u64);
+//             desc.set_mipmap_level_count(1);
+//             let usage = metal::MTLTextureUsage::ShaderRead | metal::MTLTextureUsage::RenderTarget | metal::MTLTextureUsage::ShaderWrite;
+//             desc.set_usage(usage);
+//             desc
+//         };
+
+//         // tex.tex = self.device.new_texture(&tex_desc);
+
+//         if let Some(data) = data {
+//             let stride = match texture_type {
+//                 nvg::renderer::TextureType::Alpha => width,
+//                 nvg::renderer::TextureType::RGBA => width * 4,
+//             };
+
+//             if tex_desc.storage_mode() == metal::MTLStorageMode::Private {
+
+//             }
+//             else {
+//                 let region = metal::MTLRegion {
+//                     origin: metal::MTLOrigin { x: 0, y: 0, z: 0 },
+//                     size: metal::MTLSize { width: width as u64, height: height as u64, depth: 0 },
+//                 };
+//                 // tex.replace_region(region, 0, stride as u64, data.as_ptr() as *const _);
+//             }
+//         }
+//         else {
+
+//         }
+
+//         let mut sampler_desc = metal::SamplerDescriptor::new();
+//         let filter = if flags.contains(nvg::ImageFlags::NEAREST) {
+//             metal::MTLSamplerMinMagFilter::Nearest
+//         }
+//         else {
+//             metal::MTLSamplerMinMagFilter::Linear
+//         };
+//         sampler_desc.set_min_filter(filter);
+//         sampler_desc.set_mag_filter(filter);
+
+//         if flags.contains(nvg::ImageFlags::GENERATE_MIPMAPS) {
+
+//         }
+
+//         let address_mode_s =
+//             if flags.contains(nvg::ImageFlags::REPEATX) {
+//                 metal::MTLSamplerAddressMode::Repeat
+//             }
+//             else {
+//                 metal::MTLSamplerAddressMode::ClampToEdge
+//             };
+//         sampler_desc.set_address_mode_s(address_mode_s);
+
+
+//         let address_mode_t =
+//             if flags.contains(nvg::ImageFlags::REPEATX) {
+//                 metal::MTLSamplerAddressMode::Repeat
+//             }
+//             else {
+//                 metal::MTLSamplerAddressMode::ClampToEdge
+//             };
+//         sampler_desc.set_address_mode_t(address_mode_t);
+//         todo!()
+
+//         // Self {
+
+//         // }
+//     }
+//     pub fn create(id: crate::ImageId) -> Self {
+//         todo!()
+//     }
+
+//     pub fn width(&self) -> usize {
+//         // self.tex.map(|t|t.width()).or_else(0)
+//         todo!()
+//     }
+
+//     pub fn height(&self) -> usize {
+//         // self.tex.map(|t|t.height()).or_else(0)
+//         todo!()
+//     }
+
+//     pub fn size(&self) -> (usize, usize) {
+//         (self.width(), self.height())
+//     }
+
+//     pub fn replace_region(
+//         &self,
+//         region: metal::MTLRegion,
+//         mipmap_level: usize,
+//         stride: usize,
+//         data: &[u8]
+//     ) {
+//         self.tex.as_ref().unwrap().replace_region(
+//             region,
+//             mipmap_level as u64,
+//             stride as u64,
+//             data.as_ptr() as *const _
+//         )
+//     }
+
+//     pub fn update(
+//         &self,
+//         x: usize,
+//         y: usize,
+//         width: usize,
+//         height: usize,
+//         data: &[u8],
+//     ) -> anyhow::Result<()> {
+
+//         let origin = metal::MTLOrigin { x: x as u64, y: y as u64, z: 0 };
+//         let size = metal::MTLSize { width: width as u64, height: height as u64, depth: 0 };
+//         let region = metal::MTLRegion { origin, size };
+
+//         let data_offset: usize;
+//         let stride: usize;
+//         match self.texture_type {
+//             nvg::renderer::TextureType::RGBA => {
+//                 stride = 4 * self.width();
+//                 data_offset = y * stride + x * 4;
+//             },
+//             nvg::renderer::TextureType::Alpha => {
+//                 stride = self.width();
+//                 data_offset = y * stride + x;
+//             }
+//         };
+//         self.replace_region(
+//             region,
+//             0,
+//             stride,
+//             &data[data_offset..]
+//         );
+
+//         Ok(())
+//     }
+// }
+// //impl Drop for Texture {
+// //    fn drop(&mut self) {
+// //        unsafe { gl::DeleteTextures(1, &self.tex) }
+// //    }
+// //}
