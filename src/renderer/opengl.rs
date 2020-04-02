@@ -213,6 +213,7 @@ impl OpenGl {
             gl::Disable(gl::CULL_FACE);
         }
 
+        // fill verts
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
                 unsafe { gl::DrawArrays(gl::TRIANGLE_FAN, start as i32, count as i32); }
@@ -228,6 +229,7 @@ impl OpenGl {
 
         self.set_uniforms(images, fill_paint, cmd.image, cmd.alpha_mask);
 
+        // fringes
         if self.antialias {
             unsafe {
                 match cmd.fill_rule {
@@ -246,6 +248,7 @@ impl OpenGl {
             }
         }
 
+        // triangle verts
         unsafe {
             match cmd.fill_rule {
                 FillRule::NonZero => gl::StencilFunc(gl::NOTEQUAL, 0x0, 0xff),

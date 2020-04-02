@@ -482,22 +482,6 @@ impl Mtl {
 
         // Draws fill.
 
-//         unsafe {
-//             gl::Enable(gl::STENCIL_TEST);
-//             gl::StencilMask(0xff);
-//             gl::StencilFunc(gl::ALWAYS, 0, 0xff);
-//             gl::ColorMask(gl::FALSE, gl::FALSE, gl::FALSE, gl::FALSE);
-//             //gl::DepthMask(gl::FALSE);
-//         }
-
-
-
-//         unsafe {
-//             gl::StencilOpSeparate(gl::FRONT, gl::KEEP, gl::KEEP, gl::INCR_WRAP);
-//             gl::StencilOpSeparate(gl::BACK, gl::KEEP, gl::KEEP, gl::DECR_WRAP);
-//             gl::Disable(gl::CULL_FACE);
-//         }
-
         if let Some((start, count)) = cmd.triangles_verts {
 
             encoder.draw_primitives(
@@ -506,50 +490,6 @@ impl Mtl {
                 count as u64
             );
         }
-
-//         unsafe {
-//             gl::Enable(gl::CULL_FACE);
-//             // Draw anti-aliased pixels
-//             gl::ColorMask(gl::TRUE, gl::TRUE, gl::TRUE, gl::TRUE);
-//             //gl::DepthMask(gl::TRUE);
-//         }
-
-//         self.set_uniforms(images, fill_paint, cmd.image, cmd.alpha_mask);
-
-//         if self.antialias {
-//             unsafe {
-//                 match cmd.fill_rule {
-//                     FillRule::NonZero => gl::StencilFunc(gl::EQUAL, 0x0, 0xff),
-//                     FillRule::EvenOdd => gl::StencilFunc(gl::EQUAL, 0x0, 0x1)
-//                 }
-
-//                 gl::StencilOp(gl::KEEP, gl::KEEP, gl::KEEP);
-//             }
-
-//             // draw fringes
-//             for drawable in &cmd.drawables {
-//                 if let Some((start, count)) = drawable.stroke_verts {
-//                     unsafe { gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32); }
-//                 }
-//             }
-//         }
-
-//         unsafe {
-//             match cmd.fill_rule {
-//                 FillRule::NonZero => gl::StencilFunc(gl::NOTEQUAL, 0x0, 0xff),
-//                 FillRule::EvenOdd => gl::StencilFunc(gl::NOTEQUAL, 0x0, 0x1)
-//             }
-
-//             gl::StencilOp(gl::ZERO, gl::ZERO, gl::ZERO);
-
-//             if let Some((start, count)) = cmd.triangles_verts {
-//                 gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32);
-//             }
-
-//             gl::Disable(gl::STENCIL_TEST);
-//         }
-
-//         self.check_error("concave_fill");
     }
 
     fn stroke(
@@ -560,9 +500,6 @@ impl Mtl {
         paint: Params
     ) {
         self.set_uniforms(images, paint, cmd.image, cmd.alpha_mask);
-
-        //todo if stencil_strokes
-
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
                 // unsafe { gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32); }
@@ -573,8 +510,6 @@ impl Mtl {
                 )
             }
         }
-
-//         self.check_error("stroke");
     }
 
     fn stencil_stroke(
@@ -585,16 +520,24 @@ impl Mtl {
         paint1: Params,
         paint2: Params
     ) {
-//         unsafe {
-//             gl::Enable(gl::STENCIL_TEST);
-//             gl::StencilMask(0xff);
-
-//             // Fill the stroke base without overlap
-//             gl::StencilFunc(gl::EQUAL, 0x0, 0xff);
-//             gl::StencilOp(gl::KEEP, gl::KEEP, gl::INCR);
-//         }
-
+        /// Fills the stroke base without overlap.
         self.set_uniforms(images, paint2, cmd.image, cmd.alpha_mask);
+        encoder.set_depth_stencil_state(&self.stroke_shape_stencil_state);
+        encoder.set_render_pipeline_state(&self.pipeline_state);
+
+        for drawable in &cmd.drawables {
+            if let Some((start, count)) = drawable.stroke_verts {
+                encoder.draw_primitives(
+                    metal::MTLPrimitiveType::TriangleStrip,
+                    start as u64,
+                    count as u64
+                )
+            }
+        }
+
+        /// Draw anti-aliased pixels.
+        self.set_uniforms(images, paint1, cmd.image, cmd.alpha_mask);
+        encoder.set_depth_stencil_state(&self.stroke_anti_alias_stencil_state);
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
@@ -607,41 +550,24 @@ impl Mtl {
             }
         }
 
-        // Draw anti-aliased pixels.
-        self.set_uniforms(images, paint1, cmd.image, cmd.alpha_mask);
+        // Clears stencil buffer.
+        encoder.set_depth_stencil_state(&self.stroke_clear_stencil_state);
+        encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state);
 
-//         unsafe {
-//             gl::StencilFunc(gl::EQUAL, 0x0, 0xff);
-//             gl::StencilOp(gl::KEEP, gl::KEEP, gl::KEEP);
-//         }
+        for drawable in &cmd.drawables {
+            if let Some((start, count)) = drawable.stroke_verts {
+                encoder.draw_primitives(
+                    metal::MTLPrimitiveType::TriangleStrip,
+                    start as u64,
+                    count as u64
+                );
+            }
+        }
 
-//         for drawable in &cmd.drawables {
-//             if let Some((start, count)) = drawable.stroke_verts {
-//                 unsafe { gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32); }
-//             }
-//         }
-
-//         unsafe {
-//             // Clear stencil buffer.
-//             gl::ColorMask(gl::FALSE, gl::FALSE, gl::FALSE, gl::FALSE);
-//             gl::StencilFunc(gl::ALWAYS, 0x0, 0xff);
-//             gl::StencilOp(gl::ZERO, gl::ZERO, gl::ZERO);
-//         }
-
-//         for drawable in &cmd.drawables {
-//             if let Some((start, count)) = drawable.stroke_verts {
-//                 unsafe { gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32); }
-//             }
-//         }
-
-//         unsafe {
-//             gl::ColorMask(gl::TRUE, gl::TRUE, gl::TRUE, gl::TRUE);
-//             gl::Disable(gl::STENCIL_TEST);
-//         }
-
-//         self.check_error("stencil_stroke");
+        encoder.set_depth_stencil_state(&self.default_stencil_state);
     }
 
+    // done
     fn triangles(
         &self,
         encoder: &metal::RenderCommandEncoderRef,
@@ -702,7 +628,7 @@ impl Mtl {
         width: u32,
         height: u32,
         color: Color) {
-            let viewport: metal::MTLViewport = todo!();
+            let scissor_rect: metal::MTLScissorRect = todo!();
             // encoder.set_viewport(viewport);
 //         unsafe {
 //             gl::Enable(gl::SCISSOR_TEST);

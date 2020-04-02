@@ -31,7 +31,7 @@ pub(crate) use params::Params;
 pub struct Drawable {
     pub(crate) fill_verts: Option<(usize, usize)>,
     pub(crate) stroke_verts: Option<(usize, usize)>,
-    pub(crate) index_verts: Option<(usize, usize)>,
+    // pub(crate) index_verts: Option<(usize, usize)>,
 }
 
 #[derive(Debug)]

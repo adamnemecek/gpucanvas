@@ -7,9 +7,28 @@
 
 * concave_fill
     * this is called fill in metalnvg
-    * fundametnally, there are three steps
-        * shapes
-            * 
-        * anti-aliased fragment
-        * fill
 
+    * fundamentally, there are these steps
+        * set stencil
+        * uniforms (missing in mnvg)
+        * draw shapes
+            *
+        * restore states
+        * draw anti-aliased fragments
+        * draw fill
+
+* stencil stroke
+    * fill the stroke and base without overlap
+        * set uniform
+        * setdepthstencilstate
+        * setrenderpipelinestate
+        * draw trianglestrip
+    * drawn antialiased fragments
+        * setuniform
+        * setdepthstencilstate
+        * draw trianglestrip
+    * clear stencil buffer
+        * setdepthstencilstate
+        * setrenderpipelinestate
+        * draw trianglestrip
+        * setdepthstencilstate default
