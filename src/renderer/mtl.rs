@@ -740,7 +740,8 @@ impl Renderer for Mtl {
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         let command_buffer = self.command_queue.new_command_buffer();
-        let color_texture = self.layer.next_drawable().unwrap().texture();
+        let drawable =  self.layer.next_drawable().unwrap();
+        let color_texture = drawable.texture();
         let clear_color: metal::MTLClearColor = todo!();
 
         let encoder = new_render_command_encoder(
