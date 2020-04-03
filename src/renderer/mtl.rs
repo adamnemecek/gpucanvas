@@ -57,6 +57,7 @@ type VertexBuffer = GPUVec<Vertex>;
 type IndexBuffer = GPUVec<usize>;
 type UniformBuffer = GPUVar<Uniforms>;
 
+
 // mod uniform_array;
 // use uniform_array::UniformArray;
 
@@ -67,6 +68,23 @@ type UniformBuffer = GPUVar<Uniforms>;
 
 // use gl::types::*;
 
+pub struct Test {
+
+}
+
+impl Test {
+    fn test1(&self) {
+
+    }
+
+    fn test2(&mut self) {
+
+    }
+}
+
+fn test2() {
+    let a = Test{};
+}
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub struct Blend {
@@ -105,6 +123,75 @@ impl From<CompositeOperationState> for Blend {
     }
 }
 
+pub struct PipelineState {
+    pub blend: Blend,
+    pub pixel_format: metal::MTLPixelFormat,
+    pub pipeline_state: metal::RenderPipelineState,
+    pub stencil_only_pipeline_state: metal::RenderPipelineState,
+    // stencil_only_pipeline_state: metal::RenderPipelineState,
+}
+
+impl PipelineState {
+    pub fn new(
+        device: metal::Device,
+        frag: metal::Function,
+        vert: metal::Function,
+        vert_desc: metal::VertexDescriptor,
+        blend: CompositeOperationState,
+        pixel_format: metal::MTLPixelFormat,
+    )  -> Self {
+
+        let blend: Blend = blend.into();
+        let desc = metal::RenderPipelineDescriptor::new();
+        let color_attachment_desc = desc.color_attachments().object_at(0).unwrap();
+        color_attachment_desc.set_pixel_format(pixel_format);
+
+        desc.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
+        desc.set_fragment_function(Some(&frag));
+        desc.set_vertex_function(Some(&vert));
+        desc.set_vertex_descriptor(Some(&vert_desc));
+
+        color_attachment_desc.set_blending_enabled(true);
+        color_attachment_desc.set_source_rgb_blend_factor(blend.src_rgb);
+        color_attachment_desc.set_source_alpha_blend_factor(blend.src_alpha);
+        color_attachment_desc.set_destination_rgb_blend_factor(blend.dst_rgb);
+        color_attachment_desc.set_destination_alpha_blend_factor(blend.dst_alpha);
+
+
+        let pipeline_state = device.new_render_pipeline_state(&desc).unwrap();
+        // self.pipeline_state = Some(pipeline_state);
+
+        desc.set_fragment_function(None);
+        color_attachment_desc.set_write_mask(metal::MTLColorWriteMask::empty());
+        let stencil_only_pipeline_state = device.new_render_pipeline_state(&desc).unwrap();
+
+        let pipeline_pixel_format = pixel_format;
+        Self {
+            pixel_format,
+            pipeline_state,
+            blend,
+            stencil_only_pipeline_state
+        }
+    }
+}
+
+pub struct Stuff {
+
+}
+
+impl Stuff {
+    pub fn test1(&self) {
+        todo!()
+    }
+
+    pub fn test2(&mut self) {
+        todo!()
+    }
+}
+
+fn test() {
+
+}
 pub struct Mtl {
     debug: bool,
     antialias: bool,
@@ -138,7 +225,6 @@ pub struct Mtl {
     stroke_shape_stencil_state: metal::DepthStencilState,
     stroke_anti_alias_stencil_state: metal::DepthStencilState,
     stroke_clear_stencil_state: metal::DepthStencilState,
-
 
     // MNVGbuffers
     // command_buffer
@@ -371,12 +457,47 @@ impl Mtl {
         }
     }
 
+
+
     /// updaterenderpipelinstateforblend
     fn set_composite_operation(
         &self,
         blend_state: CompositeOperationState,
-        // pixel_format: metal::MTLPixelFormat
+        // pixel_format: metal::MTLPixelFormat,
+//
     ) {
+        // if self.pipeline_state.is_some() &&
+        //     self.stencil_only_pipeline_state.is_some() &&
+        //     self.pipeline_pixel_format == pixel_format &&
+        //     self.blend_func == blend_func {
+        //     return;
+        // }
+
+        // let desc = metal::RenderPipelineDescriptor::new();
+        // let color_attachment_desc = desc.color_attachments().object_at(0).unwrap();
+        // color_attachment_desc.set_pixel_format(pixel_format);
+
+        // desc.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
+        // desc.set_fragment_function(Some(&self.frag_func));
+        // desc.set_vertex_function(Some(&self.vert_func));
+        // desc.set_vertex_descriptor(Some(&self.vert_desc));
+
+        // color_attachment_desc.set_blending_enabled(true);
+        // color_attachment_desc.set_source_rgb_blend_factor(blend_func.src_rgb);
+        // color_attachment_desc.set_source_alpha_blend_factor(blend_func.src_alpha);
+        // color_attachment_desc.set_destination_rgb_blend_factor(blend_func.dst_rgb);
+        // color_attachment_desc.set_destination_alpha_blend_factor(blend_func.dst_alpha);
+
+        // self.blend_func = blend_func;
+        // let pipeline_state = self.device.new_render_pipeline_state(&desc).unwrap();
+        // self.pipeline_state = Some(pipeline_state);
+
+        // desc.set_fragment_function(None);
+        // color_attachment_desc.set_write_mask(metal::MTLColorWriteMask::empty());
+        // let stencil_only_pipeline_state = self.device.new_render_pipeline_state(&desc).unwrap();
+        // self.stencil_only_pipeline_state = Some(stencil_only_pipeline_state);
+
+        // self.pipeline_pixel_format = pixel_format;
 //         unsafe {
 //             gl::BlendFuncSeparate(
 //                 Self::gl_factor(blend_state.src_rgb),
@@ -385,9 +506,10 @@ impl Mtl {
 //                 Self::gl_factor(blend_state.dst_alpha)
 //             );
 //         }
+        // self.pipeline
     }
 
-    // done
+    /// done
     fn convex_fill(
         &self,
         encoder: &metal::RenderCommandEncoderRef,
@@ -424,7 +546,7 @@ impl Mtl {
         }
     }
 
-
+    /// done
     fn concave_fill(
         &self,
         encoder: &metal::RenderCommandEncoderRef,
@@ -593,6 +715,7 @@ impl Mtl {
         image_tex: Option<ImageId>,
         alpha_tex: Option<ImageId>
     ) {
+        // todo!()
         let arr = Uniforms::from(paint);
 //         self.program.set_config(UniformArray::size() as i32, arr.as_ptr());
 //         self.check_error("set_uniforms uniforms");
@@ -626,7 +749,8 @@ impl Mtl {
         width: u32,
         height: u32,
         color: Color) {
-            let scissor_rect: metal::MTLScissorRect = todo!();
+            todo!()
+            // let scissor_rect: metal::MTLScissorRect = todo!();
             // encoder.set_viewport(viewport);
 //         unsafe {
 //             gl::Enable(gl::SCISSOR_TEST);
@@ -637,6 +761,17 @@ impl Mtl {
 //         }
     }
 }
+
+// fn update_render_pipeline_state(
+//     library: &metal::LibraryRef,
+//     pipeline_state: metal::RenderPipelineState,
+//     blend: Blend,
+//     pixel_format: metal::MTLPixelFormat
+// ) -> (
+//     metal::RenderPipelineState,
+// ) {
+//     todo!()
+// }
 
 fn new_render_command_encoder<'a>(
     command_buffer: &'a metal::CommandBufferRef,
@@ -706,11 +841,13 @@ impl Renderer for Mtl {
 
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
-        let command_buffer = self.command_queue.new_command_buffer();
-        let render_pass_descriptor = metal::RenderPassDescriptor::new();
-        let encoder = command_buffer.new_render_command_encoder(
-            &render_pass_descriptor
-        );
+        let encoder = {
+            let command_buffer = self.command_queue.new_command_buffer();
+            let render_pass_descriptor = metal::RenderPassDescriptor::new();
+            command_buffer.new_render_command_encoder(
+                &render_pass_descriptor
+            )
+        };
 
 //         self.program.bind();
 
@@ -753,7 +890,22 @@ impl Renderer for Mtl {
 //         self.check_error("render prepare");
 
         for cmd in commands {
-            self.set_composite_operation(cmd.composite_operation);
+            // unsafe {
+                // self.set_composite_operation(cmd.composite_operation);
+            // }
+                // if self.pipeline_state.is_none() &&
+                //     // self.stencil_only_pipeline_state.is_none() &&
+                //     self.pipeline_pixel_format != pixel_format &&
+                //     self.pipeline_state.blend != blend {
+                //     // return;
+                //     // initialize
+                //     // let pipeline_state: PipelineState = todo!();
+                //     // self.pipeline_state = pipeline_state;
+                //     let pipeline_state: metal::RenderPipelineState = todo!();
+                //     self.pipeline_state = pipeline_state;
+
+                // }
+
 
             match cmd.cmd_type {
                 CommandType::ConvexFill { params } => {
