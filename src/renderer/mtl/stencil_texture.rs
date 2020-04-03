@@ -1,13 +1,15 @@
+use crate::{
+    Size
+};
 
-
-pub fn create_stencil_texture_descriptor(size: (f32, f32)) -> metal::TextureDescriptor {
+pub fn create_stencil_texture_descriptor(size: Size) -> metal::TextureDescriptor {
     let desc = metal::TextureDescriptor::new();
     desc.set_texture_type(metal::MTLTextureType::D2);
     desc.set_pixel_format(metal::MTLPixelFormat::Stencil8);
     desc.set_resource_options(metal::MTLResourceOptions::CPUCacheModeDefaultCache);
 
-    desc.set_width(size.0 as u64);
-    desc.set_height(size.0 as u64);
+    desc.set_width(size.w as u64);
+    desc.set_height(size.h as u64);
     desc.set_mipmap_level_count(1);
 
     desc.set_resource_options(metal::MTLResourceOptions::StorageModePrivate);
@@ -18,11 +20,11 @@ pub fn create_stencil_texture_descriptor(size: (f32, f32)) -> metal::TextureDesc
 pub struct StencilTexture {
     pub device: metal::Device,
     pub tex: metal::Texture,
-    pub size: (f32, f32),
+    pub size: Size,
 }
 
 impl StencilTexture {
-    pub fn new(device: &metal::DeviceRef, size: (f32, f32)) -> Self {
+    pub fn new(device: &metal::DeviceRef, size: Size) -> Self {
         let desc = create_stencil_texture_descriptor(size);
         let tex = device.new_texture(&desc);
         Self {
@@ -48,7 +50,7 @@ impl StencilTexture {
     //     0
     // }
 
-    pub fn resize(&mut self, size: (f32, f32)) {
+    pub fn resize(&mut self, size: Size) {
         // if self.size.contains(&size) {
         //     return;
         // }

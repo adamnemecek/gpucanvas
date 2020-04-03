@@ -676,14 +676,15 @@ impl Mtl {
     // Looks like in this case the depth buffer is irrelevant. Stencil buffer contents can be cleared similarly to the depth buffer, though
 
     fn clear_rect(
-        &self,
+        &mut self,
         encoder: &metal::RenderCommandEncoderRef,
         x: u32,
         y: u32,
         width: u32,
         height: u32,
         color: Color) {
-            todo!()
+            self.clear_buffer_on_flush = true;
+            // todo!()
             // let scissor_rect: metal::MTLScissorRect = todo!();
             // encoder.set_viewport(viewport);
 //         unsafe {
@@ -694,35 +695,13 @@ impl Mtl {
 //             gl::Disable(gl::SCISSOR_TEST);
 //         }
     }
-
-
-    // pub fn new_render_command_encoder(&mut self) -> metal::RenderCommandEncoder {
-    //     let command_buffer = self.command_queue.new_command_buffer();
-    //     let render_pass_descriptor = metal::RenderPassDescriptor::new();
-    //     command_buffer.new_render_command_encoder(
-    //         &render_pass_descriptor
-    //     ).to_owned()
-    // }
 }
-
-// fn update_render_pipeline_state(
-//     library: &metal::LibraryRef,
-//     pipeline_state: metal::RenderPipelineState,
-//     blend: Blend,
-//     pixel_format: metal::MTLPixelFormat
-// ) -> (
-//     metal::RenderPipelineState,
-// ) {
-//     todo!()
-// }
 
 fn new_render_command_encoder<'a>(
     color_texture: &metal::TextureRef,
     command_buffer: &'a metal::CommandBufferRef,
     clear_color: metal::MTLClearColor,
-    // buffer: crate::Buffer<'_>,
     stencil_texture: &metal::TextureRef,
-    // drawable: metal::Texture,
     view_size: (f32, f32),
     vertex_buffer: &VertexBuffer,
     index_buffer: &IndexBuffer,
@@ -804,46 +783,6 @@ impl Renderer for Mtl {
             clear_buffer_on_flush,
         );
 
-//         self.program.bind();
-
-//         unsafe {
-//             gl::Enable(gl::CULL_FACE);
-
-//             gl::CullFace(gl::BACK);
-//             gl::FrontFace(gl::CCW);
-//             gl::Enable(gl::BLEND);
-//             gl::Disable(gl::DEPTH_TEST);
-//             gl::Disable(gl::SCISSOR_TEST);
-//             gl::ColorMask(gl::TRUE, gl::TRUE, gl::TRUE, gl::TRUE);
-//             gl::StencilMask(0xffff_ffff);
-//             gl::StencilOp(gl::KEEP, gl::KEEP, gl::KEEP);
-//             gl::StencilFunc(gl::ALWAYS, 0, 0xffff_ffff);
-//             gl::ActiveTexture(gl::TEXTURE0);
-//             gl::BindTexture(gl::TEXTURE_2D, 0);
-
-//             gl::BindVertexArray(self.vert_arr);
-
-//             let vertex_size = mem::size_of::<Vertex>();
-
-//             gl::BindBuffer(gl::ARRAY_BUFFER, self.vert_buff);
-//             let size = verts.len() * vertex_size;
-//             gl::BufferData(gl::ARRAY_BUFFER, size as isize, verts.as_ptr() as *const GLvoid, gl::STREAM_DRAW);
-
-//             gl::EnableVertexAttribArray(0);
-//             gl::EnableVertexAttribArray(1);
-
-//             gl::VertexAttribPointer(0, 2, gl::FLOAT, gl::FALSE, vertex_size as i32, ptr::null::<c_void>());
-//             gl::VertexAttribPointer(1, 2, gl::FLOAT, gl::FALSE, vertex_size as i32, (2 * mem::size_of::<f32>()) as *const c_void);
-//         }
-
-//         // Bind the two uniform samplers to texture units
-//         self.program.set_tex(0);
-//         self.program.set_masktex(1);
-//         // Set uniforms
-//         self.program.set_view(self.view);
-
-//         self.check_error("render prepare");
-
         for cmd in commands {
             self.set_composite_operation(cmd.composite_operation, color_texture.pixel_format());
 
@@ -869,19 +808,6 @@ impl Renderer for Mtl {
             }
         }
 
-//         unsafe {
-//             gl::DisableVertexAttribArray(0);
-//             gl::DisableVertexAttribArray(1);
-//             gl::BindVertexArray(0);
-
-//             gl::Disable(gl::CULL_FACE);
-//             gl::BindBuffer(gl::ARRAY_BUFFER, 0);
-//             gl::BindTexture(gl::TEXTURE_2D, 0);
-//         }
-
-//         self.program.unbind();
-
-//         self.check_error("render done");
     }
 
     fn create_image(&mut self, data: ImageSource, flags: ImageFlags) -> Result<Self::Image> {
@@ -1019,11 +945,11 @@ impl Renderer for Mtl {
         let h = self.view[1] as usize;
 
         let mut image = ImgVec::new(vec![RGBA8 {r:255, g:255, b:255, a: 255}; w*h], w, h);
-
+        todo!()
         // unsafe {
         //     gl::ReadPixels(0, 0, self.view[0] as i32, self.view[1] as i32, gl::RGBA, gl::UNSIGNED_BYTE, image.buf_mut().as_ptr() as *mut GLvoid);
         // }
-        todo!()
+        // todo!()
         // TODO: flip image
         //image = image::imageops::flip_vertical(&image);
 
@@ -1031,14 +957,3 @@ impl Renderer for Mtl {
     }
 }
 
-// impl Drop for OpenGl {
-//     fn drop(&mut self) {
-//         if self.vert_arr != 0 {
-//             unsafe { gl::DeleteVertexArrays(1, &self.vert_arr); }
-//         }
-
-//         if self.vert_buff != 0 {
-//             unsafe { gl::DeleteBuffers(1, &self.vert_buff); }
-//         }
-//     }
-// }

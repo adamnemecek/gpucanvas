@@ -208,6 +208,12 @@ impl IndexMut<usize> for Transform2D {
 }
 
 #[derive(Copy, Clone, Default, Debug, PartialEq, PartialOrd)]
+pub struct Size {
+    pub w: f32,
+    pub h: f32,
+}
+
+#[derive(Copy, Clone, Default, Debug, PartialEq, PartialOrd)]
 pub struct Rect {
     pub x: f32,
     pub y: f32,
