@@ -461,7 +461,7 @@ impl Mtl {
 
     /// updaterenderpipelinstateforblend
     fn set_composite_operation(
-        &self,
+        &mut self,
         blend_state: CompositeOperationState,
         // pixel_format: metal::MTLPixelFormat,
 //
@@ -760,6 +760,15 @@ impl Mtl {
 //             gl::Disable(gl::SCISSOR_TEST);
 //         }
     }
+
+
+    pub fn new_render_command_encoder(&mut self) -> metal::RenderCommandEncoder {
+        let command_buffer = self.command_queue.new_command_buffer();
+        let render_pass_descriptor = metal::RenderPassDescriptor::new();
+        command_buffer.new_render_command_encoder(
+            &render_pass_descriptor
+        ).to_owned()
+    }
 }
 
 // fn update_render_pipeline_state(
@@ -839,15 +848,10 @@ impl Renderer for Mtl {
 //         }
     }
 
+
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
-        let encoder = {
-            let command_buffer = self.command_queue.new_command_buffer();
-            let render_pass_descriptor = metal::RenderPassDescriptor::new();
-            command_buffer.new_render_command_encoder(
-                &render_pass_descriptor
-            )
-        };
+        let encoder = self.new_render_command_encoder();
 
 //         self.program.bind();
 
@@ -891,7 +895,7 @@ impl Renderer for Mtl {
 
         for cmd in commands {
             // unsafe {
-                // self.set_composite_operation(cmd.composite_operation);
+                self.set_composite_operation(cmd.composite_operation);
             // }
                 // if self.pipeline_state.is_none() &&
                 //     // self.stencil_only_pipeline_state.is_none() &&
