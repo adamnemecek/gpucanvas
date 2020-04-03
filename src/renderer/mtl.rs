@@ -303,14 +303,6 @@ impl Mtl {
             render_target: RenderTarget::Screen,
         };
 
-        // unsafe {
-        //     let version = CStr::from_ptr(gl::GetString(gl::VERSION) as *mut i8);
-        //     opengl.is_opengles = version.to_str().ok().map_or(false, |str| str.starts_with("OpenGL ES"));
-
-        //     gl::GenVertexArrays(1, &mut opengl.vert_arr);
-        //     gl::GenBuffers(1, &mut opengl.vert_buff);
-        // }
-
         Ok(renderer)
     }
 
@@ -480,7 +472,6 @@ impl Mtl {
 
         // Draws fill.
         if let Some((start, count)) = cmd.triangles_verts {
-
             encoder.draw_primitives(
                 metal::MTLPrimitiveType::TriangleStrip,
                 start as u64,
@@ -594,6 +585,8 @@ impl Mtl {
     ) {
         // let u = Uniforms::from(paint);
         let len = self.uniform_buffer.len();
+        let offset = 10;
+        encoder.set_fragment_buffer_offset(0, offset);
 
 
         let tex = image_tex.and_then(|id| images.get(id)).map_or(0, |tex| tex.id());
