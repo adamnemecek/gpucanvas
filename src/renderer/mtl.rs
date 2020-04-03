@@ -408,7 +408,7 @@ impl Mtl {
         cmd: &Command,
         gpu_paint: Params
     ) {
-        self.set_uniforms(images, gpu_paint, cmd.image, cmd.alpha_mask);
+        self.set_uniforms(encoder, images, gpu_paint, cmd.image, cmd.alpha_mask);
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
 
         for drawable in &cmd.drawables {
@@ -451,7 +451,7 @@ impl Mtl {
         encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state.as_ref().unwrap());
 
         /// todo metal nanovg doesn't have this
-        self.set_uniforms(images, stencil_paint, cmd.image, cmd.alpha_mask);
+        self.set_uniforms(encoder, images, stencil_paint, cmd.image, cmd.alpha_mask);
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
@@ -474,7 +474,7 @@ impl Mtl {
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
 
         // Draws anti-aliased fragments.
-        self.set_uniforms(images, fill_paint, cmd.image, cmd.alpha_mask);
+        self.set_uniforms(encoder, images, fill_paint, cmd.image, cmd.alpha_mask);
         if self.antialias {
             encoder.set_depth_stencil_state(&self.fill_anti_alias_stencil_state);
 
@@ -512,7 +512,7 @@ impl Mtl {
         cmd: &Command,
         paint: Params
     ) {
-        self.set_uniforms(images, paint, cmd.image, cmd.alpha_mask);
+        self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
                 // unsafe { gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32); }
@@ -535,7 +535,7 @@ impl Mtl {
         paint2: Params
     ) {
         /// Fills the stroke base without overlap.
-        self.set_uniforms(images, paint2, cmd.image, cmd.alpha_mask);
+        self.set_uniforms(encoder, images, paint2, cmd.image, cmd.alpha_mask);
         encoder.set_depth_stencil_state(&self.stroke_shape_stencil_state);
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
 
@@ -550,7 +550,7 @@ impl Mtl {
         }
 
         /// Draw anti-aliased pixels.
-        self.set_uniforms(images, paint1, cmd.image, cmd.alpha_mask);
+        self.set_uniforms(encoder, images, paint1, cmd.image, cmd.alpha_mask);
         encoder.set_depth_stencil_state(&self.stroke_anti_alias_stencil_state);
 
         for drawable in &cmd.drawables {
@@ -588,7 +588,7 @@ impl Mtl {
         cmd: &Command,
         paint: Params
     ) {
-        self.set_uniforms(images, paint, cmd.image, cmd.alpha_mask);
+        self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
         if let Some((start, count)) = cmd.triangles_verts {
             encoder.draw_primitives(
@@ -601,6 +601,7 @@ impl Mtl {
 
     fn set_uniforms(
         &self,
+        encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         paint: Params,
         image_tex: Option<ImageId>,
@@ -653,10 +654,14 @@ impl Mtl {
 //         }
     }
 
-    pub fn get_target_texture(&self) -> metal::TextureRef {
+    pub fn get_target(&self, images: &ImageStore<MtlTexture>) -> metal::TextureRef {
         match self.render_target {
-            RenderTarget::Screen => todo!(),
-            RenderTarget::Image(id) => todo!()
+            RenderTarget::Screen => {
+                todo!()
+            },
+            RenderTarget::Image(id) => {
+                todo!()
+            }
         }
     }
 }
@@ -714,21 +719,16 @@ fn new_render_command_encoder<'a>(
 impl Renderer for Mtl {
     type Image = MtlTexture;
 
-    fn set_size(&mut self, width: u32, height: u32, _dpi: f32) {
+    fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
         let size = Size::new(width as f32, height as f32);
         self.view_size.set_value(size);
-        // self.view[0] = width as f32;
-        // self.view[1] = height as f32;
-
-//         unsafe {
-//             gl::Viewport(0, 0, width as i32, height as i32);
-//         }
     }
-
 
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         let command_buffer = self.command_queue.new_command_buffer();
+        command_buffer.enqueue();
+        // todo: this should be calling get_target
         let drawable = self.layer.next_drawable().unwrap();
         let color_texture = drawable.texture();
         let clear_color: metal::MTLClearColor = todo!();
@@ -795,16 +795,7 @@ impl Renderer for Mtl {
 
     fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
         self.render_target = target;
-        // match target {
-        //     RenderTarget::Screen => {
-        //         //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        //     },
-        //     RenderTarget::Image(id) => {
-        //         if let Some(texture) = images.get(id) {
-
-        //         }
-        //     }
-        // }
+        todo!();
     }
 
     fn blur(&mut self, texture: &mut MtlTexture, amount: u8, x: usize, y: usize, width: usize, height: usize) {

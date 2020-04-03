@@ -223,6 +223,16 @@ impl Size {
     }
 }
 
+impl std::ops::Mul<f32> for Size {
+    type Output = Self;
+    fn mul(self, rhs: f32) -> Self::Output {
+        Self::new(
+            self.w * rhs,
+            self.h * rhs
+        )
+    }
+}
+
 #[derive(Copy, Clone, Default, Debug, PartialEq, PartialOrd)]
 pub struct Rect {
     pub x: f32,
