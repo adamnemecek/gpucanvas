@@ -66,25 +66,6 @@ type UniformBuffer = GPUVar<Uniforms>;
 //     include!(concat!(env!("OUT_DIR"), "/gl_bindings.rs"));
 // }
 
-// use gl::types::*;
-
-pub struct Test {
-
-}
-
-impl Test {
-    fn test1(&self) {
-
-    }
-
-    fn test2(&mut self) {
-
-    }
-}
-
-fn test2() {
-    let a = Test{};
-}
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub struct Blend {
@@ -93,7 +74,6 @@ pub struct Blend {
     pub src_alpha: metal::MTLBlendFactor,
     pub dst_alpha: metal::MTLBlendFactor,
 }
-
 
 fn convert_blend_factor(factor: BlendFactor) -> metal::MTLBlendFactor {
     match factor {
@@ -168,7 +148,8 @@ pub struct Mtl {
     // vertex_buffer: metal::Buffer
     vertex_buffer: GPUVec<Vertex>,
     // uniform_buffer: metal::Buffer,
-    uniform_buffer: GPUVar<Uniforms>
+    uniform_buffer: GPUVar<Uniforms>,
+    render_target: RenderTarget,
     // program: Program,
     // vert_arr: GLuint,
     // vert_buff: GLuint,
@@ -333,7 +314,8 @@ impl Mtl {
             vertex_buffer: todo!(),
             uniform_buffer: todo!(),
             vertex_descriptor: vertex_descriptor.to_owned(),
-            pipeline_pixel_format: todo!()
+            pipeline_pixel_format: todo!(),
+            render_target: RenderTarget::Screen,
         };
 
         // unsafe {
@@ -670,6 +652,10 @@ impl Mtl {
 //             gl::Disable(gl::SCISSOR_TEST);
 //         }
     }
+
+    pub fn get_target_texture(&self) -> metal::TextureRef {
+        todo!()
+    }
 }
 
 fn new_render_command_encoder<'a>(
@@ -740,7 +726,7 @@ impl Renderer for Mtl {
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         let command_buffer = self.command_queue.new_command_buffer();
-        let drawable =  self.layer.next_drawable().unwrap();
+        let drawable = self.layer.next_drawable().unwrap();
         let color_texture = drawable.texture();
         let clear_color: metal::MTLClearColor = todo!();
 
@@ -783,6 +769,13 @@ impl Renderer for Mtl {
             }
         }
 
+        encoder.end_encoding();
+        if !self.layer.presents_with_transaction() {
+            command_buffer.present_drawable(drawable);
+        }
+
+        // if target macos
+
     }
 
     fn create_image(&mut self, data: ImageSource, flags: ImageFlags) -> Result<Self::Image> {
@@ -798,16 +791,17 @@ impl Renderer for Mtl {
     }
 
     fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
-        match target {
-            RenderTarget::Screen => {
-                //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            },
-            RenderTarget::Image(id) => {
-                if let Some(texture) = images.get(id) {
+        self.render_target = target;
+        // match target {
+        //     RenderTarget::Screen => {
+        //         //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        //     },
+        //     RenderTarget::Image(id) => {
+        //         if let Some(texture) = images.get(id) {
 
-                }
-            }
-        }
+        //         }
+        //     }
+        // }
     }
 
     fn blur(&mut self, texture: &mut MtlTexture, amount: u8, x: usize, y: usize, width: usize, height: usize) {

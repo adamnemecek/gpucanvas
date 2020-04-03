@@ -217,6 +217,10 @@ impl Size {
     pub fn new(w: f32, h: f32) -> Self {
         Self { w, h }
     }
+
+    pub fn contains(&self, other: &Self) -> bool {
+        self.w > other.w && self.h > other.h
+    }
 }
 
 #[derive(Copy, Clone, Default, Debug, PartialEq, PartialOrd)]

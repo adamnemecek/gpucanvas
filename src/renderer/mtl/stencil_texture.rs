@@ -34,26 +34,10 @@ impl StencilTexture {
         }
     }
 
-    // pub fn width(&self) -> usize {
-    //     // if let Some(v) = self.tex.map(|x| x.width()) {
-    //     //     v
-    //     // }
-    //     // else {
-    //     //     0
-    //     // }
-    // }
-
-    // pub fn height(&self) -> usize {
-    //     if let Some(v) = self.tex.map(|x| x.height()) {
-    //         v
-    //     }
-    //     0
-    // }
-
     pub fn resize(&mut self, size: Size) {
-        // if self.size.contains(&size) {
-        //     return;
-        // }
+        if self.size.contains(&size) {
+            return;
+        }
 
         let desc = create_stencil_texture_descriptor(size);
 
@@ -62,7 +46,7 @@ impl StencilTexture {
     }
 
     pub fn clear(&mut self) {
-        // self.size = ViewSize::zero();
+        self.size = Size::default();
     }
 
     // pub fn into_(&self) -> &'_ metal::TextureRef {
