@@ -1,11 +1,28 @@
 
 use std::time::Instant;
 
-use glutin::event::{Event, WindowEvent, ElementState, KeyboardInput, VirtualKeyCode, MouseButton};
-use glutin::event_loop::{ControlFlow, EventLoop};
-use glutin::window::WindowBuilder;
-use glutin::ContextBuilder;
-//use glutin::{GlRequest, Api};
+use cocoa::{
+    appkit::{NSView},
+    base::id as cocoa_id,
+    foundation::{NSRange},
+};
+
+use core_graphics::geometry::CGSize;
+use objc::runtime::YES;
+use metal::*;
+use winit::platform::macos::WindowExtMacOS;
+use std::mem;
+
+use winit::{
+    event::{
+        Event, WindowEvent,
+        WindowEvent::{
+            KeyboardInput
+        }
+    },
+    event_loop::ControlFlow
+};
+
 
 use gpucanvas::{
     Renderer,
@@ -22,7 +39,7 @@ use gpucanvas::{
     Baseline,
     Weight,
     //CompositeOperation,
-    renderer::OpenGl
+    renderer::Mtl
 };
 
 pub fn quantize(a: f32, d: f32) -> f32 {
@@ -31,13 +48,35 @@ pub fn quantize(a: f32, d: f32) -> f32 {
 
 fn main() {
     let el = EventLoop::new();
-    let wb = WindowBuilder::new().with_inner_size(glutin::dpi::PhysicalSize::new(1000, 600)).with_title("gpucanvas demo");
+    let size = winit::dpi::LogicalSize::new(800, 600);
 
-    let windowed_context = ContextBuilder::new().with_vsync(true).build_windowed(wb, &el).unwrap();
-    //let windowed_context = ContextBuilder::new().with_gl(GlRequest::Specific(Api::OpenGl, (4, 4))).with_vsync(false).build_windowed(wb, &el).unwrap();
-    let windowed_context = unsafe { windowed_context.make_current().unwrap() };
+    let window = winit::window::WindowBuilder::new()
+        .with_inner_size(size)
+        .with_title("Metal".to_string())
+        .build(&events_loop)
+        .unwrap();
 
-    let renderer = OpenGl::new(|s| windowed_context.get_proc_address(s) as *const _).expect("Cannot create renderer");
+    let device = Device::system_default().expect("no device found");
+
+    let layer = CoreAnimationLayer::new();
+    layer.set_device(&device);
+    layer.set_pixel_format(MTLPixelFormat::BGRA8Unorm);
+    layer.set_presents_with_transaction(false);
+
+    unsafe {
+        let view = window.ns_view() as cocoa_id;
+        view.setWantsLayer(YES);
+        view.setLayer(mem::transmute(layer.as_ref()));
+    }
+
+    let draw_size = window.inner_size();
+    layer.set_drawable_size(CGSize::new(draw_size.width as f64, draw_size.height as f64));
+
+    let library = device
+        .new_library_with_file("examples/window/shaders.metallib")
+        .unwrap();
+
+    let renderer = Mtl::new(layer);
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
     canvas.add_font("examples/assets/Roboto-Bold.ttf").expect("Cannot add font");
@@ -64,54 +103,54 @@ fn main() {
         *control_flow = ControlFlow::Poll;
 
         match event {
-            Event::LoopDestroyed => return,
-            Event::WindowEvent { ref event, .. } => match event {
-                WindowEvent::Resized(physical_size) => {
-                    windowed_context.resize(*physical_size);
-                }
-                WindowEvent::CursorMoved { device_id: _, position, ..} => {
-                    if dragging {
-                        let p0 = canvas.transform().inversed().transform_point(mousex, mousey);
-                        let p1 = canvas.transform().inversed().transform_point(position.x as f32, position.y as f32);
+            // Event::LoopDestroyed => return,
+            Event::WindowEvent {  event, .. } => match event {
+                // WindowEvent::Resized(physical_size) => {
+                //     // layer.set_drawable_size(CGSize::new(size.width as f64, size.height as f64));
+                // },
+                // WindowEvent::CursorMoved { device_id: _, position, ..} => {
+                //     if dragging {
+                //         let p0 = canvas.transform().inversed().transform_point(mousex, mousey);
+                //         let p1 = canvas.transform().inversed().transform_point(position.x as f32, position.y as f32);
 
-                        canvas.translate(
-                            p1.0 - p0.0,
-                            p1.1 - p0.1,
-                        );
-                    }
+                //         canvas.translate(
+                //             p1.0 - p0.0,
+                //             p1.1 - p0.1,
+                //         );
+                //     }
 
-                    mousex = position.x as f32;
-                    mousey = position.y as f32;
-                }
-                WindowEvent::MouseWheel { device_id: _, delta, .. } => match delta {
-                    glutin::event::MouseScrollDelta::LineDelta(_, y) => {
-                        let pt = canvas.transform().inversed().transform_point(mousex, mousey);
-                        canvas.translate(pt.0, pt.1);
-                        canvas.scale(1.0 + (y / 10.0), 1.0 + (y / 10.0));
-                        canvas.translate(-pt.0, -pt.1);
-                    },
-                    _ => ()
-                }
-                WindowEvent::MouseInput { button: MouseButton::Left, state, .. } => {
-                    match state {
-                        ElementState::Pressed => dragging = true,
-                        ElementState::Released => dragging = false,
-                    }
-                }
-                WindowEvent::KeyboardInput { input: KeyboardInput { virtual_keycode: Some(VirtualKeyCode::S), state: ElementState::Pressed, .. }, .. } => {
-                    if let Some(screenshot_image_id) = screenshot_image_id {
-                        canvas.delete_image(screenshot_image_id);
-                    }
+                //     mousex = position.x as f32;
+                //     mousey = position.y as f32;
+                // },
+                // WindowEvent::MouseWheel { device_id: _, delta, .. } => match delta {
+                //     // glutin::event::MouseScrollDelta::LineDelta(_, y) => {
+                //     //     let pt = canvas.transform().inversed().transform_point(mousex, mousey);
+                //     //     canvas.translate(pt.0, pt.1);
+                //     //     canvas.scale(1.0 + (y / 10.0), 1.0 + (y / 10.0));
+                //     //     canvas.translate(-pt.0, -pt.1);
+                //     // },
+                //     _ => ()
+                // },
+                // WindowEvent::MouseInput { button: MouseButton::Left, state, .. } => {
+                //     match state {
+                //         ElementState::Pressed => dragging = true,
+                //         ElementState::Released => dragging = false,
+                //     }
+                // },
+                // WindowEvent::KeyboardInput { input: KeyboardInput { virtual_keycode: Some(VirtualKeyCode::S), state: ElementState::Pressed, .. }, .. } => {
+                //     if let Some(screenshot_image_id) = screenshot_image_id {
+                //         canvas.delete_image(screenshot_image_id);
+                //     }
 
-                    if let Ok(image) = canvas.screenshot() {
-                        screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
-                    }
-                }
-                WindowEvent::CloseRequested => {
-                    *control_flow = ControlFlow::Exit
-                }
+                //     if let Ok(image) = canvas.screenshot() {
+                //         screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
+                //     }
+                // },
+                // WindowEvent::CloseRequested => {
+                //     *control_flow = ControlFlow::Exit
+                // }
                 _ => (),
-            }
+            },
             Event::RedrawRequested(_) => {
                 let now = Instant::now();
                 let dt = (now - prevt).as_secs_f32();
@@ -119,16 +158,19 @@ fn main() {
 
                 perf.update(dt);
 
-                let dpi_factor = windowed_context.window().scale_factor();
-                let size = windowed_context.window().inner_size();
+                // let dpi_factor = windowed_context.window().scale_factor();
+                // let size = windowed_context.window().inner_size();
+                let width: u32 = todo!();
+                let height: u32 = todo!();
+                let dpi_factor: f32 = todo!();
 
                 let t = start.elapsed().as_secs_f32();
 
-                canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
-                canvas.clear_rect(0, 0, size.width as u32, size.height as u32, Color::rgbf(0.3, 0.3, 0.32));
+                canvas.set_size(width, height, dpi_factor);
+                canvas.clear_rect(0, 0, width, height, Color::rgbf(0.3, 0.3, 0.32));
 
-                let height = size.height as f32;
-                let width = size.width as f32;
+                let height = height as f32;
+                let width = width as f32;
 
                 draw_eyes(&mut canvas, width - 250.0, 50.0, 150.0, 100.0, mousex, mousey, t);
                 draw_graph(&mut canvas, 0.0, height / 2.0, width, height / 2.0, t);
@@ -171,11 +213,12 @@ fn main() {
                 // }
 
                 canvas.flush();
-                windowed_context.swap_buffers().unwrap();
+                // windowed_context.swap_buffers().unwrap();
             }
             Event::MainEventsCleared => {
+                window.request_redraw();
                 //scroll = 1.0;
-                windowed_context.window().request_redraw()
+                // windowed_context.window().request_redraw()
             }
             _ => (),
         }

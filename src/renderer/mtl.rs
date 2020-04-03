@@ -161,7 +161,7 @@ impl VertexOffsets {
 impl Mtl {
     pub fn new(
         layer: metal::CoreAnimationLayer,
-    ) -> Result<Self> {
+    ) -> Self {
         let device = metal::Device::system_default().unwrap();
         let library = device.new_library_with_file("shaders.metallib").expect("library not found");
         let command_queue = device.new_command_queue();
@@ -303,7 +303,7 @@ impl Mtl {
             render_target: RenderTarget::Screen,
         };
 
-        Ok(renderer)
+        renderer
     }
 
     // fn factor(factor: BlendFactor) -> metal::MTLBlendFactor {

@@ -29,6 +29,9 @@ metal = "*"
 memoffset = "*"
 metalgear = { git = "https://github.com/adamnemecek/metalgear" }
 static_assertions = "*"
+winit = "0.21"
+cocoa = "0.19"
+core-graphics = "0.17.3"
 
 [features]
 default = ["image-loading"]
