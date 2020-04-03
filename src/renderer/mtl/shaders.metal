@@ -51,6 +51,8 @@ typedef struct  {
   float strokeThr;
   int texType;
   int type;
+  float hasMask;
+  float padding[19];
 } Uniforms;
 
 float scissorMask(constant Uniforms& uniforms, float2 p);

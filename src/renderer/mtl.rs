@@ -22,7 +22,6 @@ use crate::{
 };
 
 use super::{
-
     Params,
     Renderer,
     Command,
@@ -106,9 +105,6 @@ impl From<CompositeOperationState> for Blend {
 pub struct Mtl {
     debug: bool,
     antialias: bool,
-    // is_opengles: bool,
-
-
     device: metal::Device,
     // library: metal::Library,
     command_queue: metal::CommandQueue,
@@ -138,21 +134,12 @@ pub struct Mtl {
     stroke_anti_alias_stencil_state: metal::DepthStencilState,
     stroke_clear_stencil_state: metal::DepthStencilState,
 
-    // MNVGbuffers
-    // command_buffer
-    // view: [f32; 2],
     view_size: GPUVar<Size>,
     stencil_texture: StencilTexture,
-    // index_buffer: metal::Buffer,
     index_buffer: GPUVec<usize>,
-    // vertex_buffer: metal::Buffer
     vertex_buffer: GPUVec<Vertex>,
-    // uniform_buffer: metal::Buffer,
     uniform_buffer: GPUVec<Params>,
     render_target: RenderTarget,
-    // program: Program,
-    // vert_arr: GLuint,
-    // vert_buff: GLuint,
 }
 
 
@@ -172,10 +159,8 @@ impl VertexOffsets {
 
 
 impl Mtl {
-    // pub fn new<F>(load_fn: F) -> Result<Self>  where F : Copy {
     pub fn new(
         layer: metal::CoreAnimationLayer,
-
     ) -> Result<Self> {
         let device = metal::Device::system_default().unwrap();
         let library = device.new_library_with_file("shaders.metallib").expect("library not found");
