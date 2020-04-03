@@ -42,8 +42,8 @@ use super::{
 mod mtl_texture;
 use mtl_texture::MtlTexture;
 
-mod uniforms;
-use uniforms::Uniforms;
+// mod uniforms;
+// use uniforms::Uniforms;
 
 mod stencil_texture;
 use stencil_texture::StencilTexture;
@@ -55,7 +55,7 @@ use metalgear::{
 
 type VertexBuffer = GPUVec<Vertex>;
 type IndexBuffer = GPUVec<usize>;
-type UniformBuffer = GPUVec<Uniforms>;
+type UniformBuffer = GPUVec<Params>;
 
 
 // mod uniform_array;
@@ -148,7 +148,7 @@ pub struct Mtl {
     // vertex_buffer: metal::Buffer
     vertex_buffer: GPUVec<Vertex>,
     // uniform_buffer: metal::Buffer,
-    uniform_buffer: GPUVec<Uniforms>,
+    uniform_buffer: GPUVec<Params>,
     render_target: RenderTarget,
     // program: Program,
     // vert_arr: GLuint,
@@ -402,7 +402,7 @@ impl Mtl {
 
     /// done
     fn convex_fill(
-        &self,
+        &mut self,
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
@@ -439,7 +439,7 @@ impl Mtl {
 
     /// done
     fn concave_fill(
-        &self,
+        &mut self,
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
@@ -506,7 +506,7 @@ impl Mtl {
 
     /// done
     fn stroke(
-        &self,
+        &mut self,
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
@@ -527,7 +527,7 @@ impl Mtl {
 
     /// done
     fn stencil_stroke(
-        &self,
+        &mut self,
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
@@ -582,7 +582,7 @@ impl Mtl {
 
     /// done
     fn triangles(
-        &self,
+        &mut self,
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
@@ -600,14 +600,16 @@ impl Mtl {
     }
 
     fn set_uniforms(
-        &self,
+        &mut self,
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         paint: Params,
         image_tex: Option<ImageId>,
         alpha_tex: Option<ImageId>
     ) {
-        let u = Uniforms::from(paint);
+        // let u = Uniforms::from(paint);
+        let len = self.uniform_buffer.len();
+
 
         let tex = image_tex.and_then(|id| images.get(id)).map_or(0, |tex| tex.id());
 
