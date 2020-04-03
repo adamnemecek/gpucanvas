@@ -762,9 +762,8 @@ impl Renderer for Mtl {
 
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
-        // let encoder = self.new_render_command_encoder();
         let command_buffer = self.command_queue.new_command_buffer();
-        let color_texture: metal::Texture = todo!();
+        let color_texture = self.layer.next_drawable().unwrap().texture();
         let clear_color: metal::MTLClearColor = todo!();
         let view_size: (f32, f32) = todo!();
         let clear_buffer_on_flush: bool = todo!();
@@ -823,17 +822,16 @@ impl Renderer for Mtl {
     }
 
     fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
-        todo!()
-        // match target {
-        //     RenderTarget::Screen => {
-        //         //glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        //     },
-        //     RenderTarget::Image(id) => {
-        //         if let Some(texture) = images.get(id) {
+        match target {
+            RenderTarget::Screen => {
+                //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            },
+            RenderTarget::Image(id) => {
+                if let Some(texture) = images.get(id) {
 
-        //         }
-        //     }
-        // }
+                }
+            }
+        }
     }
 
     fn blur(&mut self, texture: &mut MtlTexture, amount: u8, x: usize, y: usize, width: usize, height: usize) {
