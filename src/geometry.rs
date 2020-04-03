@@ -213,6 +213,12 @@ pub struct Size {
     pub h: f32,
 }
 
+impl Size {
+    pub fn new(w: f32, h: f32) -> Self {
+        Self { w, h }
+    }
+}
+
 #[derive(Copy, Clone, Default, Debug, PartialEq, PartialOrd)]
 pub struct Rect {
     pub x: f32,

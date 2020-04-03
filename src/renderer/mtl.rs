@@ -10,7 +10,7 @@ use rgb::RGBA8;
 use imgref::ImgVec;
 
 use crate::{
-
+    Size,
     Color,
     Result,
     ImageStore,
@@ -127,7 +127,7 @@ pub struct Mtl {
     debug: bool,
     antialias: bool,
     // is_opengles: bool,
-    view: [f32; 2],
+
 
     device: metal::Device,
     // library: metal::Library,
@@ -160,7 +160,8 @@ pub struct Mtl {
 
     // MNVGbuffers
     // command_buffer
-    view_size_buffer: metal::Buffer,
+    // view: [f32; 2],
+    view_size: GPUVar<Size>,
     stencil_texture: StencilTexture,
     // index_buffer: metal::Buffer,
     index_buffer: GPUVec<usize>,
@@ -310,12 +311,7 @@ impl Mtl {
             debug,
             antialias,
             blend_func,
-            // is_opengles: false,
-            view: [0.0, 0.0],
-            // program: program,
-
-            // vert_arr: 0,
-            // vert_buff: 0,
+            view_size: GPUVar::new(&device, Size::default()),
             device,
             command_queue,
             frag_func,
@@ -332,8 +328,6 @@ impl Mtl {
             frag_size: todo!(),
             index_size: todo!(),
             stencil_only_pipeline_state: None,
-
-            view_size_buffer: todo!(),
             stencil_texture: todo!(),
             index_buffer: todo!(),
             vertex_buffer: todo!(),
@@ -353,42 +347,23 @@ impl Mtl {
         Ok(renderer)
     }
 
-//     fn check_error(&self, label: &str) {
-//         if !self.debug { return }
+    // fn factor(factor: BlendFactor) -> metal::MTLBlendFactor {
+    //     use metal::MTLBlendFactor;
 
-//         let err = unsafe { gl::GetError() };
-
-//         if err == gl::NO_ERROR { return; }
-
-//         let message = match err {
-//             gl::INVALID_ENUM => "Invalid enum",
-//             gl::INVALID_VALUE => "Invalid value",
-//             gl::INVALID_OPERATION => "Invalid operation",
-//             gl::OUT_OF_MEMORY => "Out of memory",
-//             gl::INVALID_FRAMEBUFFER_OPERATION => "Invalid framebuffer operation",
-//             _ => "Unknown error"
-//         };
-
-//         eprintln!("({}) Error on {} - {}", err, label, message);
-//     }
-
-    fn factor(factor: BlendFactor) -> metal::MTLBlendFactor {
-        use metal::MTLBlendFactor;
-
-        match factor {
-            BlendFactor::Zero => MTLBlendFactor::Zero,
-            BlendFactor::One => MTLBlendFactor::One,
-            BlendFactor::SrcColor => MTLBlendFactor::SourceColor,
-            BlendFactor::OneMinusSrcColor => MTLBlendFactor::OneMinusSourceColor,
-            BlendFactor::DstColor => MTLBlendFactor::DestinationColor,
-            BlendFactor::OneMinusDstColor => MTLBlendFactor::OneMinusDestinationColor,
-            BlendFactor::SrcAlpha => MTLBlendFactor::SourceAlpha,
-            BlendFactor::OneMinusSrcAlpha => MTLBlendFactor::OneMinusSourceAlpha,
-            BlendFactor::DstAlpha => MTLBlendFactor::DestinationAlpha,
-            BlendFactor::OneMinusDstAlpha => MTLBlendFactor::OneMinusDestinationAlpha,
-            BlendFactor::SrcAlphaSaturate => MTLBlendFactor::SourceAlphaSaturated,
-        }
-    }
+    //     match factor {
+    //         BlendFactor::Zero => MTLBlendFactor::Zero,
+    //         BlendFactor::One => MTLBlendFactor::One,
+    //         BlendFactor::SrcColor => MTLBlendFactor::SourceColor,
+    //         BlendFactor::OneMinusSrcColor => MTLBlendFactor::OneMinusSourceColor,
+    //         BlendFactor::DstColor => MTLBlendFactor::DestinationColor,
+    //         BlendFactor::OneMinusDstColor => MTLBlendFactor::OneMinusDestinationColor,
+    //         BlendFactor::SrcAlpha => MTLBlendFactor::SourceAlpha,
+    //         BlendFactor::OneMinusSrcAlpha => MTLBlendFactor::OneMinusSourceAlpha,
+    //         BlendFactor::DstAlpha => MTLBlendFactor::DestinationAlpha,
+    //         BlendFactor::OneMinusDstAlpha => MTLBlendFactor::OneMinusDestinationAlpha,
+    //         BlendFactor::SrcAlphaSaturate => MTLBlendFactor::SourceAlphaSaturated,
+    //     }
+    // }
 
 
 
@@ -702,7 +677,7 @@ fn new_render_command_encoder<'a>(
     command_buffer: &'a metal::CommandBufferRef,
     clear_color: metal::MTLClearColor,
     stencil_texture: &metal::TextureRef,
-    view_size: (f32, f32),
+    view_size: Size,
     vertex_buffer: &VertexBuffer,
     index_buffer: &IndexBuffer,
     uniform_buffer: &UniformBuffer,
@@ -734,8 +709,8 @@ fn new_render_command_encoder<'a>(
     encoder.set_viewport(metal::MTLViewport {
         originX: 0.0,
         originY: 0.0,
-        width: view_size.0 as f64,
-        height: view_size.1 as f64,
+        width: view_size.w as f64,
+        height: view_size.h as f64,
         znear: 0.0,
         zfar: 0.0,
     });
@@ -751,8 +726,10 @@ impl Renderer for Mtl {
     type Image = MtlTexture;
 
     fn set_size(&mut self, width: u32, height: u32, _dpi: f32) {
-        self.view[0] = width as f32;
-        self.view[1] = height as f32;
+        let size = Size::new(width as f32, height as f32);
+        self.view_size.set_value(size);
+        // self.view[0] = width as f32;
+        // self.view[1] = height as f32;
 
 //         unsafe {
 //             gl::Viewport(0, 0, width as i32, height as i32);
@@ -765,22 +742,20 @@ impl Renderer for Mtl {
         let command_buffer = self.command_queue.new_command_buffer();
         let color_texture = self.layer.next_drawable().unwrap().texture();
         let clear_color: metal::MTLClearColor = todo!();
-        let view_size: (f32, f32) = todo!();
-        let clear_buffer_on_flush: bool = todo!();
-
 
         let encoder = new_render_command_encoder(
             &color_texture,
             &command_buffer,
             clear_color,
             &self.stencil_texture.tex,
-            view_size,
+            self.view_size.value(),
 
             &self.vertex_buffer,
             &self.index_buffer,
             &self.uniform_buffer,
-            clear_buffer_on_flush,
+            self.clear_buffer_on_flush,
         );
+        self.clear_buffer_on_flush = false;
 
         for cmd in commands {
             self.set_composite_operation(cmd.composite_operation, color_texture.pixel_format());
@@ -939,8 +914,9 @@ impl Renderer for Mtl {
 
     fn screenshot(&mut self) -> Result<ImgVec<RGBA8>> {
         // todo!()
-        let w = self.view[0] as usize;
-        let h = self.view[1] as usize;
+        let size = self.view_size.value();
+        let w = size.w as usize;
+        let h = size.h as usize;
 
         let mut image = ImgVec::new(vec![RGBA8 {r:255, g:255, b:255, a: 255}; w*h], w, h);
         todo!()
