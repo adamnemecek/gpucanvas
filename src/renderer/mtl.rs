@@ -55,7 +55,7 @@ use metalgear::{
 
 type VertexBuffer = GPUVec<Vertex>;
 type IndexBuffer = GPUVec<usize>;
-type UniformBuffer = GPUVar<Uniforms>;
+type UniformBuffer = GPUVec<Uniforms>;
 
 
 // mod uniform_array;
@@ -148,7 +148,7 @@ pub struct Mtl {
     // vertex_buffer: metal::Buffer
     vertex_buffer: GPUVec<Vertex>,
     // uniform_buffer: metal::Buffer,
-    uniform_buffer: GPUVar<Uniforms>,
+    uniform_buffer: GPUVec<Uniforms>,
     render_target: RenderTarget,
     // program: Program,
     // vert_arr: GLuint,
@@ -310,9 +310,9 @@ impl Mtl {
             index_size: todo!(),
             stencil_only_pipeline_state: None,
             stencil_texture: todo!(),
-            index_buffer: todo!(),
-            vertex_buffer: todo!(),
-            uniform_buffer: todo!(),
+            index_buffer: IndexBuffer::new(&device, 32),
+            vertex_buffer: VertexBuffer::new(&device, 32),
+            uniform_buffer: UniformBuffer::new(&device, 2),
             vertex_descriptor: vertex_descriptor.to_owned(),
             pipeline_pixel_format: todo!(),
             render_target: RenderTarget::Screen,
@@ -654,7 +654,10 @@ impl Mtl {
     }
 
     pub fn get_target_texture(&self) -> metal::TextureRef {
-        todo!()
+        match self.render_target {
+            RenderTarget::Screen => todo!(),
+            RenderTarget::Image(id) => todo!()
+        }
     }
 }
 
