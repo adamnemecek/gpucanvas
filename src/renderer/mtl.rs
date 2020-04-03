@@ -123,75 +123,6 @@ impl From<CompositeOperationState> for Blend {
     }
 }
 
-pub struct PipelineState {
-    pub blend: Blend,
-    pub pixel_format: metal::MTLPixelFormat,
-    pub pipeline_state: metal::RenderPipelineState,
-    pub stencil_only_pipeline_state: metal::RenderPipelineState,
-    // stencil_only_pipeline_state: metal::RenderPipelineState,
-}
-
-impl PipelineState {
-    pub fn new(
-        device: metal::Device,
-        frag: metal::Function,
-        vert: metal::Function,
-        vert_desc: metal::VertexDescriptor,
-        blend: CompositeOperationState,
-        pixel_format: metal::MTLPixelFormat,
-    )  -> Self {
-
-        let blend: Blend = blend.into();
-        let desc = metal::RenderPipelineDescriptor::new();
-        let color_attachment_desc = desc.color_attachments().object_at(0).unwrap();
-        color_attachment_desc.set_pixel_format(pixel_format);
-
-        desc.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
-        desc.set_fragment_function(Some(&frag));
-        desc.set_vertex_function(Some(&vert));
-        desc.set_vertex_descriptor(Some(&vert_desc));
-
-        color_attachment_desc.set_blending_enabled(true);
-        color_attachment_desc.set_source_rgb_blend_factor(blend.src_rgb);
-        color_attachment_desc.set_source_alpha_blend_factor(blend.src_alpha);
-        color_attachment_desc.set_destination_rgb_blend_factor(blend.dst_rgb);
-        color_attachment_desc.set_destination_alpha_blend_factor(blend.dst_alpha);
-
-
-        let pipeline_state = device.new_render_pipeline_state(&desc).unwrap();
-        // self.pipeline_state = Some(pipeline_state);
-
-        desc.set_fragment_function(None);
-        color_attachment_desc.set_write_mask(metal::MTLColorWriteMask::empty());
-        let stencil_only_pipeline_state = device.new_render_pipeline_state(&desc).unwrap();
-
-        let pipeline_pixel_format = pixel_format;
-        Self {
-            pixel_format,
-            pipeline_state,
-            blend,
-            stencil_only_pipeline_state
-        }
-    }
-}
-
-pub struct Stuff {
-
-}
-
-impl Stuff {
-    pub fn test1(&self) {
-        todo!()
-    }
-
-    pub fn test2(&mut self) {
-        todo!()
-    }
-}
-
-fn test() {
-
-}
 pub struct Mtl {
     debug: bool,
     antialias: bool,
@@ -210,10 +141,11 @@ pub struct Mtl {
     frag: metal::Function,
     vert: metal::Function,
 
-    pipeline_state: metal::RenderPipelineState,
-    stencil_only_pipeline_state: metal::RenderPipelineState,
+    pipeline_state: Option<metal::RenderPipelineState>,
+    stencil_only_pipeline_state: Option<metal::RenderPipelineState>,
     blend: Blend,
     clear_buffer_on_flush: bool,
+    pipeline_pixel_format: metal::MTLPixelFormat,
 
     ///
     /// fill and stroke have a stencil, anti_alias_stencil and shape_stencil
@@ -388,7 +320,7 @@ impl Mtl {
             command_queue,
             frag,
             vert,
-            pipeline_state: todo!(),
+            pipeline_state: None,
             clear_buffer_on_flush,
             default_stencil_state,
             fill_shape_stencil_state,
@@ -399,14 +331,15 @@ impl Mtl {
             stroke_clear_stencil_state,
             frag_size: todo!(),
             index_size: todo!(),
-            stencil_only_pipeline_state: todo!(),
+            stencil_only_pipeline_state: None,
 
             view_size_buffer: todo!(),
             stencil_texture: todo!(),
             index_buffer: todo!(),
             vertex_buffer: todo!(),
             uniform_buffer: todo!(),
-            vertex_descriptor: vertex_descriptor.to_owned()
+            vertex_descriptor: vertex_descriptor.to_owned(),
+            pipeline_pixel_format: todo!()
         };
 
         // unsafe {
@@ -462,16 +395,15 @@ impl Mtl {
     /// updaterenderpipelinstateforblend
     fn set_composite_operation(
         &mut self,
-        blend_state: CompositeOperationState,
-        // pixel_format: metal::MTLPixelFormat,
-//
+        blend: CompositeOperationState,
+        pixel_format: metal::MTLPixelFormat
     ) {
-        // if self.pipeline_state.is_some() &&
-        //     self.stencil_only_pipeline_state.is_some() &&
-        //     self.pipeline_pixel_format == pixel_format &&
-        //     self.blend_func == blend_func {
-        //     return;
-        // }
+        if self.pipeline_state.is_some() &&
+            self.stencil_only_pipeline_state.is_some() &&
+            self.pipeline_pixel_format == pixel_format &&
+            self.blend == blend.into() {
+            return;
+        }
 
         // let desc = metal::RenderPipelineDescriptor::new();
         // let color_attachment_desc = desc.color_attachments().object_at(0).unwrap();
@@ -518,7 +450,7 @@ impl Mtl {
         gpu_paint: Params
     ) {
         self.set_uniforms(images, gpu_paint, cmd.image, cmd.alpha_mask);
-        encoder.set_render_pipeline_state(&self.pipeline_state);
+        encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
@@ -557,7 +489,7 @@ impl Mtl {
     ) {
         encoder.set_cull_mode(metal::MTLCullMode::None);
         encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
-        encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state);
+        encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state.as_ref().unwrap());
 
         /// todo metal nanovg doesn't have this
         self.set_uniforms(images, stencil_paint, cmd.image, cmd.alpha_mask);
@@ -580,7 +512,7 @@ impl Mtl {
         // Restores states.
         encoder.set_cull_mode(metal::MTLCullMode::Back);
         encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
-        encoder.set_render_pipeline_state(&self.pipeline_state);
+        encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
 
         // Draws anti-aliased fragments.
         self.set_uniforms(images, fill_paint, cmd.image, cmd.alpha_mask);
@@ -646,7 +578,7 @@ impl Mtl {
         /// Fills the stroke base without overlap.
         self.set_uniforms(images, paint2, cmd.image, cmd.alpha_mask);
         encoder.set_depth_stencil_state(&self.stroke_shape_stencil_state);
-        encoder.set_render_pipeline_state(&self.pipeline_state);
+        encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
@@ -675,7 +607,7 @@ impl Mtl {
 
         /// Clears stencil buffer.
         encoder.set_depth_stencil_state(&self.stroke_clear_stencil_state);
-        encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state);
+        encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state.as_ref().unwrap());
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
@@ -698,7 +630,7 @@ impl Mtl {
         paint: Params
     ) {
         self.set_uniforms(images, paint, cmd.image, cmd.alpha_mask);
-        encoder.set_render_pipeline_state(&self.pipeline_state);
+        encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
         if let Some((start, count)) = cmd.triangles_verts {
             encoder.draw_primitives(
                 metal::MTLPrimitiveType::Triangle,
@@ -852,6 +784,7 @@ impl Renderer for Mtl {
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         let encoder = self.new_render_command_encoder();
+        let target: metal::Texture = todo!();
 
 //         self.program.bind();
 
@@ -894,9 +827,7 @@ impl Renderer for Mtl {
 //         self.check_error("render prepare");
 
         for cmd in commands {
-            // unsafe {
-                self.set_composite_operation(cmd.composite_operation);
-            // }
+            self.set_composite_operation(cmd.composite_operation, target.pixel_format());
                 // if self.pipeline_state.is_none() &&
                 //     // self.stencil_only_pipeline_state.is_none() &&
                 //     self.pipeline_pixel_format != pixel_format &&
