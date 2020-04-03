@@ -70,6 +70,12 @@ impl StencilTexture {
 
 }
 
+// impl<'a> AsRef<metal::Texture> for &'a StencilTexture {
+//     fn as_ref(self) -> &'a metal::TextureRef {
+//         todo!()
+//     }
+// }
+
 
 
 
