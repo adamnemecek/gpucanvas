@@ -1,4 +1,7 @@
 
+#[macro_use]
+extern crate static_assertions;
+
 use std::path::Path as FilePath;
 
 use rgb::RGBA8;

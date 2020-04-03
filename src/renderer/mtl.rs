@@ -607,10 +607,7 @@ impl Mtl {
         image_tex: Option<ImageId>,
         alpha_tex: Option<ImageId>
     ) {
-        // todo!()
-        let arr = Uniforms::from(paint);
-//         self.program.set_config(UniformArray::size() as i32, arr.as_ptr());
-//         self.check_error("set_uniforms uniforms");
+        let u = Uniforms::from(paint);
 
         let tex = image_tex.and_then(|id| images.get(id)).map_or(0, |tex| tex.id());
 

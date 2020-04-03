@@ -28,6 +28,7 @@ image = { version = "0.23.2", optional = true }
 metal = "*"
 memoffset = "*"
 metalgear = { git = "https://github.com/adamnemecek/metalgear" }
+static_assertions = "*"
 
 [features]
 default = ["image-loading"]

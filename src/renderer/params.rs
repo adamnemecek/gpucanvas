@@ -29,7 +29,11 @@ pub struct Params {
     pub(crate) tex_type: f32,
     pub(crate) shader_type: f32,
     pub(crate) has_mask: f32,
+    /// padding on macos because uniforms need to be aligned to 256 bytes
+    pub(crate) padding: [f32; 19]
 }
+
+const_assert!(std::mem::size_of::<Params>() == 256);
 
 impl Params {
 
