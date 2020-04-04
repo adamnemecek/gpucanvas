@@ -29,7 +29,12 @@ pub struct MtlTexture {
 }
 
 impl MtlTexture {
-    pub fn new(device: &metal::Device, info: ImageInfo) -> Result<Self> {
+    pub fn pseudo_texture(device: &metal::Device) -> Self {
+        let info = ImageInfo::new(ImageFlags::empty(), 1, 1, ImageFormat::Gray8);
+        Self::new(device, info)
+    }
+
+    pub fn new(device: &metal::Device, info: ImageInfo) -> Self {
         //let size = src.dimensions();
 
         // let mut texture = Texture {

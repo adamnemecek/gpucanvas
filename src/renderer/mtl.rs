@@ -305,9 +305,9 @@ impl Mtl {
         let stroke_clear_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
 
 
-        let pseudo_texture: MtlTexture = todo!();
+        let pseudo_texture = MtlTexture::pseudo_texture(&device);
 
-        let mut renderer = Mtl {
+        Self {
             layer: layer.to_owned(),
             debug,
             antialias,
@@ -326,20 +326,18 @@ impl Mtl {
             stroke_shape_stencil_state,
             stroke_anti_alias_stencil_state,
             stroke_clear_stencil_state,
-            frag_size: todo!(),
-            index_size: todo!(),
+            frag_size: std::mem::size_of::<Params>(),
+            index_size: 4, // MTLIndexTypeUInt32
             stencil_only_pipeline_state: None,
             stencil_texture: todo!(),
             index_buffer: IndexBuffer::new(&device, 32),
             vertex_buffer: VertexBuffer::new(&device, 32),
             uniform_buffer: UniformBuffer::new(&device, 2),
             vertex_descriptor: vertex_descriptor.to_owned(),
-            pipeline_pixel_format: todo!(),
+            pipeline_pixel_format: metal::MTLPixelFormat::Invalid,
             render_target: RenderTarget::Screen,
             pseudo_texture,
-        };
-
-        renderer
+        }
     }
 
     // fn factor(factor: BlendFactor) -> metal::MTLBlendFactor {
