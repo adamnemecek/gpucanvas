@@ -19,20 +19,20 @@ use crate::{
 // use super::gl::types::*;
 
 pub struct MtlTexture {
+    pub device: metal::Device,
     pub id: usize,
     pub info: ImageInfo,
     pub tex: Texture,
     pub sampler: SamplerState,
-
 }
 
 impl MtlTexture {
     pub fn new(info: ImageInfo) -> Result<Self> {
-        // let size = src.dimensions();
+        //let size = src.dimensions();
 
         // let mut texture = Texture {
         //     id: 0,
-        //     info: ImageInfo::new(flags, size.0, size.1, src.format())
+        //     info: info
         // };
 
         // unsafe {
@@ -44,8 +44,8 @@ impl MtlTexture {
         //     gl::PixelStorei(gl::UNPACK_SKIP_ROWS, 0);
         // }
 
-        // match src {
-        //     ImageSource::Gray(data) => unsafe {
+        // match info.format() {
+        //     ImageFormat::Gray8 => unsafe {
         //         let format = if opengles { gl::LUMINANCE } else { gl::RED };
 
         //         gl::TexImage2D(
@@ -57,10 +57,11 @@ impl MtlTexture {
         //             0,
         //             format,
         //             gl::UNSIGNED_BYTE,
-        //             data.buf().as_ptr() as *const GLvoid
+        //             ptr::null()
+        //             //data.buf().as_ptr() as *const GLvoid
         //         );
         //     },
-        //     ImageSource::Rgb(data) => unsafe {
+        //     ImageFormat::Rgb8 => unsafe {
         //         gl::TexImage2D(
         //             gl::TEXTURE_2D,
         //             0,
@@ -70,10 +71,11 @@ impl MtlTexture {
         //             0,
         //             gl::RGB,
         //             gl::UNSIGNED_BYTE,
-        //             data.buf().as_ptr() as *const GLvoid
+        //             ptr::null(),
+        //             //data.buf().as_ptr() as *const GLvoid
         //         );
         //     },
-        //     ImageSource::Rgba(data) => unsafe {
+        //     ImageFormat::Rgba8 => unsafe {
         //         gl::TexImage2D(
         //             gl::TEXTURE_2D,
         //             0,
@@ -83,10 +85,13 @@ impl MtlTexture {
         //             0,
         //             gl::RGBA,
         //             gl::UNSIGNED_BYTE,
-        //             data.buf().as_ptr() as *const GLvoid
+        //             ptr::null(),
+        //             //data.buf().as_ptr() as *const GLvoid
         //         );
         //     },
         // }
+
+        // let flags = texture.info.flags();
 
         // if flags.contains(ImageFlags::GENERATE_MIPMAPS) {
         //     if flags.contains(ImageFlags::NEAREST) {
@@ -144,7 +149,7 @@ impl MtlTexture {
         self.id
     }
 
-    pub fn update(&mut self, image: ImageSource, x: usize, y: usize) -> Result<()> {
+    pub fn update(&mut self, src: ImageSource, x: usize, y: usize) -> Result<()> {
         // let size = src.dimensions();
 
         // if x + size.0 > self.info.width() {
@@ -209,6 +214,13 @@ impl MtlTexture {
         //     }
         // }
 
+        // if self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS) {
+        //     unsafe {
+        //         gl::GenerateMipmap(gl::TEXTURE_2D);
+        //         //gl::TexParameteri(gl::TEXTURE_2D, gl::GENERATE_MIPMAP, gl::TRUE);
+        //     }
+        // }
+
         // unsafe {
         //     gl::PixelStorei(gl::UNPACK_ALIGNMENT, 4);
         //     gl::PixelStorei(gl::UNPACK_ROW_LENGTH, 0);
@@ -217,18 +229,18 @@ impl MtlTexture {
         //     gl::BindTexture(gl::TEXTURE_2D, 0);
         // }
 
-        Ok(())
+        // Ok(())
+        todo!()
     }
 
     pub fn delete(self) {
-//         unsafe {
-//             gl::DeleteTextures(1, &self.id);
-//         }
+        todo!()
+        // unsafe {
+        //     gl::DeleteTextures(1, &self.id);
+        // }
     }
-}
 
-impl MtlTexture {
-    fn info(&self) -> ImageInfo {
+    pub fn info(&self) -> ImageInfo {
         // self.info
         todo!()
     }
