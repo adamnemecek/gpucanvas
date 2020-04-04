@@ -134,6 +134,24 @@ impl From<CompositeOperationState> for Blend {
     }
 }
 
+#[derive(Copy, Clone)]
+pub struct Color1 {
+    pub r: f32,
+    pub g: f32,
+    pub b: f32,
+    pub a: f32,
+}
+
+impl Color1 {
+    pub fn new() -> Self {
+        todo!();
+    }
+}
+
+// impl From<Color> for Color1 {
+
+// }
+
 pub struct Mtl {
     debug: bool,
     antialias: bool,
@@ -166,7 +184,7 @@ pub struct Mtl {
     stroke_anti_alias_stencil_state: metal::DepthStencilState,
     stroke_clear_stencil_state: metal::DepthStencilState,
 
-    clear_color: Color,
+    clear_color: Color1,
     view_size: GPUVar<Size>,
     stencil_texture: StencilTexture,
     index_buffer: GPUVec<usize>,
@@ -338,7 +356,7 @@ impl Mtl {
             pipeline_pixel_format: metal::MTLPixelFormat::Invalid,
             render_target: RenderTarget::Screen,
             pseudo_texture,
-            clear_color: todo!(), //metal::MTLClearColor::new(0.0, 0.0, 0.0, 0.0)
+            clear_color: Color1::new(), //metal::MTLClearColor::new(0.0, 0.0, 0.0, 0.0)
         }
     }
 
@@ -665,7 +683,7 @@ impl Mtl {
         width: u32,
         height: u32,
         color: Color) {
-            self.clear_color = color;
+            // self.clear_color = color;
             // self.clear_color = metal::MTLClearColor::new(color.r, color.g, color.b, color.a);
             self.clear_buffer_on_flush = true;
             // todo!()
@@ -690,11 +708,15 @@ impl Mtl {
             }
         }
     }
+
+    // pub fn clear_color(&self) -> Color {
+    //     self.clear_color
+    // }
 }
 
 impl From<Color> for metal::MTLClearColor {
     fn from(v: Color) -> Self {
-        todo!()
+        Self::new(v.r.into(), v.g.into(), v.b.into(), v.a.into())
     }
 }
 
@@ -762,13 +784,19 @@ impl Renderer for Mtl {
         //     self.clear_color.clone()
         // };
         // let clear_color: metal::MTLClearColor = todo!();
-        // let pixel = self.pipeline_pixel_format;
-        let clear_color: Color = todo!();//self.clear_color;
+        let pixel = self.pipeline_pixel_format;
+        let clear_color: Color = todo!();
+        // let clear_color: Color = self.clear_color;
+        let clear_color1: Color1 = self.clear_color;
+
+
         let command_buffer = self.command_queue.new_command_buffer();
         command_buffer.enqueue();
+
         // todo: this should be calling get_target
         let drawable = self.layer.next_drawable().unwrap();
         let color_texture = drawable.texture();
+
 
         let encoder = new_render_command_encoder(
             &color_texture,
