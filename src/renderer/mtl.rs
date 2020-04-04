@@ -184,7 +184,7 @@ pub struct Mtl {
     stroke_anti_alias_stencil_state: metal::DepthStencilState,
     stroke_clear_stencil_state: metal::DepthStencilState,
 
-    clear_color: Color1,
+    clear_color: Color,
     view_size: GPUVar<Size>,
     stencil_texture: StencilTexture,
     index_buffer: GPUVec<usize>,
@@ -356,7 +356,7 @@ impl Mtl {
             pipeline_pixel_format: metal::MTLPixelFormat::Invalid,
             render_target: RenderTarget::Screen,
             pseudo_texture,
-            clear_color: Color1::new(), //metal::MTLClearColor::new(0.0, 0.0, 0.0, 0.0)
+            clear_color: Color::black(), //metal::MTLClearColor::new(0.0, 0.0, 0.0, 0.0)
         }
     }
 
@@ -784,10 +784,11 @@ impl Renderer for Mtl {
         //     self.clear_color.clone()
         // };
         // let clear_color: metal::MTLClearColor = todo!();
+        // let pixel = self.pipeline_pixel_format;
+        // let clear_color: Color = todo!();
+        let clear_color: Color = self.clear_color;
         let pixel = self.pipeline_pixel_format;
-        let clear_color: Color = todo!();
-        // let clear_color: Color = self.clear_color;
-        let clear_color1: Color1 = self.clear_color;
+        // let clear_color1: Color1 = self.clear_color;
 
 
         let command_buffer = self.command_queue.new_command_buffer();
