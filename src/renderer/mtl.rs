@@ -4,7 +4,7 @@
 // use std::ops::DerefMut;
 // use std::ffi::{CString, CStr, c_void};
 
-use image::DynamicImage;
+// use image::DynamicImage;
 
 use rgb::RGBA8;
 use imgref::ImgVec;
@@ -15,6 +15,7 @@ use crate::{
     Result,
     ImageStore,
     ImageSource,
+    ImageInfo,
     FillRule,
     CompositeOperationState,
     BlendFactor,
@@ -759,8 +760,9 @@ impl Renderer for Mtl {
 
     }
 
-    fn create_image(&mut self, data: ImageSource, flags: ImageFlags) -> Result<Self::Image> {
-        MtlTexture::new(data, flags)
+    fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image> {
+        // MtlTexture::new(data, flags)
+        todo!()
     }
 
     fn update_image(&mut self, image: &mut Self::Image, data: ImageSource, x: usize, y: usize) -> Result<()> {

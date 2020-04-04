@@ -6,7 +6,7 @@ use crate::{
     ErrorKind,
     ImageFlags,
     ImageSource,
-    Image,
+    // Image,
     ImageInfo,
     ImageFormat
 };
@@ -20,7 +20,7 @@ pub struct MtlTexture {
 }
 
 impl MtlTexture {
-    pub fn new(image: ImageSource, flags: ImageFlags) -> Result<Self> {
+    pub fn new(info: ImageInfo) -> Result<Self> {
         // let size = src.dimensions();
 
         // let mut texture = Texture {
@@ -220,7 +220,7 @@ impl MtlTexture {
     }
 }
 
-impl Image for MtlTexture {
+impl MtlTexture {
     fn info(&self) -> ImageInfo {
         // self.info
         todo!()
@@ -228,7 +228,7 @@ impl Image for MtlTexture {
 }
 
 
-
+// this is from nvg-metal
 // pub struct Texture {
 //     pub id: crate::ImageId,
 //     pub tex: Option<metal::Texture>,
