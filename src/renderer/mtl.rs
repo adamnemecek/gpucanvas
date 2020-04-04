@@ -799,13 +799,18 @@ impl Renderer for Mtl {
             command_buffer.present_drawable(drawable);
         }
 
-        // if target macos
+        #[cfg(target_os = "macos")]
+        {
+            let blit = command_buffer.new_blit_command_encoder();
+            blit.synchronize_resource(color_texture);
+            blit.end_encoding();
+        }
+
 
     }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image> {
-        // MtlTexture::new(data, flags)
-        todo!()
+        Ok(MtlTexture::new(&self.device, info))
     }
 
     fn update_image(&mut self, image: &mut Self::Image, data: ImageSource, x: usize, y: usize) -> Result<()> {
