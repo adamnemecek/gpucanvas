@@ -18,17 +18,6 @@ use crate::{
 // use super::gl;
 // use super::gl::types::*;
 
-pub struct PseudoTexture {
-    tex: Texture,
-    sampler: SamplerState,
-}
-
-impl PseudoTexture {
-    pub fn new() -> Self {
-        todo!()
-    }
-}
-
 pub struct MtlTexture {
     id: usize,
     info: ImageInfo,

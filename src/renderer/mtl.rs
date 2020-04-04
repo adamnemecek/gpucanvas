@@ -141,6 +141,7 @@ pub struct Mtl {
     vertex_buffer: GPUVec<Vertex>,
     uniform_buffer: GPUVec<Params>,
     render_target: RenderTarget,
+    pseudo_texture: MtlTexture,
 }
 
 
@@ -273,6 +274,8 @@ impl Mtl {
         let stroke_clear_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
 
 
+        let pseudo_texture: MtlTexture = todo!();
+
         let mut renderer = Mtl {
             layer,
             debug,
@@ -302,6 +305,7 @@ impl Mtl {
             vertex_descriptor: vertex_descriptor.to_owned(),
             pipeline_pixel_format: todo!(),
             render_target: RenderTarget::Screen,
+            pseudo_texture,
         };
 
         renderer
@@ -593,7 +597,12 @@ impl Mtl {
         todo!();
 
 
-        let tex = image_tex.and_then(|id| images.get(id)).map_or(0, |tex| tex.id());
+        let tex = if let Some(id) = image_tex {
+            images.get(id).unwrap()
+        }
+        else {
+            &self.pseudo_texture
+        };
 
 //         unsafe {
 //             gl::ActiveTexture(gl::TEXTURE0);
