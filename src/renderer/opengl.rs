@@ -9,7 +9,7 @@ use imgref::ImgVec;
 use crate::{
     Color,
     Result,
-    Image,
+    ImageInfo,
     ImageStore,
     ImageFormat,
     ImageSource,
@@ -57,7 +57,9 @@ pub struct OpenGl {
     vert_arr: GLuint,
     vert_buff: GLuint,
     quad_vao: GLuint,
-    quad_vbo: GLuint
+    quad_vbo: GLuint,
+    current_render_target: RenderTarget,
+    current_framebuffer: Option<(GLuint, GLuint)>
 }
 
 impl OpenGl {
@@ -82,6 +84,8 @@ impl OpenGl {
             vert_buff: Default::default(),
             quad_vao: Default::default(),
             quad_vbo: Default::default(),
+            current_render_target: RenderTarget::Screen,
+            current_framebuffer: Default::default()
         };
 
         unsafe {
@@ -460,8 +464,8 @@ impl Renderer for OpenGl {
         self.check_error("render done");
     }
 
-    fn create_image(&mut self, data: ImageSource, flags: ImageFlags) -> Result<Self::Image> {
-        Texture::new(data, flags, self.is_opengles)
+    fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image> {
+        Texture::new(info, self.is_opengles)
     }
 
     fn update_image(&mut self, image: &mut Self::Image, data: ImageSource, x: usize, y: usize) -> Result<()> {
@@ -472,20 +476,69 @@ impl Renderer for OpenGl {
         image.delete();
     }
 
+    // TODO: Rethink this API. Maybe RenderTarget should be a param in the render method
     fn set_target(&mut self, images: &ImageStore<Texture>, target: RenderTarget) {
+        if self.current_render_target == target {
+            return;
+        }
+
+        unsafe {
+            gl::BindFramebuffer(gl::FRAMEBUFFER, 0);
+            gl::BindTexture(gl::TEXTURE_2D, 0);
+        }
+
+        if let Some((fbo, rbo)) = self.current_framebuffer.take() {
+            unsafe {
+                gl::DeleteFramebuffers(1, &fbo);
+                gl::DeleteRenderbuffers(1, &rbo);
+            }
+        }
+
         match target {
-            RenderTarget::Screen => {
-                //glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            RenderTarget::Screen => unsafe {
+                gl::Viewport(0, 0, self.view[0] as i32, self.view[1] as i32);
             },
             RenderTarget::Image(id) => {
                 if let Some(texture) = images.get(id) {
+                    let mut fbo = 0;
+                    let mut rbo = 0;
 
+                    unsafe {
+                        gl::GenFramebuffers(1, &mut fbo);
+                        gl::BindFramebuffer(gl::FRAMEBUFFER, fbo);
+                        gl::Viewport(0, 0, texture.info().width() as i32, texture.info().height() as i32);
+
+                        gl::BindTexture(gl::TEXTURE_2D, texture.id());
+                        gl::FramebufferTexture2D(
+                            gl::FRAMEBUFFER, gl::COLOR_ATTACHMENT0, gl::TEXTURE_2D, texture.id(), 0
+                        );
+
+                        gl::GenRenderbuffers(1, &mut rbo);
+                        gl::BindRenderbuffer(gl::RENDERBUFFER, rbo);
+                        // Some graphics cards require a depth buffer along with a stencil.
+                        gl::RenderbufferStorage(gl::RENDERBUFFER, gl::DEPTH24_STENCIL8, texture.info().width() as i32, texture.info().height() as i32);
+                        gl::BindRenderbuffer(gl::RENDERBUFFER, 0);
+
+                        gl::FramebufferRenderbuffer(
+                            gl::FRAMEBUFFER, gl::STENCIL_ATTACHMENT, gl::RENDERBUFFER, rbo
+                        );
+
+                        if gl::CheckFramebufferStatus(gl::FRAMEBUFFER) != gl::FRAMEBUFFER_COMPLETE {
+                            panic!("Framebuffer not complete!");
+                        }
+                    }
+
+                    self.current_framebuffer = Some((fbo, rbo));
                 }
             }
         }
+
+        self.current_render_target = target;
     }
 
     fn blur(&mut self, texture: &mut Texture, amount: u8, x: usize, y: usize, width: usize, height: usize) {
+        // TODO: validate that the blur region is inside the texture
+        
         let pingpong_fbo = [0; 2];
         let pingpong_tex = [0; 2];
 
@@ -509,9 +562,9 @@ impl Renderer for OpenGl {
         }
 
         let gl_format = match texture.info().format() {
-            ImageFormat::Rgb => gl::RGB,
-            ImageFormat::Rgba => gl::RGBA,
-            ImageFormat::Gray => gl::RED,
+            ImageFormat::Rgb8 => gl::RGB,
+            ImageFormat::Rgba8 => gl::RGBA,
+            ImageFormat::Gray8 => gl::RED,
         };
 
         for (fbo, tex) in pingpong_fbo.iter().zip(pingpong_tex.iter()) {
@@ -542,6 +595,7 @@ impl Renderer for OpenGl {
 
         self.blur_program.bind();
         self.blur_program.set_image(0);
+        // TODO: depending on the final glsl version, we may be able to use textureSize inside the shader
         self.blur_program.set_image_size([
             texture.info().width() as f32,
             texture.info().height() as f32
@@ -585,9 +639,7 @@ impl Renderer for OpenGl {
 
             gl::Viewport(0, 0, self.view[0] as i32, self.view[1] as i32);
             gl::Disable(gl::SCISSOR_TEST);
-        }
 
-        unsafe {
             gl::DeleteTextures(2, pingpong_tex.as_ptr() as *mut GLuint);
             gl::DeleteFramebuffers(2, pingpong_fbo.as_ptr() as *mut GLuint);
         }
