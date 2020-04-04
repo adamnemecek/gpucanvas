@@ -47,7 +47,7 @@ pub fn quantize(a: f32, d: f32) -> f32 {
 }
 
 fn main() {
-    let el = EventLoop::new();
+    let events_loop = winit::event_loop::EventLoop::new();
     let size = winit::dpi::LogicalSize::new(800, 600);
 
     let window = winit::window::WindowBuilder::new()
@@ -70,12 +70,16 @@ fn main() {
     }
 
     let draw_size = window.inner_size();
-    layer.set_drawable_size(CGSize::new(draw_size.width as f64, draw_size.height as f64));
+    // layer.set_drawable_size(CGSize::new(draw_size.width as f64, draw_size.height as f64));
 
+    // let shader_code = include_bytes!("src/renderer/mtl/shaders.metal");
     let library = device
-        .new_library_with_file("examples/window/shaders.metallib")
+        .new_library_with_file("src/renderer/mtl/shaders.metallib")
         .unwrap();
 
+    // let library = device.new_library_with_source(
+    //     shader_code,
+    // );
     let renderer = Mtl::new(layer);
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
@@ -99,7 +103,7 @@ fn main() {
 
     let mut perf = PerfGraph::new();
 
-    el.run(move |event, _, control_flow| {
+    events_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
 
         match event {

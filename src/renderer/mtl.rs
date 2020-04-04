@@ -587,6 +587,7 @@ impl Mtl {
         let len = self.uniform_buffer.len();
         let offset = 10;
         encoder.set_fragment_buffer_offset(0, offset);
+        todo!();
 
 
         let tex = image_tex.and_then(|id| images.get(id)).map_or(0, |tex| tex.id());
