@@ -19,10 +19,10 @@ use crate::{
 // use super::gl::types::*;
 
 pub struct MtlTexture {
-    id: usize,
-    info: ImageInfo,
-    tex: Texture,
-    sampler: SamplerState,
+    pub id: usize,
+    pub info: ImageInfo,
+    pub tex: Texture,
+    pub sampler: SamplerState,
 
 }
 

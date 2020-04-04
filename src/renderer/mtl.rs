@@ -604,6 +604,9 @@ impl Mtl {
             &self.pseudo_texture
         };
 
+        encoder.set_fragment_texture(0, Some(&tex.tex));
+        encoder.set_fragment_sampler_state(0, Some(&tex.sampler));
+
 //         unsafe {
 //             gl::ActiveTexture(gl::TEXTURE0);
 //             gl::BindTexture(gl::TEXTURE_2D, tex);
