@@ -162,7 +162,7 @@ impl VertexOffsets {
 
 impl Mtl {
     pub fn new(
-        layer: metal::CoreAnimationLayer,
+        layer: &metal::CoreAnimationLayerRef,
     ) -> Self {
         let device = metal::Device::system_default().unwrap();
         let library = device.new_library_with_file("shaders.metallib").expect("library not found");
@@ -277,7 +277,7 @@ impl Mtl {
         let pseudo_texture: MtlTexture = todo!();
 
         let mut renderer = Mtl {
-            layer,
+            layer: layer.to_owned(),
             debug,
             antialias,
             blend_func,

@@ -80,7 +80,7 @@ fn main() {
     // let library = device.new_library_with_source(
     //     shader_code,
     // );
-    let renderer = Mtl::new(layer);
+    let renderer = Mtl::new(&layer);
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
     canvas.add_font("examples/assets/Roboto-Bold.ttf").expect("Cannot add font");
@@ -109,9 +109,9 @@ fn main() {
         match event {
             // Event::LoopDestroyed => return,
             Event::WindowEvent {  event, .. } => match event {
-                // WindowEvent::Resized(physical_size) => {
-                //     // layer.set_drawable_size(CGSize::new(size.width as f64, size.height as f64));
-                // },
+                WindowEvent::Resized(physical_size) => {
+                    layer.set_drawable_size(CGSize::new(size.width as f64, size.height as f64));
+                },
                 // WindowEvent::CursorMoved { device_id: _, position, ..} => {
                 //     if dragging {
                 //         let p0 = canvas.transform().inversed().transform_point(mousex, mousey);
