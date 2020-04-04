@@ -5,6 +5,8 @@ use metal::{
     SamplerState
 };
 
+use rgb::ComponentBytes;
+
 use crate::{
     Result,
     ErrorKind,
@@ -44,52 +46,60 @@ impl MtlTexture {
         //     gl::PixelStorei(gl::UNPACK_SKIP_ROWS, 0);
         // }
 
-        // match info.format() {
-        //     ImageFormat::Gray8 => unsafe {
-        //         let format = if opengles { gl::LUMINANCE } else { gl::RED };
+        let data_offset: usize;
+        let stride: usize;
 
-        //         gl::TexImage2D(
-        //             gl::TEXTURE_2D,
-        //             0,
-        //             format as i32,
-        //             texture.info.width() as i32,
-        //             texture.info.height() as i32,
-        //             0,
-        //             format,
-        //             gl::UNSIGNED_BYTE,
-        //             ptr::null()
-        //             //data.buf().as_ptr() as *const GLvoid
-        //         );
-        //     },
-        //     ImageFormat::Rgb8 => unsafe {
-        //         gl::TexImage2D(
-        //             gl::TEXTURE_2D,
-        //             0,
-        //             gl::RGB as i32,
-        //             texture.info.width() as i32,
-        //             texture.info.height() as i32,
-        //             0,
-        //             gl::RGB,
-        //             gl::UNSIGNED_BYTE,
-        //             ptr::null(),
-        //             //data.buf().as_ptr() as *const GLvoid
-        //         );
-        //     },
-        //     ImageFormat::Rgba8 => unsafe {
-        //         gl::TexImage2D(
-        //             gl::TEXTURE_2D,
-        //             0,
-        //             gl::RGBA as i32,
-        //             texture.info.width() as i32,
-        //             texture.info.height() as i32,
-        //             0,
-        //             gl::RGBA,
-        //             gl::UNSIGNED_BYTE,
-        //             ptr::null(),
-        //             //data.buf().as_ptr() as *const GLvoid
-        //         );
-        //     },
-        // }
+        match info.format() {
+            ImageFormat::Gray8 => {
+                todo!()
+                // let format = if opengles { gl::LUMINANCE } else { gl::RED };
+
+                // gl::TexImage2D(
+                //     gl::TEXTURE_2D,
+                //     0,
+                //     format as i32,
+                //     texture.info.width() as i32,
+                //     texture.info.height() as i32,
+                //     0,
+                //     format,
+                //     gl::UNSIGNED_BYTE,
+                //     ptr::null()
+                //     //data.buf().as_ptr() as *const GLvoid
+                // );
+            },
+            ImageFormat::Rgb8 => {
+                todo!()
+                // gl::TexImage2D(
+                //     gl::TEXTURE_2D,
+                //     0,
+                //     gl::RGB as i32,
+                //     texture.info.width() as i32,
+                //     texture.info.height() as i32,
+                //     0,
+                //     gl::RGB,
+                //     gl::UNSIGNED_BYTE,
+                //     ptr::null(),
+                //     //data.buf().as_ptr() as *const GLvoid
+                // );
+            },
+            ImageFormat::Rgba8 => {
+                todo!()
+                // stride = 4 * self.width();
+                // data_offset = y * stride + x * 4;
+                // gl::TexImage2D(
+                //     gl::TEXTURE_2D,
+                //     0,
+                //     gl::RGBA as i32,
+                //     texture.info.width() as i32,
+                //     texture.info.height() as i32,
+                //     0,
+                //     gl::RGBA,
+                //     gl::UNSIGNED_BYTE,
+                //     ptr::null(),
+                //     //data.buf().as_ptr() as *const GLvoid
+                // );
+            },
+        }
 
         // let flags = texture.info.flags();
 
@@ -149,8 +159,30 @@ impl MtlTexture {
         self.id
     }
 
+    pub fn replace_region(
+        &self,
+        region: metal::MTLRegion,
+        mipmap_level: usize,
+        stride: usize,
+        data: &[u8]
+    ) {
+        self.tex.replace_region(
+            region,
+            mipmap_level as u64,
+            stride as u64,
+            data.as_ptr() as *const _
+        )
+    }
+
     pub fn update(&mut self, src: ImageSource, x: usize, y: usize) -> Result<()> {
-        // let size = src.dimensions();
+        let (width, height) = src.dimensions();
+        let origin = metal::MTLOrigin { x: x as u64, y: y as u64, z: 0 };
+        let size = metal::MTLSize { width: width as u64, height: height as u64, depth: 0 };
+        let region = metal::MTLRegion { origin, size };
+
+        let data_offset: usize;
+        let stride: usize;
+        let data;
 
         // if x + size.0 > self.info.width() {
         //     return Err(ErrorKind::ImageUpdateOutOfBounds);
@@ -170,49 +202,24 @@ impl MtlTexture {
         //     gl::PixelStorei(gl::UNPACK_ROW_LENGTH, size.0 as i32);
         // }
 
-        // match src {
-        //     ImageSource::Gray(data) => unsafe {
-        //         let format = if opengles { gl::LUMINANCE } else { gl::RED };
 
-        //         gl::TexSubImage2D(
-        //             gl::TEXTURE_2D,
-        //             0,
-        //             x as i32,
-        //             y as i32,
-        //             size.0 as i32,
-        //             size.1 as i32,
-        //             format,
-        //             gl::UNSIGNED_BYTE,
-        //             data.buf().as_ptr() as *const GLvoid
-        //         );
-        //     }
-        //     ImageSource::Rgb(data) => unsafe {
-        //         gl::TexSubImage2D(
-        //             gl::TEXTURE_2D,
-        //             0,
-        //             x as i32,
-        //             y as i32,
-        //             size.0 as i32,
-        //             size.1 as i32,
-        //             gl::RGB,
-        //             gl::UNSIGNED_BYTE,
-        //             data.buf().as_ptr() as *const GLvoid
-        //         );
-        //     }
-        //     ImageSource::Rgba(data) => unsafe {
-        //         gl::TexSubImage2D(
-        //             gl::TEXTURE_2D,
-        //             0,
-        //             x as i32,
-        //             y as i32,
-        //             size.0 as i32,
-        //             size.1 as i32,
-        //             gl::RGBA,
-        //             gl::UNSIGNED_BYTE,
-        //             data.buf().as_ptr() as *const GLvoid
-        //         );
-        //     }
-        // }
+        match src {
+            ImageSource::Gray(data_) => {
+                stride = width;
+                data_offset = todo!();
+                data = data_.buf().as_bytes();
+            }
+            ImageSource::Rgb(data_) => {
+                stride = todo!();
+                data_offset = todo!();
+                data = data_.buf().as_bytes();
+            }
+            ImageSource::Rgba(data_) => {
+                stride = 4 * width;
+                data_offset = y * stride + x;
+                data = data_.buf().as_bytes();
+            }
+        }
 
         // if self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS) {
         //     unsafe {
@@ -229,9 +236,19 @@ impl MtlTexture {
         //     gl::BindTexture(gl::TEXTURE_2D, 0);
         // }
 
-        // Ok(())
-        todo!()
+        // let data = data.buf;
+
+        // let data_ref = data.as_slice().unwrap();
+        // let data_ref = std::slice::from_raw_parts(data_ptr, );
+        self.replace_region(
+            region,
+            0,
+            stride,
+            &data[data_offset..]
+        );
+        Ok(())
     }
+
 
     pub fn delete(self) {
         todo!()
