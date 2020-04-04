@@ -166,6 +166,7 @@ pub struct Mtl {
     stroke_anti_alias_stencil_state: metal::DepthStencilState,
     stroke_clear_stencil_state: metal::DepthStencilState,
 
+    clear_color: metal::MTLClearColor,
     view_size: GPUVar<Size>,
     stencil_texture: StencilTexture,
     index_buffer: GPUVec<usize>,
@@ -337,6 +338,7 @@ impl Mtl {
             pipeline_pixel_format: metal::MTLPixelFormat::Invalid,
             render_target: RenderTarget::Screen,
             pseudo_texture,
+            clear_color: todo!(), //metal::MTLClearColor::new(0.0, 0.0, 0.0, 0.0)
         }
     }
 
@@ -663,6 +665,7 @@ impl Mtl {
         width: u32,
         height: u32,
         color: Color) {
+            // self.clear_color = metal::MTLClearColor::new(color.r, color.g, color.b, color.a);
             self.clear_buffer_on_flush = true;
             // todo!()
             // let scissor_rect: metal::MTLScissorRect = todo!();
@@ -685,6 +688,12 @@ impl Mtl {
                 todo!()
             }
         }
+    }
+}
+
+impl From<Color> for metal::MTLClearColor {
+    fn from(v: Color) -> Self {
+        todo!()
     }
 }
 
@@ -753,6 +762,8 @@ impl Renderer for Mtl {
         // todo: this should be calling get_target
         let drawable = self.layer.next_drawable().unwrap();
         let color_texture = drawable.texture();
+
+        // let clear_color = self.clear_color.clone();
         let clear_color: metal::MTLClearColor = todo!();
 
         let encoder = new_render_command_encoder(
@@ -806,6 +817,10 @@ impl Renderer for Mtl {
             blit.end_encoding();
         }
 
+        if self.layer.presents_with_transaction() {
+            command_buffer.wait_until_scheduled();
+            drawable.present();
+        }
 
     }
 
