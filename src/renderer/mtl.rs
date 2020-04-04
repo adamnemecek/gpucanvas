@@ -57,6 +57,37 @@ type VertexBuffer = GPUVec<Vertex>;
 type IndexBuffer = GPUVec<usize>;
 type UniformBuffer = GPUVec<Params>;
 
+pub struct PathsLength {
+    pub vertex_count: usize,
+    pub index_count: usize,
+    pub stroke_count: usize,
+}
+
+impl PathsLength {
+    fn new(cmd: &Command) -> Self {
+        let mut vertex_count = 0;
+        let mut index_count = 0;
+        let mut stroke_count = 0;
+
+        for drawable in &cmd.drawables {
+            if let Some((start, count)) = drawable.fill_verts {
+                if count > 2 {
+                    vertex_count += count;
+                    index_count += (count - 2) * 3;
+                }
+            }
+
+            if let Some((start, count)) = drawable.stroke_verts {
+                if count > 0 {
+                    vertex_count += count + 2;
+                    stroke_count += count;
+                }
+            }
+        }
+        Self { vertex_count, index_count, stroke_count }
+    }
+}
+
 
 // mod uniform_array;
 // use uniform_array::UniformArray;
