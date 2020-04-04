@@ -31,7 +31,7 @@ metalgear = { git = "https://github.com/adamnemecek/metalgear" }
 static_assertions = "*"
 winit = "0.22"
 cocoa = "0.20"
-core-graphics = "0.17.3"
+core-graphics = "0.19"
 
 [dependencies.objc]
 version = "0.2.4"

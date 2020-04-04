@@ -29,7 +29,7 @@ pub struct MtlTexture {
 }
 
 impl MtlTexture {
-    pub fn new(info: ImageInfo) -> Result<Self> {
+    pub fn new(device: &metal::Device, info: ImageInfo) -> Result<Self> {
         //let size = src.dimensions();
 
         // let mut texture = Texture {
@@ -184,17 +184,17 @@ impl MtlTexture {
         let stride: usize;
         let data;
 
-        // if x + size.0 > self.info.width() {
-        //     return Err(ErrorKind::ImageUpdateOutOfBounds);
-        // }
+        if x + width > self.info.width() {
+            return Err(ErrorKind::ImageUpdateOutOfBounds);
+        }
 
-        // if y + size.1 > self.info.height() {
-        //     return Err(ErrorKind::ImageUpdateOutOfBounds);
-        // }
+        if y + height > self.info.height() {
+            return Err(ErrorKind::ImageUpdateOutOfBounds);
+        }
 
-        // if self.info.format() != src.format() {
-        //     return Err(ErrorKind::ImageUpdateWithDifferentFormat);
-        // }
+        if self.info.format() != src.format() {
+            return Err(ErrorKind::ImageUpdateWithDifferentFormat);
+        }
 
         // unsafe {
         //     gl::BindTexture(gl::TEXTURE_2D, self.id);
@@ -221,25 +221,15 @@ impl MtlTexture {
             }
         }
 
-        // if self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS) {
-        //     unsafe {
-        //         gl::GenerateMipmap(gl::TEXTURE_2D);
-        //         //gl::TexParameteri(gl::TEXTURE_2D, gl::GENERATE_MIPMAP, gl::TRUE);
-        //     }
-        // }
 
-        // unsafe {
-        //     gl::PixelStorei(gl::UNPACK_ALIGNMENT, 4);
-        //     gl::PixelStorei(gl::UNPACK_ROW_LENGTH, 0);
-        //     //gl::PixelStorei(gl::UNPACK_SKIP_PIXELS, 0);
-        //     //gl::PixelStorei(gl::UNPACK_SKIP_ROWS, 0);
-        //     gl::BindTexture(gl::TEXTURE_2D, 0);
-        // }
+        if self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS) {
+            todo!()
+            // unsafe {
+            //     gl::GenerateMipmap(gl::TEXTURE_2D);
+            //     //gl::TexParameteri(gl::TEXTURE_2D, gl::GENERATE_MIPMAP, gl::TRUE);
+            // }
+        }
 
-        // let data = data.buf;
-
-        // let data_ref = data.as_slice().unwrap();
-        // let data_ref = std::slice::from_raw_parts(data_ptr, );
         self.replace_region(
             region,
             0,

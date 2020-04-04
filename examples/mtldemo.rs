@@ -70,7 +70,7 @@ fn main() {
     }
 
     let draw_size = window.inner_size();
-    // layer.set_drawable_size(CGSize::new(draw_size.width as f64, draw_size.height as f64));
+    layer.set_drawable_size(CGSize::new(draw_size.width as f64, draw_size.height as f64));
 
     // let shader_code = include_bytes!("src/renderer/mtl/shaders.metal");
     let library = device
