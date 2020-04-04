@@ -17,6 +17,7 @@ use winit::{
     event::{
         ElementState,
         Event, WindowEvent,
+        MouseScrollDelta,
         // WindowEvent::{
             KeyboardInput, VirtualKeyCode,
             MouseButton,
@@ -83,7 +84,6 @@ fn main() {
     let renderer = Mtl::new(&layer);
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
-
     canvas.add_font("examples/assets/Roboto-Bold.ttf").expect("Cannot add font");
     canvas.add_font("examples/assets/Roboto-Light.ttf").expect("Cannot add font");
     canvas.add_font("examples/assets/Roboto-Regular.ttf").expect("Cannot add font");
@@ -128,12 +128,12 @@ fn main() {
                     mousey = position.y as f32;
                 },
                 WindowEvent::MouseWheel { device_id: _, delta, .. } => match delta {
-                    // glutin::event::MouseScrollDelta::LineDelta(_, y) => {
-                    //     let pt = canvas.transform().inversed().transform_point(mousex, mousey);
-                    //     canvas.translate(pt.0, pt.1);
-                    //     canvas.scale(1.0 + (y / 10.0), 1.0 + (y / 10.0));
-                    //     canvas.translate(-pt.0, -pt.1);
-                    // },
+                    MouseScrollDelta::LineDelta(_, y) => {
+                        let pt = canvas.transform().inversed().transform_point(mousex, mousey);
+                        canvas.translate(pt.0, pt.1);
+                        canvas.scale(1.0 + (y / 10.0), 1.0 + (y / 10.0));
+                        canvas.translate(-pt.0, -pt.1);
+                    },
                     _ => ()
                 },
                 WindowEvent::MouseInput { button: MouseButton::Left, state, .. } => {
@@ -147,9 +147,9 @@ fn main() {
                         canvas.delete_image(screenshot_image_id);
                     }
 
-                //     if let Ok(image) = canvas.screenshot() {
-                //         screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
-                //     }
+                    if let Ok(image) = canvas.screenshot() {
+                        screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
+                    }
                 },
                 WindowEvent::CloseRequested => {
                     *control_flow = ControlFlow::Exit
