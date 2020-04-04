@@ -166,7 +166,7 @@ pub struct Mtl {
     stroke_anti_alias_stencil_state: metal::DepthStencilState,
     stroke_clear_stencil_state: metal::DepthStencilState,
 
-    clear_color: metal::MTLClearColor,
+    clear_color: Color,
     view_size: GPUVar<Size>,
     stencil_texture: StencilTexture,
     index_buffer: GPUVec<usize>,
@@ -665,6 +665,7 @@ impl Mtl {
         width: u32,
         height: u32,
         color: Color) {
+            self.clear_color = color;
             // self.clear_color = metal::MTLClearColor::new(color.r, color.g, color.b, color.a);
             self.clear_buffer_on_flush = true;
             // todo!()
@@ -700,7 +701,7 @@ impl From<Color> for metal::MTLClearColor {
 fn new_render_command_encoder<'a>(
     color_texture: &metal::TextureRef,
     command_buffer: &'a metal::CommandBufferRef,
-    clear_color: metal::MTLClearColor,
+    clear_color: Color,
     stencil_texture: &metal::TextureRef,
     view_size: Size,
     vertex_buffer: &VertexBuffer,
@@ -716,7 +717,7 @@ fn new_render_command_encoder<'a>(
     };
     let desc = metal::RenderPassDescriptor::new();
 
-    // desc.color_attachments().object_at(0).unwrap().set_clear_color(self.clear_color);
+    desc.color_attachments().object_at(0).unwrap().set_clear_color(clear_color.into());
     desc.color_attachments().object_at(0).unwrap().set_load_action(load_action);
     desc.color_attachments().object_at(0).unwrap().set_store_action(metal::MTLStoreAction::Store);
     desc.color_attachments().object_at(0).unwrap().set_texture(Some(&color_texture));
@@ -757,14 +758,17 @@ impl Renderer for Mtl {
 
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+        // let clear_color: metal::MTLClearColor = ;{
+        //     self.clear_color.clone()
+        // };
+        // let clear_color: metal::MTLClearColor = todo!();
+        // let pixel = self.pipeline_pixel_format;
+        let clear_color: Color = todo!();//self.clear_color;
         let command_buffer = self.command_queue.new_command_buffer();
         command_buffer.enqueue();
         // todo: this should be calling get_target
         let drawable = self.layer.next_drawable().unwrap();
         let color_texture = drawable.texture();
-
-        // let clear_color = self.clear_color.clone();
-        let clear_color: metal::MTLClearColor = todo!();
 
         let encoder = new_render_command_encoder(
             &color_texture,
@@ -772,7 +776,6 @@ impl Renderer for Mtl {
             clear_color,
             &self.stencil_texture.tex,
             self.view_size.value(),
-
             &self.vertex_buffer,
             &self.index_buffer,
             &self.uniform_buffer,
