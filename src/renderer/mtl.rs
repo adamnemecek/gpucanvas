@@ -584,10 +584,12 @@ impl Mtl {
         image_tex: Option<ImageId>,
         alpha_tex: Option<ImageId>
     ) {
-        // let u = Uniforms::from(paint);
+        ///
+        /// https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1515917-setfragmentbufferoffset?language=objc
+        ///
         let len = self.uniform_buffer.len();
-        let offset = 10;
-        encoder.set_fragment_buffer_offset(0, offset);
+        let offset = len * std::mem::size_of::<Params>();
+        encoder.set_fragment_buffer_offset(0, offset as u64);
         todo!();
 
 
