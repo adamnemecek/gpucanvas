@@ -381,7 +381,7 @@ impl Mtl {
 
 
     /// updaterenderpipelinstateforblend
-    fn set_composite_operation(
+    pub fn set_composite_operation(
         &mut self,
         blend_func: CompositeOperationState,
         pixel_format: metal::MTLPixelFormat
@@ -432,7 +432,7 @@ impl Mtl {
     }
 
     /// done
-    fn convex_fill(
+    pub fn convex_fill(
         &mut self,
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
@@ -469,7 +469,7 @@ impl Mtl {
     }
 
     /// done
-    fn concave_fill(
+    pub fn concave_fill(
         &mut self,
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
@@ -535,7 +535,7 @@ impl Mtl {
     }
 
     /// done
-    fn stroke(
+    pub fn stroke(
         &mut self,
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
@@ -556,7 +556,7 @@ impl Mtl {
     }
 
     /// done
-    fn stencil_stroke(
+    pub fn stencil_stroke(
         &mut self,
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
@@ -611,7 +611,7 @@ impl Mtl {
     }
 
     /// done
-    fn triangles(
+    pub fn triangles(
         &mut self,
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
@@ -629,7 +629,7 @@ impl Mtl {
         }
     }
 
-    fn set_uniforms(
+    pub fn set_uniforms(
         &mut self,
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
@@ -675,7 +675,7 @@ impl Mtl {
     // Well, as I think we discussed previously, scissor state doesn’t affect clear load actions in Metal, but you can simulate this by drawing a rect with a solid color with depth read disabled and depth write enabled and forcing the depth to the clear depth value (assuming you’re using a depth buffer)
     // Looks like in this case the depth buffer is irrelevant. Stencil buffer contents can be cleared similarly to the depth buffer, though
 
-    fn clear_rect(
+    pub fn clear_rect(
         &mut self,
         encoder: &metal::RenderCommandEncoderRef,
         x: u32,
@@ -708,6 +708,10 @@ impl Mtl {
             }
         }
     }
+
+    // pub fn new_command_buffer(&self) -> metal::CommandBuffer {
+    //     self.command_queue.new_command_buffer().to_owned()
+    // }
 
     // pub fn clear_color(&self) -> Color {
     //     self.clear_color
@@ -785,19 +789,16 @@ impl Renderer for Mtl {
         // };
         // let clear_color: metal::MTLClearColor = todo!();
         // let pixel = self.pipeline_pixel_format;
-        // let clear_color: Color = todo!();
+
         let clear_color: Color = self.clear_color;
-        let pixel = self.pipeline_pixel_format;
-        // let clear_color1: Color1 = self.clear_color;
 
-
-        let command_buffer = self.command_queue.new_command_buffer();
+        let command_buffer = self.command_queue.new_command_buffer().to_owned();
         command_buffer.enqueue();
 
         // todo: this should be calling get_target
-        let drawable = self.layer.next_drawable().unwrap();
+        let drawable = self.layer.next_drawable().unwrap().to_owned();
         let color_texture = drawable.texture();
-
+        let pixel_format = color_texture.pixel_format();
 
         let encoder = new_render_command_encoder(
             &color_texture,
@@ -813,7 +814,7 @@ impl Renderer for Mtl {
         self.clear_buffer_on_flush = false;
 
         for cmd in commands {
-            self.set_composite_operation(cmd.composite_operation, color_texture.pixel_format());
+            self.set_composite_operation(cmd.composite_operation, pixel_format);
 
             match cmd.cmd_type {
                 CommandType::ConvexFill { params } => {
@@ -839,7 +840,7 @@ impl Renderer for Mtl {
 
         encoder.end_encoding();
         if !self.layer.presents_with_transaction() {
-            command_buffer.present_drawable(drawable);
+            command_buffer.present_drawable(&drawable);
         }
 
         #[cfg(target_os = "macos")]
