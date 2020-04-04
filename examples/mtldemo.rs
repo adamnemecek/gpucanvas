@@ -15,10 +15,12 @@ use std::mem;
 
 use winit::{
     event::{
+        ElementState,
         Event, WindowEvent,
-        WindowEvent::{
-            KeyboardInput
-        }
+        // WindowEvent::{
+            KeyboardInput, VirtualKeyCode,
+            MouseButton,
+        // }
     },
     event_loop::ControlFlow
 };
@@ -73,15 +75,14 @@ fn main() {
     layer.set_drawable_size(CGSize::new(draw_size.width as f64, draw_size.height as f64));
 
     // let shader_code = include_bytes!("src/renderer/mtl/shaders.metal");
-    let library = device
-        .new_library_with_file("src/renderer/mtl/shaders.metallib")
-        .unwrap();
+
 
     // let library = device.new_library_with_source(
     //     shader_code,
     // );
     let renderer = Mtl::new(&layer);
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
+
 
     canvas.add_font("examples/assets/Roboto-Bold.ttf").expect("Cannot add font");
     canvas.add_font("examples/assets/Roboto-Light.ttf").expect("Cannot add font");
@@ -112,47 +113,47 @@ fn main() {
                 WindowEvent::Resized(physical_size) => {
                     layer.set_drawable_size(CGSize::new(size.width as f64, size.height as f64));
                 },
-                // WindowEvent::CursorMoved { device_id: _, position, ..} => {
-                //     if dragging {
-                //         let p0 = canvas.transform().inversed().transform_point(mousex, mousey);
-                //         let p1 = canvas.transform().inversed().transform_point(position.x as f32, position.y as f32);
+                WindowEvent::CursorMoved { device_id: _, position, ..} => {
+                    if dragging {
+                        let p0 = canvas.transform().inversed().transform_point(mousex, mousey);
+                        let p1 = canvas.transform().inversed().transform_point(position.x as f32, position.y as f32);
 
-                //         canvas.translate(
-                //             p1.0 - p0.0,
-                //             p1.1 - p0.1,
-                //         );
-                //     }
+                        canvas.translate(
+                            p1.0 - p0.0,
+                            p1.1 - p0.1,
+                        );
+                    }
 
-                //     mousex = position.x as f32;
-                //     mousey = position.y as f32;
-                // },
-                // WindowEvent::MouseWheel { device_id: _, delta, .. } => match delta {
-                //     // glutin::event::MouseScrollDelta::LineDelta(_, y) => {
-                //     //     let pt = canvas.transform().inversed().transform_point(mousex, mousey);
-                //     //     canvas.translate(pt.0, pt.1);
-                //     //     canvas.scale(1.0 + (y / 10.0), 1.0 + (y / 10.0));
-                //     //     canvas.translate(-pt.0, -pt.1);
-                //     // },
-                //     _ => ()
-                // },
-                // WindowEvent::MouseInput { button: MouseButton::Left, state, .. } => {
-                //     match state {
-                //         ElementState::Pressed => dragging = true,
-                //         ElementState::Released => dragging = false,
-                //     }
-                // },
-                // WindowEvent::KeyboardInput { input: KeyboardInput { virtual_keycode: Some(VirtualKeyCode::S), state: ElementState::Pressed, .. }, .. } => {
-                //     if let Some(screenshot_image_id) = screenshot_image_id {
-                //         canvas.delete_image(screenshot_image_id);
-                //     }
+                    mousex = position.x as f32;
+                    mousey = position.y as f32;
+                },
+                WindowEvent::MouseWheel { device_id: _, delta, .. } => match delta {
+                    // glutin::event::MouseScrollDelta::LineDelta(_, y) => {
+                    //     let pt = canvas.transform().inversed().transform_point(mousex, mousey);
+                    //     canvas.translate(pt.0, pt.1);
+                    //     canvas.scale(1.0 + (y / 10.0), 1.0 + (y / 10.0));
+                    //     canvas.translate(-pt.0, -pt.1);
+                    // },
+                    _ => ()
+                },
+                WindowEvent::MouseInput { button: MouseButton::Left, state, .. } => {
+                    match state {
+                        ElementState::Pressed => dragging = true,
+                        ElementState::Released => dragging = false,
+                    }
+                },
+                WindowEvent::KeyboardInput { input: KeyboardInput { virtual_keycode: Some(VirtualKeyCode::S), state: ElementState::Pressed, .. }, .. } => {
+                    if let Some(screenshot_image_id) = screenshot_image_id {
+                        canvas.delete_image(screenshot_image_id);
+                    }
 
                 //     if let Ok(image) = canvas.screenshot() {
                 //         screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
                 //     }
-                // },
-                // WindowEvent::CloseRequested => {
-                //     *control_flow = ControlFlow::Exit
-                // }
+                },
+                WindowEvent::CloseRequested => {
+                    *control_flow = ControlFlow::Exit
+                }
                 _ => (),
             },
             Event::RedrawRequested(_) => {
