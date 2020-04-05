@@ -1,5 +1,6 @@
 use rgb::RGBA8;
 use imgref::ImgVec;
+use core_graphics::geometry::CGSize;
 
 use crate::{
     Size,
@@ -43,31 +44,39 @@ pub struct PathsLength {
     pub vertex_count: usize,
     pub index_count: usize,
     pub stroke_count: usize,
+    pub triangle_count: usize,
 }
 
 impl PathsLength {
-    fn new(cmd: &Command) -> Self {
+    fn new(cmds: &[Command]) -> Self {
         let mut vertex_count = 0;
         let mut index_count = 0;
         let mut stroke_count = 0;
+        let mut triangle_count = 0;
 
-        for drawable in &cmd.drawables {
-            if let Some((start, count)) = drawable.fill_verts {
-                if count > 2 {
-                    vertex_count += count;
-                    index_count += (count - 2) * 3;
+        for cmd in cmds {
+            for drawable in &cmd.drawables {
+                if let Some((start, count)) = drawable.fill_verts {
+                    if count > 2 {
+                        vertex_count += count;
+                        index_count += (count - 2) * 3;
+                    }
+                }
+
+                if let Some((start, count)) = drawable.stroke_verts {
+                    if count > 0 {
+                        vertex_count += count + 2;
+                        stroke_count += count;
+                    }
                 }
             }
 
-            if let Some((start, count)) = drawable.stroke_verts {
-                if count > 0 {
-                    vertex_count += count + 2;
-                    stroke_count += count;
-                }
+            if let Some((start, count)) = cmd.triangles_verts {
+                triangle_count += count;
             }
         }
 
-        Self { vertex_count, index_count, stroke_count }
+        Self { vertex_count, index_count, stroke_count, triangle_count }
     }
 }
 
@@ -117,24 +126,6 @@ impl From<CompositeOperationState> for Blend {
     }
 }
 
-#[derive(Copy, Clone)]
-pub struct Color1 {
-    pub r: f32,
-    pub g: f32,
-    pub b: f32,
-    pub a: f32,
-}
-
-impl Color1 {
-    pub fn new() -> Self {
-        todo!();
-    }
-}
-
-// impl From<Color> for Color1 {
-
-// }
-
 pub struct Mtl {
     debug: bool,
     antialias: bool,
@@ -178,6 +169,12 @@ pub struct Mtl {
 }
 
 
+impl From<CGSize> for Size {
+    fn from(v: CGSize) -> Self {
+        Self::new(v.width as f32, v.height as f32)
+    }
+}
+
 pub struct VertexOffsets {
     x: usize,
     u: usize,
@@ -197,6 +194,7 @@ impl Mtl {
     pub fn new(
         layer: &metal::CoreAnimationLayerRef,
     ) -> Self {
+
         let device = metal::Device::system_default().unwrap();
         let library = device.new_library_with_file("shaders.metallib").expect("library not found");
         let command_queue = device.new_command_queue();
@@ -213,6 +211,8 @@ impl Mtl {
         };
 
         let clear_buffer_on_flush = false;
+
+        let drawable_size = layer.drawable_size();
 
         let vertex_descriptor = {
             let desc = metal::VertexDescriptor::new();
@@ -232,6 +232,7 @@ impl Mtl {
 
         // pseudosampler sescriptor
         let pseudo_texture = MtlTexture::pseudo_texture(&device);
+        let stencil_texture = StencilTexture::new(&device, drawable_size.into());
 
         // Initializes default blend states.
         let blend_func = Blend {
@@ -317,7 +318,6 @@ impl Mtl {
             blend_func,
             // todo check what is this initialized to
             view_size_buffer: GPUVar::new(&device, Size::default()),
-            device,
             command_queue,
             frag_func,
             vert_func,
@@ -333,7 +333,7 @@ impl Mtl {
             frag_size: std::mem::size_of::<Params>(),
             index_size: 4, // MTLIndexTypeUInt32
             stencil_only_pipeline_state: None,
-            stencil_texture: todo!(),
+            stencil_texture,
             index_buffer: IndexBuffer::new(&device, 32),
             vertex_buffer: VertexBuffer::new(&device, 32),
             uniform_buffer: UniformBuffer::new(&device, 2),
@@ -342,6 +342,7 @@ impl Mtl {
             render_target: RenderTarget::Screen,
             pseudo_texture,
             clear_color: Color::black(),
+            device,
         }
     }
 
@@ -623,9 +624,9 @@ impl Mtl {
         /// https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1515917-setfragmentbufferoffset?language=objc
         ///
         let len = self.uniform_buffer.len();
+        self.uniform_buffer.push(paint);
         let offset = len * std::mem::size_of::<Params>();
         encoder.set_fragment_buffer_offset(0, offset as u64);
-        todo!();
 
 
         let tex = if let Some(id) = image_tex {
@@ -690,6 +691,10 @@ impl Mtl {
             }
         }
     }
+
+    // pub fn reset(&mut self) {
+
+    // }
 
     // pub fn new_command_buffer(&self) -> metal::CommandBuffer {
     //     self.command_queue.new_command_buffer().to_owned()
@@ -769,6 +774,13 @@ impl Renderer for Mtl {
 
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+
+        self.vertex_buffer.set_len(0);
+        self.vertex_buffer.extend_from_slice(verts);
+
+        let lens = PathsLength::new(commands);
+
+
         let clear_color: Color = self.clear_color;
 
         let command_buffer = self.command_queue.new_command_buffer().to_owned();
@@ -778,6 +790,7 @@ impl Renderer for Mtl {
         let drawable = self.layer.next_drawable().unwrap().to_owned();
         let color_texture = drawable.texture();
         let pixel_format = color_texture.pixel_format();
+
 
         let encoder = new_render_command_encoder(
             &color_texture,
