@@ -348,6 +348,143 @@ fn draw_window<T: Renderer>(canvas: &mut Canvas<T>, title: &str, x: f32, y: f32,
 	canvas.restore();
 }
 
+fn draw_thumbnails<T: Renderer>(
+    context: &mut Canvas<T>,
+    x: f32, y: f32, w: f32, h: f32,
+    t: f32,
+    image_count: usize,
+    // image: &Image
+) {
+//     rect: RectF,
+//     time: f32,
+//     image_count: usize,
+//     image: &Image) {
+    const CORNER_RADIUS: f32 = 3.0;
+    const THUMB_HEIGHT: f32 = 60.0;
+    const ARROW_Y_POSITION: f32 = 30.5;
+    const IMAGES_ACROSS: usize = 4;
+
+    let stack_height = image_count as f32 * 0.5 * (THUMB_HEIGHT + 10.0) + 10.0;
+    let scroll_height = h / stack_height * (h - 8.0);
+    let scroll_y = (1.0 + f32::cos(t * 0.5)) * 0.5;
+    let load_y = (1.0 - f32::cos(t * 0.2)) * 0.5;
+    let image_y_scale = 1.0 / (image_count as f32 - 1.0);
+
+    context.save();
+
+    // Draw drop shadow.
+    let mut path = Path::new();
+    // path.rounded_rect(x, y, w, h, CORNER_RADIUS * 2.0);
+    // set_fill_style
+    // context.set_color(Color::rgba(0, 0, 0, 0));
+    // context.set_shadow_blur(20.0);
+    // context.set_shadow_color(rgbau(0, 0, 0, 128));
+    // context.set_shadow_offset(vec2f(0.0, 4.0));
+    // context.fill_path(shadow_path, FillRule::Winding);
+    // context.set_shadow_color(rgbau(0, 0, 0, 0));
+
+//     // Draw window.
+//     let mut path = create_rounded_rect_path(rect, CORNER_RADIUS);
+//     path.move_to(rect.origin() + vec2f(-10.0, ARROW_Y_POSITION));
+//     path.line_to(rect.origin() + vec2f(1.0, ARROW_Y_POSITION - 11.0));
+//     path.line_to(rect.origin() + vec2f(1.0, ARROW_Y_POSITION + 11.0));
+//     context.set_fill_style(rgbu(200, 200, 200));
+//     context.fill_path(path, FillRule::Winding);
+
+//     // Draw images.
+
+//     context.save();
+//     let mut clip_path = Path2D::new();
+//     clip_path.rect(rect);
+//     context.clip_path(clip_path, FillRule::Winding);
+//     context.translate(vec2f(0.0, -scroll_y * (stack_height - rect.height())));
+
+//     for image_index in 0..image_count {
+//         let image_origin = rect.origin() + vec2f(10.0, 10.0) +
+//         vec2i(image_index as i32 % 2, image_index as i32 / 2).to_f32() * (THUMB_HEIGHT + 10.0);
+//         let image_rect = RectF::new(image_origin, Vector2F::splat(THUMB_HEIGHT)); 
+
+//         // Draw shadow.
+//         let shadow_path = create_rounded_rect_path(image_rect.dilate(1.0) + vec2f(0.0, 1.0), 5.0);
+//         context.set_fill_style(rgbu(200, 200, 200));
+//         context.set_shadow_blur(3.0);
+//         context.set_shadow_offset(vec2f(0.0, 0.0));
+//         context.set_shadow_color(rgbau(0, 0, 0, 128));
+//         context.fill_path(shadow_path, FillRule::Winding);
+//         context.set_shadow_color(rgbau(0, 0, 0, 0));
+
+//         let image_y = image_index as f32 * image_y_scale;
+//         let alpha = util::clamp((load_y - image_y) / image_y_scale, 0.0, 1.0);
+//         if alpha < 1.0 {
+//             draw_spinner(context, image_rect.center(), THUMB_HEIGHT * 0.25, t);
+//         }
+
+//         let image_path = create_rounded_rect_path(image_rect, 5.0);
+//         let pattern_transform = Transform2F::from_translation(
+//             image_rect.origin() - vec2i(
+//             (image_index % IMAGES_ACROSS) as i32,
+//             (image_index / IMAGES_ACROSS) as i32).to_f32() * THUMB_HEIGHT) *
+//             Transform2F::from_scale(0.5);
+//             let mut pattern = Pattern::from_image((*image).clone());
+//             pattern.apply_transform(pattern_transform);
+//             context.set_fill_style(pattern);
+//             context.set_global_alpha(alpha);
+//             context.fill_path(image_path, FillRule::Winding);
+//             context.set_global_alpha(1.0);
+
+//             context.set_stroke_style(rgbau(255, 255, 255, 192));
+//             context.stroke_path(create_rounded_rect_path(image_rect.dilate(0.5), 3.5));
+//     }
+
+//     context.restore();
+
+//     // Draw fade-away gradients.
+
+//     let mut fade_gradient = Gradient::linear_from_points(rect.origin(),
+//                                             rect.origin() + vec2f(0.0, 6.0));
+//     fade_gradient.add_color_stop(rgbau(200, 200, 200, 255), 0.0);
+//     fade_gradient.add_color_stop(rgbau(200, 200, 200, 0),   1.0);
+//     context.set_fill_style(fade_gradient);
+//     context.fill_rect(RectF::new(rect.origin() + vec2f(4.0, 0.0), vec2f(rect.width() - 8.0, 6.0)));
+
+//     let mut fade_gradient = Gradient::linear_from_points(rect.lower_left(),
+//                                             rect.lower_left() - vec2f(0.0, 6.0));
+//     fade_gradient.add_color_stop(rgbau(200, 200, 200, 255), 0.0);
+//     fade_gradient.add_color_stop(rgbau(200, 200, 200, 0),   1.0);
+//     context.set_fill_style(fade_gradient);
+//     context.fill_rect(RectF::new(rect.lower_left() + vec2f(4.0, -6.0),
+//                     vec2f(rect.width() - 8.0, 6.0)));
+
+//     // Draw scroll bar.
+
+//     let scroll_bar_rect = RectF::new(rect.upper_right() + vec2f(-12.0, 4.0),
+//                         vec2f(8.0, rect.height() - 8.0));
+//     context.save();
+//     context.set_shadow_blur(4.0);
+//     context.set_shadow_offset(vec2f(0.0, 0.0));
+//     context.set_shadow_color(rgbau(0, 0, 0, 92));
+//     context.set_fill_style(rgbau(0, 0, 0, 32));
+//     let clip_path = create_rounded_rect_path(scroll_bar_rect, CORNER_RADIUS);
+//     context.clip_path(clip_path, FillRule::Winding);
+//     let path = create_rounded_rect_path(scroll_bar_rect + vec2f(0.0, 1.0), CORNER_RADIUS);
+//     context.fill_path(path, FillRule::Winding);
+//     context.restore();
+
+//     let knob_rect = RectF::new(
+//     rect.upper_right() + vec2f(-11.0, 5.0 + (rect.height() - 8.0 - scroll_height) * scroll_y),
+//     vec2f(6.0, scroll_height - 2.0));
+//     context.set_shadow_blur(4.0);
+//     context.set_shadow_offset(vec2f(0.0, 1.0));
+//     context.set_shadow_color(rgbu(220, 220, 220));
+//     context.set_fill_style(rgbau(0, 0, 0, 32));
+//     let clip_path = create_rounded_rect_path(knob_rect, 2.0);
+//     context.clip_path(clip_path, FillRule::Winding);
+//     let path = create_rounded_rect_path(knob_rect.dilate(2.0) + vec2f(0.0, 1.0), 3.0);
+    // context.fill_path(path, FillRule::Winding);
+
+    context.restore();
+}
+
 fn draw_search_box<T: Renderer>(canvas: &mut Canvas<T>, title: &str, x: f32, y: f32, w: f32, h: f32) {
     let corner_radius = (h / 2.0) - 1.0;
 
