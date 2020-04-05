@@ -710,7 +710,7 @@ fn new_render_command_encoder<'a>(
     color_texture: &metal::TextureRef,
     command_buffer: &'a metal::CommandBufferRef,
     clear_color: Color,
-    stencil_texture: &metal::TextureRef,
+    stencil_texture: &StencilTexture,
     // view_size: Size,
     vertex_buffer: &VertexBuffer,
     view_size_buffer: &ViewSizeBuffer,
@@ -736,7 +736,7 @@ fn new_render_command_encoder<'a>(
     desc.stencil_attachment().unwrap().set_clear_stencil(0);
     desc.stencil_attachment().unwrap().set_load_action(metal::MTLLoadAction::Clear);
     desc.stencil_attachment().unwrap().set_store_action(metal::MTLStoreAction::DontCare);
-    desc.stencil_attachment().unwrap().set_texture(Some(&stencil_texture));
+    desc.stencil_attachment().unwrap().set_texture(Some(&stencil_texture.tex));
 
     let encoder = command_buffer.new_render_command_encoder(&desc);
 
@@ -783,7 +783,7 @@ impl Renderer for Mtl {
             &color_texture,
             &command_buffer,
             clear_color,
-            &self.stencil_texture.tex,
+            &self.stencil_texture,
             &self.vertex_buffer,
             &self.view_size_buffer,
             &self.uniform_buffer,
