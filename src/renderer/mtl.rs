@@ -484,7 +484,7 @@ impl Mtl {
         encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state.as_ref().unwrap());
 
         /// todo metal nanovg doesn't have this
-        self.set_uniforms(encoder, images, stencil_paint, cmd.image, cmd.alpha_mask);
+        self.set_uniforms(encoder, images, stencil_paint, None, None);
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
@@ -512,9 +512,6 @@ impl Mtl {
 
             for drawable in &cmd.drawables {
                 if let Some((start, count)) = drawable.stroke_verts {
-                    /// offset is in bytes
-                    let index_buffer_offset = start * self.index_size;
-
                     /// draw fans
                     encoder.draw_primitives(
                         metal::MTLPrimitiveType::TriangleStrip,
@@ -525,8 +522,8 @@ impl Mtl {
             }
         }
 
-        encoder.set_depth_stencil_state(&self.fill_stencil_state);
         // Draws fill.
+        encoder.set_depth_stencil_state(&self.fill_stencil_state);
         if let Some((start, count)) = cmd.triangles_verts {
             encoder.draw_primitives(
                 metal::MTLPrimitiveType::TriangleStrip,
