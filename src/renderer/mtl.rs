@@ -56,6 +56,7 @@ use metalgear::{
 type VertexBuffer = GPUVec<Vertex>;
 type IndexBuffer = GPUVec<usize>;
 type UniformBuffer = GPUVec<Params>;
+type ViewSizeBuffer = GPUVar<Size>;
 
 pub struct PathsLength {
     pub vertex_count: usize,
@@ -185,11 +186,11 @@ pub struct Mtl {
     stroke_clear_stencil_state: metal::DepthStencilState,
 
     clear_color: Color,
-    view_size: GPUVar<Size>,
+    view_size_buffer: ViewSizeBuffer,
     stencil_texture: StencilTexture,
-    index_buffer: GPUVec<usize>,
-    vertex_buffer: GPUVec<Vertex>,
-    uniform_buffer: GPUVec<Params>,
+    index_buffer: IndexBuffer,
+    vertex_buffer: VertexBuffer,
+    uniform_buffer: UniformBuffer,
     render_target: RenderTarget,
     pseudo_texture: MtlTexture,
 }
@@ -331,7 +332,8 @@ impl Mtl {
             debug,
             antialias,
             blend_func,
-            view_size: GPUVar::new(&device, Size::default()),
+            // todo check what is this initialized to
+            view_size_buffer: GPUVar::new(&device, Size::default()),
             device,
             command_queue,
             frag_func,
@@ -729,9 +731,10 @@ fn new_render_command_encoder<'a>(
     command_buffer: &'a metal::CommandBufferRef,
     clear_color: Color,
     stencil_texture: &metal::TextureRef,
-    view_size: Size,
+    // view_size: Size,
     vertex_buffer: &VertexBuffer,
-    index_buffer: &IndexBuffer,
+    view_size_buffer: &ViewSizeBuffer,
+    // index_buffer: &IndexBuffer,
     uniform_buffer: &UniformBuffer,
     clear_buffer_on_flush: bool
 ) -> &'a metal::RenderCommandEncoderRef {
@@ -742,6 +745,8 @@ fn new_render_command_encoder<'a>(
         metal::MTLLoadAction::Load
     };
     let desc = metal::RenderPassDescriptor::new();
+
+    let view_size = view_size_buffer.value();
 
     desc.color_attachments().object_at(0).unwrap().set_clear_color(clear_color.into());
     desc.color_attachments().object_at(0).unwrap().set_load_action(load_action);
@@ -768,7 +773,7 @@ fn new_render_command_encoder<'a>(
     });
 
     encoder.set_vertex_buffer(0, Some(vertex_buffer.as_ref()), 0);
-    encoder.set_vertex_buffer(1, Some(index_buffer.as_ref()), 0);
+    encoder.set_vertex_buffer(1, Some(view_size_buffer.as_ref()), 0);
     encoder.set_fragment_buffer(0, Some(uniform_buffer.as_ref()), 0);
 
     encoder
@@ -779,7 +784,7 @@ impl Renderer for Mtl {
 
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
         let size = Size::new(width as f32, height as f32);
-        self.view_size.set_value(size);
+        self.view_size_buffer.set_value(size);
     }
 
     // called flush in ollix and nvg
@@ -805,9 +810,9 @@ impl Renderer for Mtl {
             &command_buffer,
             clear_color,
             &self.stencil_texture.tex,
-            self.view_size.value(),
+            // self.view_size.value(),
             &self.vertex_buffer,
-            &self.index_buffer,
+            &self.view_size_buffer,
             &self.uniform_buffer,
             self.clear_buffer_on_flush,
         );
@@ -979,7 +984,7 @@ impl Renderer for Mtl {
 
     fn screenshot(&mut self) -> Result<ImgVec<RGBA8>> {
         // todo!()
-        let size = self.view_size.value();
+        let size = self.view_size_buffer.value();
         let w = size.w as usize;
         let h = size.h as usize;
 
