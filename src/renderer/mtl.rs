@@ -1,11 +1,3 @@
-
-// use std::ptr;
-// use std::mem;
-// use std::ops::DerefMut;
-// use std::ffi::{CString, CStr, c_void};
-
-// use image::DynamicImage;
-
 use rgb::RGBA8;
 use imgref::ImgVec;
 
@@ -31,19 +23,8 @@ use super::{
     RenderTarget
 };
 
-// mod program;
-// use program::{
-//     Shader,
-//     Program
-// };
-
-// mod texture;
-// use texture::Texture;
 mod mtl_texture;
 use mtl_texture::MtlTexture;
-
-// mod uniforms;
-// use uniforms::Uniforms;
 
 mod stencil_texture;
 use stencil_texture::StencilTexture;
@@ -85,6 +66,7 @@ impl PathsLength {
                 }
             }
         }
+
         Self { vertex_count, index_count, stroke_count }
     }
 }
@@ -359,7 +341,7 @@ impl Mtl {
             pipeline_pixel_format: metal::MTLPixelFormat::Invalid,
             render_target: RenderTarget::Screen,
             pseudo_texture,
-            clear_color: Color::black(), //metal::MTLClearColor::new(0.0, 0.0, 0.0, 0.0)
+            clear_color: Color::black(),
         }
     }
 
