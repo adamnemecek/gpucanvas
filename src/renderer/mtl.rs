@@ -48,7 +48,7 @@ pub struct PathsLength {
 }
 
 impl PathsLength {
-    fn new(cmds: &[Command]) -> Self {
+    pub fn new(cmds: &[Command]) -> Self {
         let mut vertex_count = 0;
         let mut index_count = 0;
         let mut stroke_count = 0;
@@ -774,12 +774,13 @@ impl Renderer for Mtl {
 
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
-
-        self.vertex_buffer.set_len(0);
-        self.vertex_buffer.extend_from_slice(verts);
-
         let lens = PathsLength::new(commands);
 
+        self.vertex_buffer.clear();
+        self.vertex_buffer.extend_from_slice(verts);
+
+        /// build indices
+        self.index_buffer.clear();
 
         let clear_color: Color = self.clear_color;
 
