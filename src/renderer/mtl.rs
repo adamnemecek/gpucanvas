@@ -230,13 +230,6 @@ impl Mtl {
             library.get_function("fragmentShaderAA", None).expect("frag shader not found")
         };
 
-        let blend_func = Blend {
-            src_rgb: metal::MTLBlendFactor::One,
-            dst_rgb: metal::MTLBlendFactor::OneMinusSourceAlpha,
-            src_alpha: metal::MTLBlendFactor::One,
-            dst_alpha: metal::MTLBlendFactor::OneMinusSourceAlpha,
-        };
-
         let clear_buffer_on_flush = false;
 
         let vertex_descriptor = {
@@ -253,6 +246,17 @@ impl Mtl {
             desc.layouts().object_at(0).unwrap().set_stride(std::mem::size_of::<Vertex>() as u64);
             desc.layouts().object_at(0).unwrap().set_step_function(metal::MTLVertexStepFunction::PerVertex);
             desc
+        };
+
+        // pseudosampler sescriptor
+        let pseudo_texture = MtlTexture::pseudo_texture(&device);
+
+        // Initializes default blend states.
+        let blend_func = Blend {
+            src_rgb: metal::MTLBlendFactor::One,
+            dst_rgb: metal::MTLBlendFactor::OneMinusSourceAlpha,
+            src_alpha: metal::MTLBlendFactor::One,
+            dst_alpha: metal::MTLBlendFactor::OneMinusSourceAlpha,
         };
 
         // // Initializes stencil states.
@@ -323,9 +327,6 @@ impl Mtl {
         stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
 
         let stroke_clear_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
-
-
-        let pseudo_texture = MtlTexture::pseudo_texture(&device);
 
         Self {
             layer: layer.to_owned(),
@@ -545,7 +546,6 @@ impl Mtl {
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
-                // unsafe { gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32); }
                 encoder.draw_primitives(
                     metal::MTLPrimitiveType::TriangleStrip,
                     start as u64,
@@ -850,7 +850,6 @@ impl Renderer for Mtl {
             command_buffer.wait_until_scheduled();
             drawable.present();
         }
-
     }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image> {

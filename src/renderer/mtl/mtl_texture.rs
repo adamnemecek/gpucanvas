@@ -31,6 +31,8 @@ pub struct MtlTexture {
 impl MtlTexture {
     pub fn pseudo_texture(device: &metal::Device) -> Self {
         let info = ImageInfo::new(ImageFlags::empty(), 1, 1, ImageFormat::Gray8);
+        let sampler = metal::SamplerDescriptor::new();
+
         Self::new(device, info)
     }
 
