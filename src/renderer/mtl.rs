@@ -503,7 +503,6 @@ impl Mtl {
         }
         // Restores states.
         encoder.set_cull_mode(metal::MTLCullMode::Back);
-        encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
 
         // Draws anti-aliased fragments.
@@ -526,6 +525,7 @@ impl Mtl {
             }
         }
 
+        encoder.set_depth_stencil_state(&self.fill_stencil_state);
         // Draws fill.
         if let Some((start, count)) = cmd.triangles_verts {
             encoder.draw_primitives(
@@ -534,6 +534,7 @@ impl Mtl {
                 count as u64
             );
         }
+        encoder.set_depth_stencil_state(&self.default_stencil_state);
     }
 
     /// done
@@ -789,12 +790,6 @@ impl Renderer for Mtl {
 
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
-        // let clear_color: metal::MTLClearColor = ;{
-        //     self.clear_color.clone()
-        // };
-        // let clear_color: metal::MTLClearColor = todo!();
-        // let pixel = self.pipeline_pixel_format;
-
         let clear_color: Color = self.clear_color;
 
         let command_buffer = self.command_queue.new_command_buffer().to_owned();
@@ -810,7 +805,6 @@ impl Renderer for Mtl {
             &command_buffer,
             clear_color,
             &self.stencil_texture.tex,
-            // self.view_size.value(),
             &self.vertex_buffer,
             &self.view_size_buffer,
             &self.uniform_buffer,

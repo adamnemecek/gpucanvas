@@ -1431,8 +1431,7 @@ error:
       dispatch_semaphore_signal(self.semaphore);
   }];
 
-  if (s_framebuffer == NULL ||
-      nvgInternalParams(s_framebuffer->ctx)->userPtr != (__bridge void*)self) {
+  if (s_framebuffer == NULL || nvgInternalParams(s_framebuffer->ctx)->userPtr != (__bridge void*)self) {
     textureSize = _viewPortSize;
   } else {  // renders in framebuffer
     buffers->image = s_framebuffer->image;
