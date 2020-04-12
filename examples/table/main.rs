@@ -19,6 +19,8 @@ use gpucanvas::{
     renderer::OpenGl
 };
 
+use specs::prelude::*;
+
 fn main() {
 
     let window_size = glutin::dpi::PhysicalSize::new(1000, 600);
