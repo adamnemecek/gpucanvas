@@ -48,7 +48,10 @@ pub struct ItemStatus {
     data: Status
 }
 
-
+// these are cached for the view that are currently visible
+pub struct Texture {
+    // data: metal::Texture
+}
 
 // impl Component for ItemStatus {
 //     type Storage = NullStorage<Self>;
@@ -64,7 +67,7 @@ pub struct Label {
 //     }
 // }
 
-fn draw_dropdown(canvas: &mut Canvas<OpenGl>, text: &str) {
+fn draw_dropdown(canvas: &mut Canvas<OpenGl>, text: &str, rect: Rect, status: Status) {
     // void DrawDropDown(DrawContext* context, const char* text, float x, float y, float w, float h)
 	// {
 	// 	NVGpaint bg;
@@ -104,16 +107,24 @@ pub enum Event {
 
 }
 
+pub struct EventTableViewMouse {
+
+}
+
 pub struct SysTableViewInput {
-    reader_id: ReaderId<ComponentEvent>
+    reader_id: ReaderId<EventTableViewMouse>
 }
 
 impl<'a> System<'a> for SysTableViewInput {
     type SystemData = (
-
+        // rect
+        // selected
+        //
     );
     fn run(&mut self, data: Self::SystemData) {
-
+        // find the entry that was hit and make it selected
+        // if the hit was on the icon, expand it
+        // if shift was down, don't
     }
 }
 pub struct SysTableViewRenderer;
@@ -123,30 +134,36 @@ impl<'a> System<'a> for SysTableViewRenderer {
         // IndexPath
         // Icon
         // Label
-        //
+        // Rect
+        // status
     );
 
     fn run(&mut self, data: Self::SystemData) {
-        // sort by indexpath
-        // iterate through them and render into
-        // for e in data.join() {
-            // let entry =
-            // draw_entry(canvas, )
-        // }
+        // sort by indexpath (eventually, the entities will be sorted by their index path)
+        // iterate through them and render into canvas
+        /*
+        for e in data.join() {
+            let entry =
+            draw_entry(canvas, label)
+        }
+        */
     }
 }
 
 
 pub struct App {
-    canvas: Canvas<OpenGl>
+    world: World,
+    canvas: Canvas<OpenGl>,
+    // dispatcher
 }
 
 impl App {
     pub fn new(canvas: Canvas<OpenGl>) -> Self {
-        Self { canvas }
+        // Self { canvas }
+        todo!()
     }
 
     pub fn input(&mut self, event: Event) {
-
+        // hierarchy
     }
 }
