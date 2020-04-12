@@ -22,21 +22,59 @@ impl HParent for Parent {
     }
 }
 
+
+
+pub struct IndexPath {
+    data: Vec<usize>
+}
+
+impl Component for IndexPath {
+    type Storage = DenseVecStorage<Self>;
+}
+
+#[derive(Default)]
 pub struct Expanded;
-pub struct Icon;
+impl Component for Expanded {
+    type Storage = NullStorage<Self>;
+}
+
+// impl std::default::Default for Expanded {
+//     fn default() -> Self {
+//         Self {}
+//     }
+// }
+
+pub struct Icon {
+
+}
 
 pub enum Event {
 
 }
 
-pub struct SysTableViewRenderer;
+pub struct SysTableViewInput {
+    reader_id: ReaderId<ComponentEvent>
+}
 
-impl<'a> System<'a> for SysTableViewRenderer {
+impl<'a> System<'a> for SysTableViewInput {
     type SystemData = (
 
     );
     fn run(&mut self, data: Self::SystemData) {
-        todo!()
+
+    }
+}
+pub struct SysTableViewRenderer;
+
+impl<'a> System<'a> for SysTableViewRenderer {
+    type SystemData = (
+        // IndexPath
+        // Icon
+        //
+    );
+
+    fn run(&mut self, data: Self::SystemData) {
+
     }
 }
 
