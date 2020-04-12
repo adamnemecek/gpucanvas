@@ -69,7 +69,7 @@ use renderer::{
 
 pub(crate) mod geometry;
 use geometry::*;
-pub use geometry::Transform2D;
+pub use geometry::{Transform2D, Rect};
 
 mod paint;
 pub use paint::Paint;

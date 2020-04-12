@@ -2,27 +2,11 @@ use specs::prelude::*;
 use specs_hierarchy::{Hierarchy, Parent as HParent};
 use gpucanvas::Canvas;
 use gpucanvas::renderer::OpenGl;
+use gpucanvas::Rect;
 
 
-pub struct Slider {
-    data: f32
-}
-
-impl Component for Slider {
-    type Storage = DenseVecStorage<Self>;
-}
-
-struct SysSliderInput;
-
-impl<'a> System<'a> for SysSliderInput {
-    type SystemData = ();
-    fn run(&mut self, data: Self::SystemData) {
-
-    }
-}
 
 
-/// Component for defining a parent entity.
 ///
 /// The entity with this component *has* a parent, rather than *is* a parent.
 ///
@@ -43,9 +27,6 @@ impl HParent for Parent {
     }
 }
 
-pub struct Rect {
-
-}
 
 pub struct IndexPath {
     data: Vec<usize>

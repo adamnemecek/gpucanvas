@@ -22,6 +22,9 @@ use gpucanvas::{
 mod ecs;
 use ecs::*;
 
+mod widgets;
+use widgets::*;
+
 
 
 fn main() {
