@@ -19,7 +19,10 @@ use gpucanvas::{
     renderer::OpenGl
 };
 
-use specs::prelude::*;
+mod ecs;
+use ecs::*;
+
+
 
 fn main() {
 

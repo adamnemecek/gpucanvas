@@ -24,6 +24,7 @@ generational-arena = "0.2.7"
 lru = { version = "0.4.3", default-features = false }
 image = { version = "0.23.2", optional = true }
 specs = "*"
+specs-hierarchy = "*"
 
 [features]
 default = ["image-loading"]
