@@ -22,7 +22,9 @@ impl HParent for Parent {
     }
 }
 
+pub struct Rect {
 
+}
 
 pub struct IndexPath {
     data: Vec<usize>
@@ -32,10 +34,28 @@ impl Component for IndexPath {
     type Storage = DenseVecStorage<Self>;
 }
 
+enum Status {
+    Collapsed, Expanded
+}
+impl Default for Status {
+    fn default() -> Self {
+        Self::Collapsed
+    }
+}
+
 #[derive(Default)]
-pub struct Expanded;
-impl Component for Expanded {
-    type Storage = NullStorage<Self>;
+pub struct ItemStatus {
+    data: Status
+}
+
+
+
+// impl Component for ItemStatus {
+//     type Storage = NullStorage<Self>;
+// }
+
+pub struct Label {
+    data: String
 }
 
 // impl std::default::Default for Expanded {
@@ -43,6 +63,38 @@ impl Component for Expanded {
 //         Self {}
 //     }
 // }
+
+fn draw_dropdown(canvas: &mut Canvas<OpenGl>, text: &str) {
+    // void DrawDropDown(DrawContext* context, const char* text, float x, float y, float w, float h)
+	// {
+	// 	NVGpaint bg;
+	// 	char icon[8];
+	// 	float cornerRadius = 2.0f;
+
+	// 	bg = nvgLinearGradient(ctx, x, y, x, y + h, nvgRGBA(255, 255, 255, 16), nvgRGBA(0, 0, 0, 16));
+	// 	nvgBeginPath(ctx);
+	// 	nvgRoundedRect(ctx, x + 1, y + 1, w - 2, h - 2, cornerRadius - 1);
+	// 	nvgFillPaint(ctx, bg);
+	// 	nvgFill(ctx);
+
+	// 	nvgBeginPath(ctx);
+	// 	nvgRoundedRect(ctx, x + 0.5f, y + 0.5f, w - 1, h - 1, cornerRadius - 0.5f);
+	// 	nvgStrokeColor(ctx, nvgRGBA(0, 0, 0, 48));
+	// 	nvgStroke(ctx);
+
+	// 	nvgFontSize(ctx, theme->standardFontSize);
+	// 	nvgFontFace(ctx, "sans");
+	// 	nvgFillColor(ctx, theme->textColor);
+	// 	nvgTextAlign(ctx, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
+	// 	nvgText(ctx, x + h * 0.3f, y + h * 0.5f, text, NULL);
+
+	// 	nvgFontSize(ctx, h);
+	// 	nvgFontFace(ctx, "ui");
+	// 	nvgFillColor(ctx, theme->textColor);
+	// 	nvgTextAlign(ctx, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
+	// 	nvgText(ctx, x + w - h * 0.5f, y + h * 0.5f, cpToUTF8(ICON_UNFOLD_MORE, icon), NULL);
+	// }
+}
 
 pub struct Icon {
 
@@ -70,11 +122,17 @@ impl<'a> System<'a> for SysTableViewRenderer {
     type SystemData = (
         // IndexPath
         // Icon
+        // Label
         //
     );
 
     fn run(&mut self, data: Self::SystemData) {
-
+        // sort by indexpath
+        // iterate through them and render into
+        // for e in data.join() {
+            // let entry =
+            // draw_entry(canvas, )
+        // }
     }
 }
 
