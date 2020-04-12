@@ -58,6 +58,17 @@ pub struct Texture {
     // data: metal::Texture
 }
 
+pub struct SysMouseInput;
+
+impl<'a> System<'a> for SysMouseInput {
+    type SystemData = (
+
+    );
+    fn run(&mut self, data: Self::SystemData) {
+
+    }
+}
+
 // impl Component for ItemStatus {
 //     type Storage = NullStorage<Self>;
 // }
@@ -132,6 +143,26 @@ impl<'a> System<'a> for SysTableViewInput {
         // if shift was down, don't
     }
 }
+
+// layout system orders the items by their indexpath and
+pub struct SysTableViewLayout {
+
+}
+
+impl SysTableViewLayout {
+    fn run() {
+        /*
+        let offset = 0;
+        for entity, rect, status, size in data {
+            if status == Status::Collapsed {
+                offset += size.h;
+            }
+        }
+        */
+
+    }
+}
+
 pub struct SysTableViewRenderer;
 
 impl<'a> System<'a> for SysTableViewRenderer {
@@ -170,10 +201,13 @@ pub struct App {
 impl App {
     pub fn new(canvas: Canvas<OpenGl>) -> Self {
         // Self { canvas }
+        // let a =
         todo!()
     }
 
     pub fn input(&mut self, event: Event) {
         // hierarchy
     }
+
+
 }
