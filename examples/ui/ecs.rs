@@ -3,9 +3,30 @@ use specs_hierarchy::{Hierarchy, Parent as HParent};
 use gpucanvas::Canvas;
 use gpucanvas::renderer::OpenGl;
 
+
+pub struct Slider {
+    data: f32
+}
+
+impl Component for Slider {
+    type Storage = DenseVecStorage<Self>;
+}
+
+struct SysSliderInput;
+
+impl<'a> System<'a> for SysSliderInput {
+    type SystemData = ();
+    fn run(&mut self, data: Self::SystemData) {
+
+    }
+}
+
+
 /// Component for defining a parent entity.
 ///
 /// The entity with this component *has* a parent, rather than *is* a parent.
+///
+///
 #[derive(Debug, Clone, Eq, Ord, PartialEq, PartialOrd)]
 pub struct Parent {
     /// The parent entity
@@ -64,6 +85,7 @@ impl<'a> System<'a> for SysMouseInput {
     type SystemData = (
 
     );
+
     fn run(&mut self, data: Self::SystemData) {
 
     }
