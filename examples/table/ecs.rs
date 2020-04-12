@@ -34,7 +34,7 @@ impl Component for IndexPath {
     type Storage = DenseVecStorage<Self>;
 }
 
-enum Status {
+pub enum Status {
     Collapsed, Expanded
 }
 impl Default for Status {
@@ -42,6 +42,11 @@ impl Default for Status {
         Self::Collapsed
     }
 }
+
+impl Component for Status {
+    type Storage = DenseVecStorage<Self>;
+}
+
 
 #[derive(Default)]
 pub struct ItemStatus {
@@ -131,6 +136,8 @@ pub struct SysTableViewRenderer;
 
 impl<'a> System<'a> for SysTableViewRenderer {
     type SystemData = (
+        Entities<'a>,
+        ReadStorage<'a, Status>
         // IndexPath
         // Icon
         // Label
@@ -142,9 +149,12 @@ impl<'a> System<'a> for SysTableViewRenderer {
         // sort by indexpath (eventually, the entities will be sorted by their index path)
         // iterate through them and render into canvas
         /*
-        for e in data.join() {
-            let entry =
-            draw_entry(canvas, label)
+        for (ent, status) in data.join() {
+            let entry = todo!();
+            if status == Status::Collapsed {
+                continue;
+            }
+            // draw_entry(canvas, label)
         }
         */
     }
