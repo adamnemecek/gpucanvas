@@ -1,24 +1,22 @@
-
+#[cfg(feature = "serde")]
 #[macro_use]
-extern crate static_assertions;
+extern crate serde;
 
+use std::ops::Range;
 use std::path::Path as FilePath;
 
-use rgb::RGBA8;
 use imgref::ImgVec;
+use rgb::RGBA8;
 
 /*
+HTML5 Canvas API:
+https://bucephalus.org/text/CanvasHandbook/CanvasHandbook.html
+
 TODO:
-    - Review geometry module and maybe migrate to euclid
-    - Custom shader support
-    - Review text functions for:
-        - Measuring text - text_bounds?
-        - Computing bounding boxes - text_bounds?
-        - Mapping from coordinates to character indices
-        - Mapping from character index to coordinates
-        - Emoji support
-    - Tests
     - Documentation
+    - Rename crate to femtovg
+    - Tests
+    - Publish to crates.io
 */
 
 mod utils;
@@ -28,57 +26,24 @@ mod text;
 mod error;
 pub use error::ErrorKind;
 
-#[macro_use]
-extern crate memoffset;
+pub use text::{Align, Baseline, FontId, FontMetrics, TextMetrics};
 
-pub use text::{
-    Weight,
-    WidthClass,
-    FontStyle,
-    Baseline,
-    Align,
-    TextLayout
-};
-
-use text::{
-    FontDb,
-    Shaper,
-    TextRenderer,
-    TextStyle,
-    RenderStyle,
-};
+use text::{RenderMode, TextContext};
 
 mod image;
-pub use crate::image::{
-    ImageId,
-    ImageInfo,
-    ImageFlags,
-    ImageStore,
-    ImageFormat,
-    ImageSource,
-};
+pub use crate::image::{ImageFlags, ImageId, ImageInfo, ImageSource, ImageStore, PixelFormat};
 
 mod color;
 pub use color::Color;
 
 pub mod renderer;
-pub use renderer::{
-    Renderer,
-    RenderTarget
-};
+pub use renderer::{RenderTarget, Renderer};
 
-use renderer::{
-    Vertex,
-    Params,
-    Command,
-    CommandType,
-    ShaderType,
-    Drawable,
-};
+use renderer::{Command, CommandType, Drawable, Params, ShaderType, Vertex};
 
 pub(crate) mod geometry;
-use geometry::*;
 pub use geometry::Transform2D;
+use geometry::*;
 
 mod paint;
 pub use paint::Paint;
@@ -86,17 +51,21 @@ use paint::PaintFlavor;
 
 mod path;
 use path::Convexity;
-pub use path::{
-    Path,
-    Solidity
-};
+pub use path::{Path, Solidity};
 
-type Result<T> = std::result::Result<T, ErrorKind>;
+#[macro_use]
+extern crate static_assertions;
+
+
+#[macro_use]
+extern crate memoffset;
+
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum FillRule {
     EvenOdd,
-    NonZero
+    NonZero,
 }
 
 impl Default for FillRule {
@@ -117,7 +86,7 @@ pub enum BlendFactor {
     OneMinusSrcAlpha,
     DstAlpha,
     OneMinusDstAlpha,
-    SrcAlphaSaturate
+    SrcAlphaSaturate,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
@@ -132,7 +101,7 @@ pub enum CompositeOperation {
     DestinationAtop,
     Lighter,
     Copy,
-    Xor
+    Xor,
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
@@ -156,7 +125,7 @@ impl CompositeOperationState {
             CompositeOperation::DestinationAtop => (BlendFactor::OneMinusDstAlpha, BlendFactor::SrcAlpha),
             CompositeOperation::Lighter => (BlendFactor::One, BlendFactor::One),
             CompositeOperation::Copy => (BlendFactor::One, BlendFactor::Zero),
-            CompositeOperation::Xor => (BlendFactor::OneMinusDstAlpha, BlendFactor::OneMinusSrcAlpha)
+            CompositeOperation::Xor => (BlendFactor::OneMinusDstAlpha, BlendFactor::OneMinusSrcAlpha),
         };
 
         Self {
@@ -184,12 +153,13 @@ impl Default for Scissor {
     fn default() -> Self {
         Self {
             transform: Default::default(),
-            extent: None
+            extent: None,
         }
     }
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum LineCap {
     Butt,
     Round,
@@ -203,10 +173,11 @@ impl Default for LineCap {
 }
 
 #[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum LineJoin {
     Miter,
     Round,
-    Bevel
+    Bevel,
 }
 
 impl Default for LineJoin {
@@ -235,12 +206,11 @@ impl Default for State {
 }
 
 pub struct Canvas<T: Renderer> {
-    width: f32,
-    height: f32,
+    width: u32,
+    height: u32,
     renderer: T,
-    fontdb: FontDb,
-    shaper: Shaper,
-    text_renderer: TextRenderer,
+    text_context: TextContext,
+    current_render_target: RenderTarget,
     state_stack: Vec<State>,
     commands: Vec<Command>,
     verts: Vec<Vertex>,
@@ -248,21 +218,20 @@ pub struct Canvas<T: Renderer> {
     fringe_width: f32,
     device_px_ratio: f32,
     tess_tol: f32,
-    dist_tol: f32
+    dist_tol: f32,
 }
 
-impl<T> Canvas<T> where T: Renderer {
-
-    pub fn new(renderer: T) -> Result<Self> {
-        let fontdb = FontDb::new()?;
-
+impl<T> Canvas<T>
+where
+    T: Renderer,
+{
+    pub fn new(renderer: T) -> Result<Self, ErrorKind> {
         let mut canvas = Self {
-            width: Default::default(),
-            height: Default::default(),
+            width: 0,
+            height: 0,
             renderer: renderer,
-            fontdb: fontdb,
-            shaper: Default::default(),
-            text_renderer: Default::default(),
+            text_context: Default::default(),
+            current_render_target: RenderTarget::Screen,
             state_stack: Default::default(),
             commands: Default::default(),
             verts: Default::default(),
@@ -270,7 +239,7 @@ impl<T> Canvas<T> where T: Renderer {
             fringe_width: 1.0,
             device_px_ratio: 1.0,
             tess_tol: 0.25,
-            dist_tol: 0.01
+            dist_tol: 0.01,
         };
 
         canvas.save();
@@ -279,32 +248,38 @@ impl<T> Canvas<T> where T: Renderer {
     }
 
     pub fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
-        self.width = width as f32;
-        self.height = height as f32;
+        self.width = width;
+        self.height = height;
         self.fringe_width = 1.0 / dpi;
         self.tess_tol = 0.25 / dpi;
         self.dist_tol = 0.01 / dpi;
         self.device_px_ratio = dpi;
 
         self.renderer.set_size(width, height, dpi);
+
+        self.append_cmd(Command::new(CommandType::SetRenderTarget(RenderTarget::Screen)));
     }
 
     pub fn clear_rect(&mut self, x: u32, y: u32, width: u32, height: u32, color: Color) {
         let cmd = Command::new(CommandType::ClearRect {
-            x, y, width, height, color
+            x,
+            y,
+            width,
+            height,
+            color,
         });
 
-        self.commands.push(cmd);
+        self.append_cmd(cmd);
     }
 
     /// Returns the with of the canvas
     pub fn width(&self) -> f32 {
-        self.width
+        self.width as f32
     }
 
     /// Returns the height of the canvas
     pub fn height(&self) -> f32 {
-        self.height
+        self.height as f32
     }
 
     /// Tells the renderer to execute all drawing commands and clears the current internal state
@@ -316,7 +291,8 @@ impl<T> Canvas<T> where T: Renderer {
         self.verts.clear();
     }
 
-    pub fn screenshot(&mut self) -> Result<ImgVec<RGBA8>> {
+    pub fn screenshot(&mut self) -> Result<ImgVec<RGBA8>, ErrorKind> {
+        self.flush();
         self.renderer.screenshot()
     }
 
@@ -332,15 +308,30 @@ impl<T> Canvas<T> where T: Renderer {
     }
 
     /// Restores the previous render state
+    ///
+    /// Restoring the initial/first state will just reset it to the defaults
     pub fn restore(&mut self) {
         if self.state_stack.len() > 1 {
             self.state_stack.pop();
+        } else {
+            self.reset();
         }
     }
 
-    /// Resets current render state to default values. Does not affect the render state stack.
+    /// Resets current state to default values. Does not affect the state stack.
     pub fn reset(&mut self) {
         *self.state_mut() = Default::default();
+    }
+
+    /// Saves the current state before calling the callback and restores it afterwards
+    ///
+    /// This is less error prone than remembering to match save() -> restore() calls
+    pub fn save_with(&mut self, mut callback: impl FnMut(&mut Self)) {
+        self.save();
+
+        callback(self);
+
+        self.restore();
     }
 
     // Render styles
@@ -363,23 +354,52 @@ impl<T> Canvas<T> where T: Renderer {
     }
 
     /// Sets the composite operation with custom pixel arithmetic for RGB and alpha components separately.
-    pub fn global_composite_blend_func_separate(&mut self, src_rgb: BlendFactor, dst_rgb: BlendFactor, src_alpha: BlendFactor, dst_alpha: BlendFactor) {
-        self.state_mut().composite_operation = CompositeOperationState { src_rgb, src_alpha, dst_rgb, dst_alpha }
+    pub fn global_composite_blend_func_separate(
+        &mut self,
+        src_rgb: BlendFactor,
+        dst_rgb: BlendFactor,
+        src_alpha: BlendFactor,
+        dst_alpha: BlendFactor,
+    ) {
+        self.state_mut().composite_operation = CompositeOperationState {
+            src_rgb,
+            src_alpha,
+            dst_rgb,
+            dst_alpha,
+        }
     }
 
+    /// Sets a new render target. All drawing operations after this call will happen on the provided render target
     pub fn set_render_target(&mut self, target: RenderTarget) {
-        self.renderer.set_target(&self.images, target);
+        if self.current_render_target != target {
+            self.append_cmd(Command::new(CommandType::SetRenderTarget(target)));
+            self.current_render_target = target;
+        }
+    }
+
+    fn append_cmd(&mut self, cmd: Command) {
+        self.commands.push(cmd);
     }
 
     // Images
 
-    pub fn create_image_empty(&mut self, width: usize, height: usize, format: ImageFormat, flags: ImageFlags) -> Result<ImageId> {
+    pub fn create_image_empty(
+        &mut self,
+        width: usize,
+        height: usize,
+        format: PixelFormat,
+        flags: ImageFlags,
+    ) -> Result<ImageId, ErrorKind> {
         let info = ImageInfo::new(flags, width, height, format);
 
         self.images.alloc(&mut self.renderer, info)
     }
 
-    pub fn create_image<'a, S: Into<ImageSource<'a>>>(&mut self, src: S, flags: ImageFlags) -> Result<ImageId> {
+    pub fn create_image<'a, S: Into<ImageSource<'a>>>(
+        &mut self,
+        src: S,
+        flags: ImageFlags,
+    ) -> Result<ImageId, ErrorKind> {
         let src = src.into();
         let size = src.dimensions();
 
@@ -392,7 +412,11 @@ impl<T> Canvas<T> where T: Renderer {
 
     /// Decode an image from file
     #[cfg(feature = "image-loading")]
-    pub fn load_image_file<P: AsRef<FilePath>>(&mut self, filename: P, flags: ImageFlags) -> Result<ImageId> {
+    pub fn load_image_file<P: AsRef<FilePath>>(
+        &mut self,
+        filename: P,
+        flags: ImageFlags,
+    ) -> Result<ImageId, ErrorKind> {
         let image = ::image::open(filename)?;
 
         use std::convert::TryFrom;
@@ -404,7 +428,7 @@ impl<T> Canvas<T> where T: Renderer {
 
     /// Decode an image from memory
     #[cfg(feature = "image-loading")]
-    pub fn load_image_mem(&mut self, data: &[u8], flags: ImageFlags) -> Result<ImageId> {
+    pub fn load_image_mem(&mut self, data: &[u8], flags: ImageFlags) -> Result<ImageId, ErrorKind> {
         let image = ::image::load_from_memory(data)?;
 
         use std::convert::TryFrom;
@@ -415,7 +439,13 @@ impl<T> Canvas<T> where T: Renderer {
     }
 
     /// Updates image data specified by image handle.
-    pub fn update_image<'a, S: Into<ImageSource<'a>>>(&mut self, id: ImageId, src: S, x: usize, y: usize) -> Result<()> {
+    pub fn update_image<'a, S: Into<ImageSource<'a>>>(
+        &mut self,
+        id: ImageId,
+        src: S,
+        x: usize,
+        y: usize,
+    ) -> Result<(), ErrorKind> {
         self.images.update(&mut self.renderer, id, src.into(), x, y)
     }
 
@@ -424,16 +454,8 @@ impl<T> Canvas<T> where T: Renderer {
         self.images.remove(&mut self.renderer, id);
     }
 
-    /// Blurs the provided image inside the specified region.
-    /// Amount is the number of times that the blur is ran against the image.
-    pub fn blur_image(&mut self, id: ImageId, amount: u8, x: usize, y: usize, width: usize, height: usize) {
-        if let Some(img) = self.images.get_mut(id) {
-            self.renderer.blur(img, amount, x, y, width, height);
-        }
-    }
-
     /// Returns the size in pixels of the image for the specified id.
-    pub fn image_size(&self, id: ImageId) -> Result<(usize, usize)> {
+    pub fn image_size(&self, id: ImageId) -> Result<(usize, usize), ErrorKind> {
         if let Some(info) = self.images.info(id) {
             Ok((info.width(), info.height()))
         } else {
@@ -494,6 +516,8 @@ impl<T> Canvas<T> where T: Renderer {
     }
 
     /// Returns the current transformation matrix
+    ///
+    /// TODO: It's not ok that this method returns Transform2D while set_transform accepts 6 floats - make it consistant
     pub fn transform(&self) -> Transform2D {
         self.state().transform
     }
@@ -547,10 +571,10 @@ impl<T> Canvas<T> where T: Renderer {
         let ex = extent[0];
         let ey = extent[1];
 
-        let tex = ex*pxform[0].abs() + ey*pxform[2].abs();
-        let tey = ex*pxform[1].abs() + ey*pxform[3].abs();
+        let tex = ex * pxform[0].abs() + ey * pxform[2].abs();
+        let tey = ex * pxform[1].abs() + ey * pxform[3].abs();
 
-        let rect = Rect::new(pxform[4]-tex, pxform[5]-tey, tex*2.0, tey*2.0);
+        let rect = Rect::new(pxform[4] - tex, pxform[5] - tey, tex * 2.0, tey * 2.0);
         let res = rect.intersect(Rect::new(x, y, w, h));
 
         self.scissor(res.x, res.y, res.w, res.h);
@@ -563,6 +587,7 @@ impl<T> Canvas<T> where T: Renderer {
 
     // Paths
 
+    /// Returns true if the specified point (x,y) is in the provided path, and false otherwise.
     pub fn contains_point(&mut self, path: &mut Path, x: f32, y: f32, fill_rule: FillRule) -> bool {
         let transform = self.state().transform;
 
@@ -570,12 +595,24 @@ impl<T> Canvas<T> where T: Renderer {
         let path_cache = path.cache(&transform, self.tess_tol, self.dist_tol);
 
         // Early out if path is outside the canvas bounds
-        if path_cache.bounds.maxx < 0.0 || path_cache.bounds.minx > self.width ||
-            path_cache.bounds.maxy < 0.0 || path_cache.bounds.miny > self.height {
+        if path_cache.bounds.maxx < 0.0
+            || path_cache.bounds.minx > self.width()
+            || path_cache.bounds.maxy < 0.0
+            || path_cache.bounds.miny > self.height()
+        {
             return false;
         }
 
         path_cache.contains_point(x, y, fill_rule)
+    }
+
+    pub fn path_bbox(&self, path: &mut Path) -> Bounds {
+        let transform = self.state().transform;
+
+        // The path cache saves a flattened and transformed version of the path.
+        let path_cache = path.cache(&transform, self.tess_tol, self.dist_tol);
+
+        path_cache.bounds
     }
 
     /// Fills the current path with current fill style.
@@ -586,8 +623,11 @@ impl<T> Canvas<T> where T: Renderer {
         let path_cache = path.cache(&transform, self.tess_tol, self.dist_tol);
 
         // Early out if path is outside the canvas bounds
-        if path_cache.bounds.maxx < 0.0 || path_cache.bounds.minx > self.width ||
-            path_cache.bounds.maxy < 0.0 || path_cache.bounds.miny > self.height {
+        if path_cache.bounds.maxx < 0.0
+            || path_cache.bounds.minx > self.width()
+            || path_cache.bounds.maxy < 0.0
+            || path_cache.bounds.miny > self.height()
+        {
             return;
         }
 
@@ -607,7 +647,14 @@ impl<T> Canvas<T> where T: Renderer {
 
         // GPU uniforms
         let flavor = if path_cache.contours.len() == 1 && path_cache.contours[0].convexity == Convexity::Convex {
-            let params = Params::new(&self.images, &paint, &scissor, self.fringe_width, self.fringe_width, -1.0);
+            let params = Params::new(
+                &self.images,
+                &paint,
+                &scissor,
+                self.fringe_width,
+                self.fringe_width,
+                -1.0,
+            );
 
             CommandType::ConvexFill { params }
         } else {
@@ -615,9 +662,19 @@ impl<T> Canvas<T> where T: Renderer {
             stencil_params.stroke_thr = -1.0;
             stencil_params.shader_type = ShaderType::Stencil.to_f32();
 
-            let fill_params = Params::new(&self.images, &paint, &scissor, self.fringe_width, self.fringe_width, -1.0);
+            let fill_params = Params::new(
+                &self.images,
+                &paint,
+                &scissor,
+                self.fringe_width,
+                self.fringe_width,
+                -1.0,
+            );
 
-            CommandType::ConcaveFill { stencil_params, fill_params }
+            CommandType::ConcaveFill {
+                stencil_params,
+                fill_params,
+            }
         };
 
         // GPU command
@@ -654,19 +711,23 @@ impl<T> Canvas<T> where T: Renderer {
             cmd.drawables.push(drawable);
         }
 
-        if let CommandType::ConcaveFill {..} = cmd.cmd_type {
+        if let CommandType::ConcaveFill { .. } = cmd.cmd_type {
             // Concave shapes are first filled by writing to a stencil buffer and then drawing a quad
             // over the shape area with stencil test enabled to produce the final fill. These are
             // the verts needed for the covering quad
-            self.verts.push(Vertex::new(path_cache.bounds.maxx, path_cache.bounds.maxy, 0.5, 1.0));
-            self.verts.push(Vertex::new(path_cache.bounds.maxx, path_cache.bounds.miny, 0.5, 1.0));
-            self.verts.push(Vertex::new(path_cache.bounds.minx, path_cache.bounds.maxy, 0.5, 1.0));
-            self.verts.push(Vertex::new(path_cache.bounds.minx, path_cache.bounds.miny, 0.5, 1.0));
+            self.verts
+                .push(Vertex::new(path_cache.bounds.maxx, path_cache.bounds.maxy, 0.5, 1.0));
+            self.verts
+                .push(Vertex::new(path_cache.bounds.maxx, path_cache.bounds.miny, 0.5, 1.0));
+            self.verts
+                .push(Vertex::new(path_cache.bounds.minx, path_cache.bounds.maxy, 0.5, 1.0));
+            self.verts
+                .push(Vertex::new(path_cache.bounds.minx, path_cache.bounds.miny, 0.5, 1.0));
 
             cmd.triangles_verts = Some((offset, 4));
         }
 
-        self.commands.push(cmd);
+        self.append_cmd(cmd);
     }
 
     /// Strokes the provided Path using Paint.
@@ -677,8 +738,11 @@ impl<T> Canvas<T> where T: Renderer {
         let path_cache = path.cache(&transform, self.tess_tol, self.dist_tol);
 
         // Early out if path is outside the canvas bounds
-        if path_cache.bounds.maxx < 0.0 || path_cache.bounds.minx > self.width ||
-            path_cache.bounds.maxy < 0.0 || path_cache.bounds.miny > self.height {
+        if path_cache.bounds.maxx < 0.0
+            || path_cache.bounds.minx > self.width()
+            || path_cache.bounds.maxy < 0.0
+            || path_cache.bounds.miny > self.height()
+        {
             return;
         }
 
@@ -688,19 +752,19 @@ impl<T> Canvas<T> where T: Renderer {
         paint.transform = transform;
 
         // Scale stroke width by current transform scale.
-        // Note: I don't know why the original author clamped the max stroke width to 200, but it didn'
+        // Note: I don't know why the original author clamped the max stroke width to 200, but it didn't
         // look correct when zooming in. There was probably a good reson for doing so and I may have
         // introduced a bug by removing the upper bound.
         //paint.set_stroke_width((paint.stroke_width() * transform.average_scale()).max(0.0).min(200.0));
-        paint.set_stroke_width((paint.stroke_width() * transform.average_scale()).max(0.0));
+        paint.line_width = (paint.line_width * transform.average_scale()).max(0.0);
 
-        if paint.stroke_width() < self.fringe_width {
+        if paint.line_width < self.fringe_width {
             // If the stroke width is less than pixel size, use alpha to emulate coverage.
             // Since coverage is area, scale by alpha*alpha.
-            let alpha = (paint.stroke_width() / self.fringe_width).max(0.0).min(1.0);
+            let alpha = (paint.line_width / self.fringe_width).max(0.0).min(1.0);
 
-            paint.mul_alpha(alpha*alpha);
-            paint.set_stroke_width(self.fringe_width)
+            paint.mul_alpha(alpha * alpha);
+            paint.line_width = self.fringe_width;
         }
 
         // Apply global alpha
@@ -710,22 +774,39 @@ impl<T> Canvas<T> where T: Renderer {
         // expand_stroke will fill path_cache.contours[].stroke with vertex data for the GPU
         let fringe_with = if paint.anti_alias() { self.fringe_width } else { 0.0 };
         path_cache.expand_stroke(
-            paint.stroke_width() * 0.5,
+            paint.line_width * 0.5,
             fringe_with,
             paint.line_cap_start,
             paint.line_cap_end,
-            paint.line_join(),
-            paint.miter_limit(),
-            self.tess_tol
+            paint.line_join,
+            paint.miter_limit,
+            self.tess_tol,
         );
 
         // GPU uniforms
-        let params = Params::new(&self.images, &paint, &scissor, paint.stroke_width(), self.fringe_width, -1.0);
+        let params = Params::new(
+            &self.images,
+            &paint,
+            &scissor,
+            paint.line_width,
+            self.fringe_width,
+            -1.0,
+        );
 
         let flavor = if paint.stencil_strokes() {
-            let params2 = Params::new(&self.images, &paint, &scissor, paint.stroke_width(), self.fringe_width, 1.0 - 0.5/255.0);
+            let params2 = Params::new(
+                &self.images,
+                &paint,
+                &scissor,
+                paint.line_width,
+                self.fringe_width,
+                1.0 - 0.5 / 255.0,
+            );
 
-            CommandType::StencilStroke { params1: params, params2 }
+            CommandType::StencilStroke {
+                params1: params,
+                params2,
+            }
         } else {
             CommandType::Stroke { params }
         };
@@ -754,113 +835,185 @@ impl<T> Canvas<T> where T: Renderer {
             cmd.drawables.push(drawable);
         }
 
-        self.commands.push(cmd);
+        self.append_cmd(cmd);
     }
 
     // Text
 
-    pub fn add_font<P: AsRef<FilePath>>(&mut self, file_path: P) -> Result<()> {
-        self.fontdb.add_font_file(file_path)?;
-        self.shaper.clear_cache();
-        Ok(())
+    pub fn add_font<P: AsRef<FilePath>>(&mut self, file_path: P) -> Result<FontId, ErrorKind> {
+        self.text_context.add_font_file(file_path)
     }
 
-    pub fn scan_font_dir<P: AsRef<FilePath>>(&mut self, dir_path: P) -> Result<()> {
-        self.fontdb.scan_dir(dir_path)?;
-        self.shaper.clear_cache();
-        Ok(())
+    pub fn add_font_mem(&mut self, data: &[u8]) -> Result<FontId, ErrorKind> {
+        self.text_context.add_font_mem(data)
     }
 
-    pub fn add_font_mem(&mut self, data: Vec<u8>) -> Result<()> {
-        self.fontdb.add_font_mem(data)?;
-        self.shaper.clear_cache();
-        Ok(())
+    pub fn add_font_dir<P: AsRef<FilePath>>(&mut self, dir_path: P) -> Result<Vec<FontId>, ErrorKind> {
+        self.text_context.add_font_dir(dir_path)
     }
 
-    pub fn layout_text<S: AsRef<str>>(&mut self, x: f32, y: f32, text: S, paint: Paint) -> Result<TextLayout> {
+    pub fn measure_text<S: AsRef<str>>(
+        &mut self,
+        x: f32,
+        y: f32,
+        text: S,
+        mut paint: Paint,
+    ) -> Result<TextMetrics, ErrorKind> {
+        self.transform_text_paint(&mut paint);
+
         let text = text.as_ref();
-        let scale = self.font_scale() * self.device_px_ratio;
-        let style = self.text_style_for_paint(&paint);
-
-        self.shaper.shape(x * scale, y * scale, &mut self.fontdb, &style, text)
-    }
-
-    pub fn fill_text<S: AsRef<str>>(&mut self, x: f32, y: f32, text: S, paint: Paint) -> Result<TextLayout> {
-        let text = text.as_ref();
-        self.draw_text(x, y, text, paint, RenderStyle::Fill)
-    }
-
-    pub fn stroke_text<S: AsRef<str>>(&mut self, x: f32, y: f32, text: S, paint: Paint) -> Result<TextLayout> {
-        let text = text.as_ref();
-
-        self.draw_text(x, y, text, paint, RenderStyle::Stroke {
-            width: paint.stroke_width().ceil() as u16// TODO: this is fishy
-        })
-    }
-
-    // Private
-
-    fn text_style_for_paint<'a>(&self, paint: &'a Paint) -> TextStyle<'a> {
-        let scale = self.font_scale() * self.device_px_ratio;
-        TextStyle {
-            family_name: paint.font_family,
-            size: (paint.font_size() as f32 * scale) as u16,
-            weight: paint.font_weight(),
-            width_class: paint.font_width_class(),
-            font_style: paint.font_style(),
-            letter_spacing: paint.letter_spacing() * scale,
-            baseline: paint.text_baseline(),
-            align: paint.text_align(),
-            blur: paint.font_blur().saturating_mul(scale.min(255.0) as u8),
-            render_style: Default::default()
-        }
-    }
-
-    fn draw_text(&mut self, x: f32, y: f32, text: &str, mut paint: Paint, render_style: RenderStyle) -> Result<TextLayout> {
-        let transform = self.state().transform;
-        let scissor = self.state().scissor;
         let scale = self.font_scale() * self.device_px_ratio;
         let invscale = 1.0 / scale;
 
-        let mut style = self.text_style_for_paint(&paint);
-        style.render_style = render_style;
-
-        let layout = self.shaper.shape(x * scale, y * scale, &mut self.fontdb, &style, text)?;
-
-        // TODO: Early out if text is outside the canvas bounds, or maybe even check for each character in layout.
-
-        let cmds = self.text_renderer.render(&mut self.renderer, &mut self.images, &mut self.fontdb, &layout, &style).unwrap();
-
-        for cmd in &cmds {
-            let mut verts = Vec::with_capacity(cmd.quads.len() * 6);
-
-            for quad in &cmd.quads {
-                let (p0, p1) = transform.transform_point(quad.x0*invscale, quad.y0*invscale);
-                let (p2, p3) = transform.transform_point(quad.x1*invscale, quad.y0*invscale);
-                let (p4, p5) = transform.transform_point(quad.x1*invscale, quad.y1*invscale);
-                let (p6, p7) = transform.transform_point(quad.x0*invscale, quad.y1*invscale);
-
-                verts.push(Vertex::new(p0, p1, quad.s0, quad.t0));
-                verts.push(Vertex::new(p4, p5, quad.s1, quad.t1));
-                verts.push(Vertex::new(p2, p3, quad.s1, quad.t0));
-                verts.push(Vertex::new(p0, p1, quad.s0, quad.t0));
-                verts.push(Vertex::new(p6, p7, quad.s0, quad.t1));
-                verts.push(Vertex::new(p4, p5, quad.s1, quad.t1));
-            }
-
-            paint.set_alpha_mask(Some(cmd.image_id));
-
-            // Apply global alpha
-            paint.mul_alpha(self.state().alpha);
-
-            self.render_triangles(&verts, &paint, &scissor);
-        }
+        let mut layout = text::shape(x * scale, y * scale, &mut self.text_context, &paint, text, None)?;
+        layout.scale(invscale);
 
         Ok(layout)
     }
 
-    fn render_triangles(&mut self, verts: &[Vertex], paint: &Paint, scissor: &Scissor) {
-        let params = Params::new(&self.images, paint, scissor, 1.0, 1.0, -1.0);
+    pub fn measure_font(&mut self, mut paint: Paint) -> Result<FontMetrics, ErrorKind> {
+        self.transform_text_paint(&mut paint);
+
+        if let Some(Some(id)) = paint.font_ids.get(0) {
+            if let Some(font) = self.text_context.font(*id) {
+                return Ok(font.metrics(paint.font_size));
+            }
+        }
+
+        Err(ErrorKind::NoFontFound)
+    }
+
+    /// Returns the maximum index-th byte of text that will fit inside max_width.
+    ///
+    /// The retuned index will always lie at the start and/or end of a UTF-8 code point sequence or at the start or end of the text
+    pub fn break_text<S: AsRef<str>>(&mut self, max_width: f32, text: S, mut paint: Paint) -> Result<usize, ErrorKind> {
+        self.transform_text_paint(&mut paint);
+
+        let text = text.as_ref();
+        let scale = self.font_scale() * self.device_px_ratio;
+        let max_width = max_width * scale;
+
+        let layout = text::shape(0.0, 0.0, &mut self.text_context, &paint, text, Some(max_width))?;
+
+        Ok(layout.final_byte_index)
+    }
+
+    pub fn break_text_vec<S: AsRef<str>>(
+        &mut self,
+        max_width: f32,
+        text: S,
+        paint: Paint,
+    ) -> Result<Vec<Range<usize>>, ErrorKind> {
+        let text = text.as_ref();
+
+        let mut res = Vec::new();
+        let mut start = 0;
+
+        while start < text.len() {
+            if let Ok(index) = self.break_text(max_width, &text[start..], paint) {
+                if index == 0 {
+                    break;
+                }
+
+                let index = start + index;
+                res.push(start..index);
+                start += &text[start..index].len();
+            } else {
+                break;
+            }
+        }
+
+        Ok(res)
+    }
+
+    pub fn fill_text<S: AsRef<str>>(
+        &mut self,
+        x: f32,
+        y: f32,
+        text: S,
+        paint: Paint,
+    ) -> Result<TextMetrics, ErrorKind> {
+        self.draw_text(x, y, text.as_ref(), paint, RenderMode::Fill)
+    }
+
+    pub fn stroke_text<S: AsRef<str>>(
+        &mut self,
+        x: f32,
+        y: f32,
+        text: S,
+        paint: Paint,
+    ) -> Result<TextMetrics, ErrorKind> {
+        self.draw_text(x, y, text.as_ref(), paint, RenderMode::Stroke)
+    }
+
+    // Private
+
+    fn transform_text_paint(&self, paint: &mut Paint) {
+        let scale = self.font_scale() * self.device_px_ratio;
+        paint.font_size *= scale;
+        paint.letter_spacing *= scale;
+        paint.line_width *= scale;
+    }
+
+    fn draw_text(
+        &mut self,
+        x: f32,
+        y: f32,
+        text: &str,
+        mut paint: Paint,
+        render_mode: RenderMode,
+    ) -> Result<TextMetrics, ErrorKind> {
+        let transform = self.state().transform;
+        let scale = self.font_scale() * self.device_px_ratio;
+        let invscale = 1.0 / scale;
+
+        self.transform_text_paint(&mut paint);
+
+        let mut layout = text::shape(x * scale, y * scale, &mut self.text_context, &paint, text, None)?;
+        //let layout = self.layout_text(x, y, text, paint)?;
+
+        // TODO: Early out if text is outside the canvas bounds, or maybe even check for each character in layout.
+
+        if paint.font_size > 92.0 {
+            text::render_direct(self, &layout, &paint, render_mode, invscale)?;
+        } else {
+            let cmds = text::render_atlas(self, &layout, &paint, render_mode)?;
+
+            for cmd in &cmds {
+                let mut verts = Vec::with_capacity(cmd.quads.len() * 6);
+
+                for quad in &cmd.quads {
+                    let (p0, p1) = transform.transform_point(quad.x0 * invscale, quad.y0 * invscale);
+                    let (p2, p3) = transform.transform_point(quad.x1 * invscale, quad.y0 * invscale);
+                    let (p4, p5) = transform.transform_point(quad.x1 * invscale, quad.y1 * invscale);
+                    let (p6, p7) = transform.transform_point(quad.x0 * invscale, quad.y1 * invscale);
+
+                    verts.push(Vertex::new(p0, p1, quad.s0, quad.t0));
+                    verts.push(Vertex::new(p4, p5, quad.s1, quad.t1));
+                    verts.push(Vertex::new(p2, p3, quad.s1, quad.t0));
+                    verts.push(Vertex::new(p0, p1, quad.s0, quad.t0));
+                    verts.push(Vertex::new(p6, p7, quad.s0, quad.t1));
+                    verts.push(Vertex::new(p4, p5, quad.s1, quad.t1));
+                }
+
+                paint.set_alpha_mask(Some(cmd.image_id));
+
+                // Apply global alpha
+                paint.mul_alpha(self.state().alpha);
+
+                self.render_triangles(&verts, &paint);
+            }
+        }
+
+        layout.scale(invscale);
+
+        Ok(layout)
+    }
+
+    fn render_triangles(&mut self, verts: &[Vertex], paint: &Paint) {
+        let scissor = self.state().scissor;
+
+        let params = Params::new(&self.images, paint, &scissor, 1.0, 1.0, -1.0);
 
         let mut cmd = Command::new(CommandType::Triangles { params });
         cmd.composite_operation = self.state().composite_operation;
@@ -871,7 +1024,7 @@ impl<T> Canvas<T> where T: Renderer {
         }
 
         cmd.triangles_verts = Some((self.verts.len(), verts.len()));
-        self.commands.push(cmd);
+        self.append_cmd(cmd);
 
         self.verts.extend_from_slice(verts);
     }
@@ -881,6 +1034,8 @@ impl<T> Canvas<T> where T: Renderer {
 
         geometry::quantize(avg_scale, 0.1).min(7.0)
     }
+
+    //
 
     fn state(&self) -> &State {
         self.state_stack.last().unwrap()
@@ -896,29 +1051,3 @@ impl<T: Renderer> Drop for Canvas<T> {
         self.images.clear(&mut self.renderer);
     }
 }
-
-/*
-ttf_parser crate is awesome! But the technique used here is not suitable for very small shapes like
-glyphs. I very much wanted to render glyps on the GPU using the same code path as other shapes and
-without using freetype, but the qulity was horrendous.
-impl<T: Renderer> ttf_parser::OutlineBuilder for Canvas<T> {
-    fn move_to(&mut self, x: f32, y: f32) {
-        self.move_to(x, y);
-    }
-
-    fn line_to(&mut self, x: f32, y: f32) {
-        self.line_to(x, y);
-    }
-
-    fn quad_to(&mut self, x1: f32, y1: f32, x: f32, y: f32) {
-        self.quad_to(x1, y1, x, y);
-    }
-
-    fn curve_to(&mut self, x1: f32, y1: f32, x2: f32, y2: f32, x: f32, y: f32) {
-        self.bezier_to(x1, y1, x2, y2, x, y);
-    }
-
-    fn close(&mut self) {
-        self.close_path();
-    }
-}*/

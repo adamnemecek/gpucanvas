@@ -1,9 +1,8 @@
-
 use std::env;
 use std::fs::File;
 use std::path::PathBuf;
 
-use gl_generator::{Api, Fallbacks, Profile, Registry, GlobalGenerator};
+use gl_generator::{Api, Fallbacks, GlobalGenerator, Profile, Registry};
 
 fn main() {
     let dest = PathBuf::from(&env::var("OUT_DIR").unwrap());
@@ -15,15 +14,4 @@ fn main() {
     Registry::new(Api::Gles2, (3, 0), Profile::Core, Fallbacks::All, [])
         .write_bindings(GlobalGenerator, &mut file)
         .unwrap();
-
-    let ft_probe = pkg_config::Config::new()
-        .statik(true)
-        .probe("freetype2");
-
-    match ft_probe {
-        Ok(_) => return,
-        Err(_) => {
-            println!("cargo:rustc-link-lib=static=freetype");
-        }
-    }
 }

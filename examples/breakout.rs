@@ -1,30 +1,16 @@
-
 use std::time::Instant;
 
 use rand::{
+    distributions::{Distribution, Standard},
     prelude::*,
-    distributions::{Distribution, Standard}
 };
 
-use glutin::event::{Event, WindowEvent, DeviceEvent, ElementState, KeyboardInput, VirtualKeyCode, MouseButton};
+use glutin::event::{DeviceEvent, ElementState, Event, KeyboardInput, MouseButton, VirtualKeyCode, WindowEvent};
 use glutin::event_loop::{ControlFlow, EventLoop};
 use glutin::window::{Window, WindowBuilder};
 use glutin::ContextBuilder;
 
-use gpucanvas::{
-    //Renderer,
-    //Canvas,
-    Color,
-    Paint,
-    ImageFlags,
-    Align,
-    Baseline,
-    ImageId,
-    Path,
-    Weight,
-    //CompositeOperation,
-    renderer::OpenGl
-};
+use gpucanvas::{renderer::OpenGl, Align, Baseline, Color, FontId, ImageFlags, ImageId, Paint, Path};
 
 type Canvas = gpucanvas::Canvas<OpenGl>;
 type Point = euclid::default::Point2D<f32>;
@@ -34,17 +20,17 @@ type Rect = euclid::default::Rect<f32>;
 
 #[derive(Copy, Clone)]
 enum Direction {
-	Up,
-	Right,
-	Down,
-	Left
+    Up,
+    Right,
+    Down,
+    Left,
 }
 
 struct Ball {
     position: Point,
     velocity: Vector,
     radius: f32,
-    on_paddle: bool
+    on_paddle: bool,
 }
 
 impl Ball {
@@ -67,23 +53,24 @@ impl Ball {
 #[derive(Copy, Clone, PartialEq)]
 enum State {
     TitleScreen,
-    RoundInfo {
-        time: f32
-    },
+    RoundInfo { time: f32 },
     InGame,
     Paused,
-    GameOver {
-        time: f32
-    },
-    Win {
-        time: f32
-    },
+    GameOver { time: f32 },
+    Win { time: f32 },
+}
+
+struct Fonts {
+    regular: FontId,
+    bold: FontId,
+    light: FontId,
 }
 
 struct Game {
     state: State,
     balls: Vec<Ball>,
     logo_image_id: ImageId,
+    fonts: Fonts,
     paddle_rect: Rect,
     size: Size,
     bricks: Vec<Brick>,
@@ -91,14 +78,28 @@ struct Game {
     powerups: Vec<Powerup>,
     current_level: usize,
     lives: u8,
-    score: u32
+    score: u32,
 }
 
 impl Game {
     fn new(canvas: &mut Canvas, levels: Vec<Vec<Vec<Cmd>>>) -> Self {
-        let image_id = canvas.load_image_file("examples/assets/rust-logo.png", ImageFlags::GENERATE_MIPMAPS).expect("Cannot create image");
+        let image_id = canvas
+            .load_image_file("examples/assets/rust-logo.png", ImageFlags::GENERATE_MIPMAPS)
+            .expect("Cannot create image");
 
         let paddle_rect = Rect::new(Point::new(0.0, 0.0), Size::new(100.0, 20.0));
+
+        let fonts = Fonts {
+            regular: canvas
+                .add_font("examples/assets/Roboto-Regular.ttf")
+                .expect("Cannot add font"),
+            bold: canvas
+                .add_font("examples/assets/Roboto-Bold.ttf")
+                .expect("Cannot add font"),
+            light: canvas
+                .add_font("examples/assets/Roboto-Light.ttf")
+                .expect("Cannot add font"),
+        };
 
         let mut game = Self {
             state: State::TitleScreen,
@@ -106,9 +107,10 @@ impl Game {
                 position: Point::new(-100.0, -100.0),
                 velocity: Vector::new(0.0, 0.0),
                 radius: 10.0,
-                on_paddle: true
+                on_paddle: true,
             }],
             logo_image_id: image_id,
+            fonts: fonts,
             paddle_rect: paddle_rect,
             size: Size::new(canvas.width(), canvas.height()),
             bricks: Vec::new(),
@@ -116,7 +118,7 @@ impl Game {
             powerups: Vec::new(),
             current_level: 0,
             lives: 3,
-            score: 0
+            score: 0,
         };
 
         game.load_level();
@@ -128,7 +130,10 @@ impl Game {
         // Bricks
         let brick_padding = 5.0;
 
-        let brick_size = Size::new(self.size.width as f32 / self.levels[self.current_level][0].len() as f32, 30.0);
+        let brick_size = Size::new(
+            self.size.width as f32 / self.levels[self.current_level][0].len() as f32,
+            30.0,
+        );
         let mut brick_loc = Point::new(0.0, 0.0);
 
         for row in &self.levels[self.current_level] {
@@ -161,39 +166,47 @@ impl Game {
 
         match event {
             Event::WindowEvent { ref event, .. } => match event {
-                WindowEvent::KeyboardInput { input: KeyboardInput { virtual_keycode: Some(VirtualKeyCode::Escape), state: ElementState::Pressed, .. }, .. } => {
-                    match self.state {
-                        State::TitleScreen => *control_flow = ControlFlow::Exit,
-                        State::InGame => self.state = State::Paused,
-                        State::Paused => self.state = State::TitleScreen,
-                        State::Win { .. } | State::GameOver { .. } => self.state = State::TitleScreen,
-                        _ => ()
+                WindowEvent::KeyboardInput {
+                    input:
+                        KeyboardInput {
+                            virtual_keycode: Some(VirtualKeyCode::Escape),
+                            state: ElementState::Pressed,
+                            ..
+                        },
+                    ..
+                } => match self.state {
+                    State::TitleScreen => *control_flow = ControlFlow::Exit,
+                    State::InGame => self.state = State::Paused,
+                    State::Paused => self.state = State::TitleScreen,
+                    State::Win { .. } | State::GameOver { .. } => self.state = State::TitleScreen,
+                    _ => (),
+                },
+                WindowEvent::MouseInput {
+                    button: MouseButton::Left,
+                    state: ElementState::Pressed,
+                    ..
+                } => match self.state {
+                    State::TitleScreen => {
+                        self.state = State::RoundInfo { time: 3.0 };
                     }
-                }
-                WindowEvent::MouseInput { button: MouseButton::Left, state: ElementState::Pressed, ..} => {
-                    match self.state {
-                        State::TitleScreen => {
-                            self.state = State::RoundInfo { time: 3.0 };
-                        }
-                        State::RoundInfo { .. } => {
-                            self.state = State::InGame;
+                    State::RoundInfo { .. } => {
+                        self.state = State::InGame;
 
-                            self.paddle_rect.origin.x = self.size.width as f32 / 2.0 - self.paddle_rect.size.width / 2.0;
-                            self.paddle_rect.origin.y = self.size.height as f32 - self.paddle_rect.size.height - 10.0;
-                            self.balls[0].on_paddle = true;
-                        }
-                        State::Paused => self.state = State::InGame,
-                        State::InGame => {
-                            if self.balls[0].on_paddle {
-                                self.balls[0].velocity = Vector::new(100.0, -350.0);
-                                self.balls[0].on_paddle = false;
-                            }
-                        }
-                        _ => ()
+                        self.paddle_rect.origin.x = self.size.width as f32 / 2.0 - self.paddle_rect.size.width / 2.0;
+                        self.paddle_rect.origin.y = self.size.height as f32 - self.paddle_rect.size.height - 10.0;
+                        self.balls[0].on_paddle = true;
                     }
-                }
+                    State::Paused => self.state = State::InGame,
+                    State::InGame => {
+                        if self.balls[0].on_paddle {
+                            self.balls[0].velocity = Vector::new(100.0, -350.0);
+                            self.balls[0].on_paddle = false;
+                        }
+                    }
+                    _ => (),
+                },
                 _ => (),
-            }
+            },
             Event::DeviceEvent { ref event, .. } => match event {
                 DeviceEvent::MouseMotion { delta } => {
                     if self.state == State::InGame {
@@ -204,12 +217,15 @@ impl Game {
                         self.paddle_rect.origin.y = self.size.height as f32 - self.paddle_rect.size.height - 10.0;
                         self.paddle_rect.origin = self.paddle_rect.origin.clamp(
                             Point::new(0.0, self.paddle_rect.origin.y),
-                            Point::new(self.size.width as f32 - self.paddle_rect.size.width, self.paddle_rect.origin.y)
+                            Point::new(
+                                self.size.width as f32 - self.paddle_rect.size.width,
+                                self.paddle_rect.origin.y,
+                            ),
                         );
                     }
                 }
-                _ => ()
-            }
+                _ => (),
+            },
             _ => (),
         }
     }
@@ -256,12 +272,14 @@ impl Game {
             return;
         }
 
-        if self.state != State::InGame { return }
+        if self.state != State::InGame {
+            return;
+        }
 
-        if self.balls[0].on_paddle {
-            self.balls[0].position = (
-                self.paddle_rect.center() - Point::new(0.0, self.paddle_rect.height() / 2.0 + self.balls[0].radius)
-            ).to_point();
+        if !self.balls.is_empty() && self.balls[0].on_paddle {
+            self.balls[0].position = (self.paddle_rect.center()
+                - Point::new(0.0, self.paddle_rect.height() / 2.0 + self.balls[0].radius))
+            .to_point();
         } else {
             let num_balls = self.balls.len();
 
@@ -309,7 +327,9 @@ impl Game {
 
         // Collision with bricks
         for brick in &mut self.bricks {
-            if brick.destroyed { continue; }
+            if brick.destroyed {
+                continue;
+            }
 
             for ball in &mut self.balls {
                 if let Some((dir, diff_vector)) = ball.collides(brick.rect) {
@@ -331,7 +351,7 @@ impl Game {
                         if x < 100 {
                             self.powerups.push(Powerup {
                                 ty: rand::random(),
-                                rect: brick.rect
+                                rect: brick.rect,
                             });
                         }
                     }
@@ -347,19 +367,19 @@ impl Game {
                         Direction::Left => {
                             ball.velocity.x = -ball.velocity.x;
                             ball.position.x += ball.radius - diff_vector.x.abs();
-                        },
+                        }
                         Direction::Right => {
                             ball.velocity.x = -ball.velocity.x;
                             ball.position.x -= ball.radius - diff_vector.x.abs();
-                        },
+                        }
                         Direction::Up => {
                             ball.velocity.y = -ball.velocity.y;
                             ball.position.y -= ball.radius - diff_vector.y.abs();
-                        },
+                        }
                         Direction::Down => {
                             ball.velocity.y = -ball.velocity.y;
                             ball.position.y += ball.radius - diff_vector.y.abs();
-                        },
+                        }
                     }
                 }
             }
@@ -383,23 +403,23 @@ impl Game {
                             position: self.balls[0].position,
                             velocity: Vector::new(x, y),
                             radius: 10.0,
-                            on_paddle: false
+                            on_paddle: false,
                         });
 
                         self.balls.push(Ball {
                             position: self.balls[0].position,
                             velocity: Vector::new(-x, y),
                             radius: 10.0,
-                            on_paddle: false
+                            on_paddle: false,
                         });
-                    },
+                    }
                     PowerupType::Slow => {
                         for ball in &mut self.balls {
                             if ball.velocity.length() > 100.0 {
                                 ball.velocity *= 0.5;
                             }
                         }
-                    },
+                    }
                     PowerupType::Fast => {
                         for ball in &mut self.balls {
                             if ball.velocity.length() < 1000.0 {
@@ -432,7 +452,11 @@ impl Game {
 
         // check if all bricks are cleared
         if has_hit {
-            if self.bricks.iter().all(|b| b.destroyed && b.brick_type != BrickType::Invincible) {
+            if self
+                .bricks
+                .iter()
+                .all(|b| b.destroyed && b.brick_type != BrickType::Invincible)
+            {
                 // next level or win
                 if self.current_level == self.levels.len() - 1 {
                     // win
@@ -464,7 +488,6 @@ impl Game {
                 ball.velocity = ball.velocity.normalize() * old_velocity.length();
             }
         }
-
     }
 
     fn draw(&mut self, canvas: &mut Canvas) {
@@ -517,11 +540,10 @@ impl Game {
         // title
         let mut paint = Paint::color(Color::rgb(240, 240, 240));
         paint.set_text_align(Align::Center);
-        paint.set_font_family("Roboto");
-        paint.set_font_weight(Weight::Bold);
-        paint.set_font_size(80);
+        paint.set_font(&[self.fonts.bold]);
+        paint.set_font_size(80.0);
 
-        paint.set_stroke_width(4.0);
+        paint.set_line_width(4.0);
         let _ = canvas.stroke_text(canvas.width() / 2.0, canvas.height() / 2.0, "rsBREAKOUT", paint);
 
         paint.set_color(Color::rgb(143, 80, 49));
@@ -530,8 +552,8 @@ impl Game {
         // Info
         let mut paint = Paint::color(Color::rgb(240, 240, 240));
         paint.set_text_align(Align::Center);
-        paint.set_font_family("Roboto");
-        paint.set_font_size(16);
+        paint.set_font(&[self.fonts.regular]);
+        paint.set_font_size(16.0);
         let text = "Click anywhere to START.";
         let _ = canvas.fill_text(canvas.width() / 2.0, (canvas.height() / 2.0) + 40.0, text, paint);
     }
@@ -545,8 +567,8 @@ impl Game {
             self.paddle_rect.origin.y,
             self.paddle_rect.origin.x,
             self.paddle_rect.origin.y + 10.0,
-            Color::rgba(255,255,255,100),
-            Color::rgba(255,255,255,40)
+            Color::rgba(255, 255, 255, 100),
+            Color::rgba(255, 255, 255, 40),
         );
 
         let mut path = Path::new();
@@ -556,7 +578,8 @@ impl Game {
             side_size,
             self.paddle_rect.size.height,
             self.paddle_rect.size.height / 2.0,
-            0.0, 0.0,
+            0.0,
+            0.0,
             self.paddle_rect.size.height / 2.0,
         );
         path.rounded_rect_varying(
@@ -567,9 +590,9 @@ impl Game {
             0.0,
             self.paddle_rect.size.height / 2.0,
             self.paddle_rect.size.height / 2.0,
-            0.0
+            0.0,
         );
-        canvas.fill_path(&mut path, Paint::color(Color::rgb(119,123,126)));
+        canvas.fill_path(&mut path, Paint::color(Color::rgb(119, 123, 126)));
         canvas.stroke_path(&mut path, highlight);
 
         let mut path = Path::new();
@@ -577,9 +600,9 @@ impl Game {
             self.paddle_rect.origin.x + side_size + 3.0,
             self.paddle_rect.origin.y,
             self.paddle_rect.size.width - (side_size * 2.0) - 6.0,
-            self.paddle_rect.size.height
+            self.paddle_rect.size.height,
         );
-        canvas.fill_path(&mut path, Paint::color(Color::rgb(119,123,126)));
+        canvas.fill_path(&mut path, Paint::color(Color::rgb(119, 123, 126)));
         canvas.stroke_path(&mut path, highlight);
 
         let mut path = Path::new();
@@ -590,7 +613,8 @@ impl Game {
             self.paddle_rect.size.height - 10.0,
             self.paddle_rect.size.height / 2.0,
             self.paddle_rect.size.height / 2.0,
-            25.0, 25.0
+            25.0,
+            25.0,
         );
 
         canvas.fill_path(&mut path, highlight);
@@ -606,8 +630,8 @@ impl Game {
                 ball.position.y - ball.radius,
                 ball.position.x,
                 ball.position.y,
-                Color::rgba(255,255,255,60),
-                Color::rgba(255,255,255,16)
+                Color::rgba(255, 255, 255, 60),
+                Color::rgba(255, 255, 255, 16),
             );
 
             let mut path = Path::new();
@@ -617,7 +641,7 @@ impl Game {
 
         // powerups
         for powerup in &self.powerups {
-            powerup.draw(canvas);
+            powerup.draw(canvas, &self.fonts);
         }
 
         self.draw_bricks(canvas);
@@ -625,16 +649,14 @@ impl Game {
         // lives
         let mut paint = Paint::color(Color::rgb(240, 240, 240));
         paint.set_text_align(Align::Right);
-        paint.set_font_family("Roboto");
-        paint.set_font_weight(Weight::Bold);
-        paint.set_font_size(22);
+        paint.set_font(&[self.fonts.bold]);
+        paint.set_font_size(22.0);
         let _ = canvas.fill_text(canvas.width() - 20.0, 25.0, &format!("Lives: {}", self.lives), paint);
 
         // score
         let mut paint = Paint::color(Color::rgb(240, 240, 240));
-        paint.set_font_family("Roboto");
-        paint.set_font_weight(Weight::Bold);
-        paint.set_font_size(22);
+        paint.set_font(&[self.fonts.bold]);
+        paint.set_font_size(22.0);
         let _ = canvas.fill_text(20.0, 25.0, &format!("Score: {}", self.score), paint);
     }
 
@@ -663,7 +685,9 @@ impl Game {
     fn draw_bricks(&self, canvas: &mut Canvas) {
         // Bricks
         for brick in &self.bricks {
-            if brick.destroyed { continue; }
+            if brick.destroyed {
+                continue;
+            }
 
             brick.draw(canvas);
         }
@@ -680,13 +704,12 @@ impl Game {
         // title
         let mut paint = Paint::color(Color::rgb(240, 240, 240));
         paint.set_text_align(Align::Center);
-        paint.set_font_family("Roboto");
-        paint.set_font_weight(Weight::Bold);
-        paint.set_font_size(80);
+        paint.set_font(&[self.fonts.bold]);
+        paint.set_font_size(80.0);
 
         let offset = 30.0;
 
-        paint.set_stroke_width(4.0);
+        paint.set_line_width(4.0);
         let _ = canvas.stroke_text(canvas.width() / 2.0, (canvas.height() / 2.0) + offset, heading, paint);
 
         paint.set_color(Color::rgb(143, 80, 49));
@@ -695,9 +718,14 @@ impl Game {
         // Info
         let mut paint = Paint::color(Color::rgb(240, 240, 240));
         paint.set_text_align(Align::Center);
-        paint.set_font_family("Roboto");
-        paint.set_font_size(16);
-        let _ = canvas.fill_text(canvas.width() / 2.0, (canvas.height() / 2.0) + offset * 2.0, subtext, paint);
+        paint.set_font(&[self.fonts.regular]);
+        paint.set_font_size(16.0);
+        let _ = canvas.fill_text(
+            canvas.width() / 2.0,
+            (canvas.height() / 2.0) + offset * 2.0,
+            subtext,
+            paint,
+        );
     }
 }
 
@@ -727,11 +755,11 @@ impl Distribution<PowerupType> for Standard {
 
 struct Powerup {
     ty: PowerupType,
-    rect: Rect
+    rect: Rect,
 }
 
 impl Powerup {
-    fn draw(&self, canvas: &mut Canvas) {
+    fn draw(&self, canvas: &mut Canvas, fonts: &Fonts) {
         let mut path = Path::new();
         path.rounded_rect(
             self.rect.origin.x,
@@ -746,10 +774,14 @@ impl Powerup {
         let mut text_paint = Paint::color(Color::rgb(240, 240, 240));
         text_paint.set_text_align(Align::Center);
         text_paint.set_text_baseline(Baseline::Middle);
-        text_paint.set_font_family("Roboto");
-        text_paint.set_font_weight(Weight::Light);
-        text_paint.set_font_size(16);
-        let _ = canvas.fill_text(self.rect.center().x, self.rect.center().y, &format!("{:?}", self.ty), text_paint);
+        text_paint.set_font(&[fonts.light]);
+        text_paint.set_font_size(16.0);
+        let _ = canvas.fill_text(
+            self.rect.center().x,
+            self.rect.center().y,
+            &format!("{:?}", self.ty),
+            text_paint,
+        );
     }
 }
 
@@ -784,7 +816,7 @@ impl Brick {
         Self {
             brick_type: brick_type,
             destroyed: false,
-            rect: rect
+            rect: rect,
         }
     }
 
@@ -800,10 +832,18 @@ impl Brick {
     }
 
     fn draw(&self, canvas: &mut Canvas) {
-        if self.destroyed { return }
+        if self.destroyed {
+            return;
+        }
 
         let mut path = Path::new();
-        path.rounded_rect(self.rect.origin.x, self.rect.origin.y, self.rect.size.width, self.rect.size.height, 3.0);
+        path.rounded_rect(
+            self.rect.origin.x,
+            self.rect.origin.y,
+            self.rect.size.width,
+            self.rect.size.height,
+            3.0,
+        );
 
         let paint = Paint::color(match self.brick_type {
             BrickType::Variant0 => Color::rgb(49, 136, 143),
@@ -814,7 +854,7 @@ impl Brick {
             BrickType::Multihit(hits) => match hits {
                 2 => Color::rgb(152, 152, 152),
                 _ => Color::rgb(175, 175, 175),
-            }
+            },
         });
 
         canvas.fill_path(&mut path, paint);
@@ -822,8 +862,14 @@ impl Brick {
 
         let mut path = Path::new();
         path.rounded_rect_varying(
-            self.rect.origin.x, self.rect.origin.y, self.rect.size.width, self.rect.size.height / 2.0,
-            3.0, 3.0, 15.0, 15.0
+            self.rect.origin.x,
+            self.rect.origin.y,
+            self.rect.size.width,
+            self.rect.size.height / 2.0,
+            3.0,
+            3.0,
+            15.0,
+            15.0,
         );
         canvas.fill_path(&mut path, Paint::color(Color::rgba(255, 255, 255, 50)));
     }
@@ -831,49 +877,368 @@ impl Brick {
 
 // Level commands
 enum Cmd {
-    Spac, // 1 brick space
-    B(u8) // Brick Id
+    Spac,  // 1 brick space
+    B(u8), // Brick Id
 }
 
 fn main() {
     let mut levels = Vec::new();
 
     levels.push(vec![
-        vec![Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5)],
-        vec![Cmd::B(3), Cmd::B(3), Cmd::B(3), Cmd::B(3), Cmd::B(3), Cmd::B(3), Cmd::B(3), Cmd::B(3), Cmd::B(3), Cmd::B(3)],
-        vec![Cmd::B(2), Cmd::B(2), Cmd::B(2), Cmd::B(2), Cmd::B(2), Cmd::B(2), Cmd::B(2), Cmd::B(2), Cmd::B(2), Cmd::B(2)],
-        vec![Cmd::B(1), Cmd::B(1), Cmd::B(1), Cmd::B(1), Cmd::B(1), Cmd::B(1), Cmd::B(1), Cmd::B(1), Cmd::B(1), Cmd::B(1)],
-        vec![Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0)],
+        vec![
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+        ],
+        vec![
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+        ],
+        vec![
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+        ],
+        vec![
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+        ],
+        vec![
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+        ],
     ]);
 
     levels.push(vec![
-        vec![Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::B(0), Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::B(0), Cmd::B(0), Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::Spac, Cmd::Spac],
-        vec![Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::Spac],
-        vec![Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5)],
+        vec![
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(0),
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+        ],
     ]);
 
     levels.push(vec![
-        vec![Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5), Cmd::B(5)],
-        vec![Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::B(3), Cmd::B(3), Cmd::B(3), Cmd::B(3), Cmd::B(3), Cmd::B(3), Cmd::B(3), Cmd::B(3), Cmd::B(3), Cmd::B(3)],
-        vec![Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::B(2), Cmd::B(2), Cmd::B(2), Cmd::B(2), Cmd::B(2), Cmd::B(2), Cmd::B(2), Cmd::B(2), Cmd::B(2), Cmd::B(2)],
-        vec![Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::B(1), Cmd::B(1), Cmd::B(1), Cmd::B(1), Cmd::B(1), Cmd::B(1), Cmd::B(1), Cmd::B(1), Cmd::B(1), Cmd::B(1)],
-        vec![Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac, Cmd::Spac],
-        vec![Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0), Cmd::B(0)],
+        vec![
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+            Cmd::B(5),
+        ],
+        vec![
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+            Cmd::B(3),
+        ],
+        vec![
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+            Cmd::B(2),
+        ],
+        vec![
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+            Cmd::B(1),
+        ],
+        vec![
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+            Cmd::Spac,
+        ],
+        vec![
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+            Cmd::B(0),
+        ],
     ]);
 
     let window_size = glutin::dpi::PhysicalSize::new(800, 600);
@@ -888,11 +1253,11 @@ fn main() {
 
     let renderer = OpenGl::new(|s| windowed_context.get_proc_address(s) as *const _).expect("Cannot create renderer");
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
-    canvas.set_size(window_size.width as u32, window_size.height as u32, windowed_context.window().scale_factor() as f32);
-
-    canvas.add_font("examples/assets/Roboto-Bold.ttf").expect("Cannot add font");
-    canvas.add_font("examples/assets/Roboto-Light.ttf").expect("Cannot add font");
-    canvas.add_font("examples/assets/Roboto-Regular.ttf").expect("Cannot add font");
+    canvas.set_size(
+        window_size.width as u32,
+        window_size.height as u32,
+        windowed_context.window().scale_factor() as f32,
+    );
 
     let mut game = Game::new(&mut canvas, levels);
     game.size = Size::new(window_size.width as f32, window_size.height as f32);
@@ -912,16 +1277,20 @@ fn main() {
                     windowed_context.resize(*physical_size);
                     game.size = Size::new(physical_size.width as f32, physical_size.height as f32);
                 }
-                WindowEvent::CloseRequested => {
-                    *control_flow = ControlFlow::Exit
-                }
+                WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                 _ => (),
-            }
+            },
             Event::RedrawRequested(_) => {
                 let dpi_factor = windowed_context.window().scale_factor();
                 let size = windowed_context.window().inner_size();
                 canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
-                canvas.clear_rect(0, 0, size.width as u32, size.height as u32, Color::rgbf(0.15, 0.15, 0.12));
+                canvas.clear_rect(
+                    0,
+                    0,
+                    size.width as u32,
+                    size.height as u32,
+                    Color::rgbf(0.15, 0.15, 0.12),
+                );
 
                 let now = Instant::now();
                 let dt = (now - prevt).as_secs_f32();
@@ -933,9 +1302,7 @@ fn main() {
                 canvas.flush();
                 windowed_context.swap_buffers().unwrap();
             }
-            Event::MainEventsCleared => {
-                windowed_context.window().request_redraw()
-            }
+            Event::MainEventsCleared => windowed_context.window().request_redraw(),
             _ => (),
         }
     });
@@ -946,7 +1313,7 @@ fn vector_direction(target: Vector) -> Direction {
         (Direction::Up, Vector::new(0.0, 1.0)),
         (Direction::Right, Vector::new(1.0, 0.0)),
         (Direction::Down, Vector::new(0.0, -1.0)),
-        (Direction::Left, Vector::new(-1.0, 0.0))
+        (Direction::Left, Vector::new(-1.0, 0.0)),
     ];
 
     let mut max = 0.0;

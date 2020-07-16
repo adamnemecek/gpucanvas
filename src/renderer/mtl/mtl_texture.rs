@@ -1,4 +1,6 @@
 
+use crate::{ErrorKind, ImageFlags, ImageInfo, ImageSource, PixelFormat};
+
 use image::{DynamicImage, GenericImageView};
 use metal::{
     Texture,
@@ -7,15 +9,7 @@ use metal::{
 
 use rgb::ComponentBytes;
 
-use crate::{
-    Result,
-    ErrorKind,
-    ImageFlags,
-    ImageSource,
-    // Image,
-    ImageInfo,
-    ImageFormat
-};
+
 
 // use super::gl;
 // use super::gl::types::*;
@@ -30,7 +24,7 @@ pub struct MtlTexture {
 
 impl MtlTexture {
     pub fn pseudo_texture(device: &metal::Device) -> Self {
-        let info = ImageInfo::new(ImageFlags::empty(), 1, 1, ImageFormat::Gray8);
+        let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
         let sampler = metal::SamplerDescriptor::new();
 
         Self::new(device, info)
@@ -57,7 +51,7 @@ impl MtlTexture {
         let stride: usize;
 
         match info.format() {
-            ImageFormat::Gray8 => {
+            PixelFormat::Gray8 => {
                 todo!()
                 // let format = if opengles { gl::LUMINANCE } else { gl::RED };
 
@@ -74,7 +68,7 @@ impl MtlTexture {
                 //     //data.buf().as_ptr() as *const GLvoid
                 // );
             },
-            ImageFormat::Rgb8 => {
+            PixelFormat::Rgb8 => {
                 todo!()
                 // gl::TexImage2D(
                 //     gl::TEXTURE_2D,
@@ -89,7 +83,7 @@ impl MtlTexture {
                 //     //data.buf().as_ptr() as *const GLvoid
                 // );
             },
-            ImageFormat::Rgba8 => {
+            PixelFormat::Rgba8 => {
                 todo!()
                 // stride = 4 * self.width();
                 // data_offset = y * stride + x * 4;
@@ -181,7 +175,7 @@ impl MtlTexture {
         )
     }
 
-    pub fn update(&mut self, src: ImageSource, x: usize, y: usize) -> Result<()> {
+    pub fn update(&mut self, src: ImageSource, x: usize, y: usize) -> Result<(), ErrorKind> {
         let (width, height) = src.dimensions();
         let origin = metal::MTLOrigin { x: x as u64, y: y as u64, z: 0 };
         let size = metal::MTLSize { width: width as u64, height: height as u64, depth: 0 };

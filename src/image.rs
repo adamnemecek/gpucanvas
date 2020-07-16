@@ -1,9 +1,8 @@
-
-use rgb::*;
-use rgb::alt::GRAY8;
-use imgref::*;
 use bitflags::bitflags;
 use generational_arena::{Arena, Index};
+use imgref::*;
+use rgb::alt::GRAY8;
+use rgb::*;
 
 #[cfg(feature = "image-loading")]
 use ::image::DynamicImage;
@@ -11,20 +10,16 @@ use ::image::DynamicImage;
 #[cfg(feature = "image-loading")]
 use std::convert::TryFrom;
 
-use crate::{
-    Result,
-    ErrorKind,
-    Renderer
-};
+use crate::{ErrorKind, Renderer};
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct ImageId(pub Index);
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum ImageFormat {
+pub enum PixelFormat {
     Rgb8,
     Rgba8,
-    Gray8
+    Gray8,
 }
 
 bitflags! {
@@ -47,11 +42,11 @@ pub enum ImageSource<'a> {
 }
 
 impl ImageSource<'_> {
-    pub fn format(&self) -> ImageFormat {
+    pub fn format(&self) -> PixelFormat {
         match self {
-            Self::Rgb(_) => ImageFormat::Rgb8,
-            Self::Rgba(_) => ImageFormat::Rgb8,
-            Self::Gray(_) => ImageFormat::Gray8,
+            Self::Rgb(_) => PixelFormat::Rgb8,
+            Self::Rgba(_) => PixelFormat::Rgb8,
+            Self::Gray(_) => PixelFormat::Gray8,
         }
     }
 
@@ -87,28 +82,25 @@ impl<'a> From<ImgRef<'a, GRAY8>> for ImageSource<'a> {
 impl<'a> TryFrom<&'a DynamicImage> for ImageSource<'a> {
     type Error = ErrorKind;
 
-    fn try_from(src: &'a DynamicImage) -> Result<Self> {
+    fn try_from(src: &'a DynamicImage) -> Result<Self, ErrorKind> {
         match src {
             ::image::DynamicImage::ImageLuma8(img) => {
-                let src: Img<&[GRAY8]> = Img::new(
-                    img.as_ref().as_pixels(),
-                    img.width() as usize,
-                    img.height() as usize
-                );
+                let src: Img<&[GRAY8]> =
+                    Img::new(img.as_ref().as_pixels(), img.width() as usize, img.height() as usize);
 
                 Ok(ImageSource::from(src))
-            },
+            }
             ::image::DynamicImage::ImageRgb8(img) => {
                 let src = Img::new(img.as_ref().as_rgb(), img.width() as usize, img.height() as usize);
                 Ok(ImageSource::from(src))
-            },
+            }
             ::image::DynamicImage::ImageRgba8(img) => {
                 let src = Img::new(img.as_ref().as_rgba(), img.width() as usize, img.height() as usize);
                 Ok(ImageSource::from(src))
-            },
+            }
             // TODO: if format is not supported maybe we should convert it here,
             // Buut that is an expensive operation on the render thread that will remain hidden from the user
-            _ => Err(ErrorKind::UnsuportedImageFromat)
+            _ => Err(ErrorKind::UnsuportedImageFromat),
         }
     }
 }
@@ -118,12 +110,17 @@ pub struct ImageInfo {
     flags: ImageFlags,
     width: usize,
     height: usize,
-    format: ImageFormat
+    format: PixelFormat,
 }
 
 impl ImageInfo {
-    pub fn new(flags: ImageFlags, width: usize, height: usize, format: ImageFormat) -> Self {
-        Self { flags, width, height, format }
+    pub fn new(flags: ImageFlags, width: usize, height: usize, format: PixelFormat) -> Self {
+        Self {
+            flags,
+            width,
+            height,
+            format,
+        }
     }
 
     pub fn flags(&self) -> ImageFlags {
@@ -138,11 +135,11 @@ impl ImageInfo {
         self.height
     }
 
-    pub fn format(&self) -> ImageFormat {
+    pub fn format(&self) -> PixelFormat {
         self.format
     }
 
-    pub fn set_format(&mut self, format: ImageFormat) {
+    pub fn set_format(&mut self, format: PixelFormat) {
         self.format = format;
     }
 }
@@ -160,7 +157,7 @@ impl<T> ImageStore<T> {
         Self(Arena::new())
     }
 
-    pub fn alloc<R: Renderer<Image = T>>(&mut self, renderer: &mut R, info: ImageInfo) -> Result<ImageId> {
+    pub fn alloc<R: Renderer<Image = T>>(&mut self, renderer: &mut R, info: ImageInfo) -> Result<ImageId, ErrorKind> {
         let image = renderer.alloc_image(info)?;
 
         Ok(ImageId(self.0.insert((info, image))))
@@ -174,7 +171,14 @@ impl<T> ImageStore<T> {
         self.0.get_mut(id.0).map(|inner| &mut inner.1)
     }
 
-    pub fn update<R: Renderer<Image = T>>(&mut self, renderer: &mut R, id: ImageId, data: ImageSource, x: usize, y: usize) -> Result<()> {
+    pub fn update<R: Renderer<Image = T>>(
+        &mut self,
+        renderer: &mut R,
+        id: ImageId,
+        data: ImageSource,
+        x: usize,
+        y: usize,
+    ) -> Result<(), ErrorKind> {
         if let Some(image) = self.0.get_mut(id.0) {
             renderer.update_image(&mut image.1, data, x, y)?;
         } else {

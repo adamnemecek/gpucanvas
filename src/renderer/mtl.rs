@@ -5,14 +5,15 @@ use core_graphics::geometry::CGSize;
 use crate::{
     Size,
     Color,
-    Result,
     ImageStore,
     ImageSource,
     ImageInfo,
     FillRule,
     CompositeOperationState,
     BlendFactor,
-    renderer::{Vertex, ImageId}
+    renderer::{Vertex, ImageId},
+    image::ImageFlags,
+    ErrorKind
 };
 
 use super::{
@@ -20,7 +21,7 @@ use super::{
     Renderer,
     Command,
     CommandType,
-    ImageFlags,
+
     RenderTarget
 };
 
@@ -317,7 +318,7 @@ impl Mtl {
             antialias,
             blend_func,
             // todo check what is this initialized to
-            view_size_buffer: GPUVar::new(&device, Size::default()),
+            view_size_buffer: GPUVar::with_value(&device, Size::default()),
             command_queue,
             frag_func,
             vert_func,
@@ -334,9 +335,9 @@ impl Mtl {
             index_size: 4, // MTLIndexTypeUInt32
             stencil_only_pipeline_state: None,
             stencil_texture,
-            index_buffer: IndexBuffer::new(&device, 32),
-            vertex_buffer: VertexBuffer::new(&device, 32),
-            uniform_buffer: UniformBuffer::new(&device, 2),
+            index_buffer: IndexBuffer::with_capacity(&device, 32),
+            vertex_buffer: VertexBuffer::with_capacity(&device, 32),
+            uniform_buffer: UniformBuffer::with_capacity(&device, 2),
             vertex_descriptor: vertex_descriptor.to_owned(),
             pipeline_pixel_format: metal::MTLPixelFormat::Invalid,
             render_target: RenderTarget::Screen,
@@ -434,13 +435,14 @@ impl Mtl {
                 let index_buffer_offset = start * self.index_size;
 
                 /// original uses fans
-                encoder.draw_indexed_primitives(
-                    metal::MTLPrimitiveType::Triangle,
-                    count as u64,
-                    metal::MTLIndexType::UInt32,
-                    self.index_buffer.as_ref(),
-                    index_buffer_offset as u64,
-                );
+                // encoder.draw_indexed_primitives(
+                //     metal::MTLPrimitiveType::Triangle,
+                //     count as u64,
+                //     metal::MTLIndexType::UInt32,
+                //     self.index_buffer.as_ref(),
+                //     index_buffer_offset as u64,
+                // );
+                todo!()
             }
 
              // Draw fringes
@@ -476,13 +478,14 @@ impl Mtl {
                 let index_buffer_offset = start * self.index_size;
 
                 /// draw fans
-                encoder.draw_indexed_primitives(
-                    metal::MTLPrimitiveType::Triangle,
-                    count as u64,
-                    metal::MTLIndexType::UInt32,
-                    self.index_buffer.as_ref(),
-                    index_buffer_offset as u64,
-                );
+                todo!()
+                // encoder.draw_indexed_primitives(
+                //     metal::MTLPrimitiveType::Triangle,
+                //     count as u64,
+                //     metal::MTLIndexType::UInt32,
+                //     self.index_buffer.as_ref(),
+                //     index_buffer_offset as u64,
+                // );
             }
         }
         // Restores states.
@@ -731,7 +734,7 @@ fn new_render_command_encoder<'a>(
     };
     let desc = metal::RenderPassDescriptor::new();
 
-    let view_size = view_size_buffer.value();
+    let view_size = &*view_size_buffer;
 
     desc.color_attachments().object_at(0).unwrap().set_clear_color(clear_color.into());
     desc.color_attachments().object_at(0).unwrap().set_load_action(load_action);
@@ -769,7 +772,7 @@ impl Renderer for Mtl {
 
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
         let size = Size::new(width as f32, height as f32);
-        self.view_size_buffer.set_value(size);
+        *self.view_size_buffer = size;
     }
 
     // called flush in ollix and nvg
@@ -827,6 +830,9 @@ impl Renderer for Mtl {
                 CommandType::ClearRect { x, y, width, height, color } => {
                     self.clear_rect(&encoder, x, y, width, height, color);
                 }
+                CommandType::SetRenderTarget(_) => {
+
+                }
             }
         }
 
@@ -848,25 +854,27 @@ impl Renderer for Mtl {
         }
     }
 
-    fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image> {
-        Ok(MtlTexture::new(&self.device, info))
+    fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
+        // Ok(MtlTexture::new(&self.device, info))
+        todo!()
     }
 
-    fn update_image(&mut self, image: &mut Self::Image, data: ImageSource, x: usize, y: usize) -> Result<()> {
-        image.update(data, x, y)
+    fn update_image(&mut self, image: &mut Self::Image, data: ImageSource, x: usize, y: usize) ->  Result<(), ErrorKind> {
+        // image.update(data, x, y)
+        todo!()
     }
 
     fn delete_image(&mut self, image: Self::Image) {
         image.delete();
     }
 
-    fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
-        self.render_target = target;
-        todo!();
-    }
+    // fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
+    //     self.render_target = target;
+    //     todo!();
+    // }
 
-    fn blur(&mut self, texture: &mut MtlTexture, amount: u8, x: usize, y: usize, width: usize, height: usize) {
-        todo!()
+    // fn blur(&mut self, texture: &mut MtlTexture, amount: u8, x: usize, y: usize, width: usize, height: usize) {
+        // todo!()
         // let pingpong_fbo = [0; 2];
         // let pingpong_tex = [0; 2];
 
@@ -966,11 +974,11 @@ impl Renderer for Mtl {
         // }
 
         // self.check_error("blur copy");
-    }
+    // }
 
-    fn screenshot(&mut self) -> Result<ImgVec<RGBA8>> {
+    fn screenshot(&mut self) -> Result<ImgVec<RGBA8>, ErrorKind> {
         // todo!()
-        let size = self.view_size_buffer.value();
+        let size = *self.view_size_buffer;
         let w = size.w as usize;
         let h = size.h as usize;
 

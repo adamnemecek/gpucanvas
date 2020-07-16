@@ -1,4 +1,3 @@
-
 use super::Params;
 
 const UNIFORMARRAY_SIZE: usize = 12;
@@ -8,20 +7,9 @@ pub struct UniformArray([f32; UNIFORMARRAY_SIZE * 4]);
 impl Default for UniformArray {
     fn default() -> Self {
         Self([
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
-
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
-
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
-            0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
+            0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
         ])
     }
 }
@@ -92,8 +80,8 @@ impl UniformArray {
     }
 }
 
-impl From<Params> for UniformArray {
-    fn from(params: Params) -> Self {
+impl From<&Params> for UniformArray {
+    fn from(params: &Params) -> Self {
         let mut arr = Self::default();
 
         arr.set_scissor_mat(params.scissor_mat);

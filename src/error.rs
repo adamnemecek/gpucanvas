@@ -1,28 +1,24 @@
-
-use std::io;
 use std::error::Error;
 use std::ffi::NulError;
 use std::fmt::{self, Display, Formatter};
-
-use ttf_parser as ttf;
-
-use crate::text;
+use std::io;
 
 /// Enum with all possible canvas errors that could occur.
 #[derive(Debug)]
 #[non_exhaustive]
 pub enum ErrorKind {
+    UnknownError,
     GeneralError(String),
     #[cfg(feature = "image-loading")]
     ImageError(::image::ImageError),
     IoError(io::Error),
-    FreetypeError(text::freetype::Error),
-    TtfParserError(ttf::Error),
+    FontParseError,
     NoFontFound,
     FontInfoExtracionError,
     FontSizeTooLargeForAtlas,
     ShaderCompileError(String),
     ShaderLinkError(String),
+    RenderTargetError(String),
     ImageIdNotFound,
     ImageUpdateOutOfBounds,
     ImageUpdateWithDifferentFormat,
@@ -45,18 +41,6 @@ impl From<::image::ImageError> for ErrorKind {
 impl From<io::Error> for ErrorKind {
     fn from(error: io::Error) -> Self {
         Self::IoError(error)
-    }
-}
-
-impl From<text::freetype::Error> for ErrorKind {
-    fn from(error: text::freetype::Error) -> Self {
-        Self::FreetypeError(error)
-    }
-}
-
-impl From<ttf::Error> for ErrorKind {
-    fn from(error: ttf::Error) -> Self {
-        Self::TtfParserError(error)
     }
 }
 

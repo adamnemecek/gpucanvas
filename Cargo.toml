@@ -10,28 +10,33 @@ categories = ["graphics"]
 repository = "https://github.com/cytecbg/gpucanvas"
 edition = "2018"
 
+[profile.release]
+debug = true
+
 [dependencies]
-fnv = "1.0.6"
-rgb = "0.8.16"
-libc = "0.2.68"
-imgref = "1.4.0"
+fnv = "1.0.7"
+rgb = "0.8.20"
+imgref = "1.6.1"
 bitflags = "1.2.1"
-ttf-parser = "0.3.0"
-harfbuzz_rs = "1.0.1"
+owned_ttf_parser = "0.6.0"
+harfbuzz_rs = "1.1.1"
 unicode-bidi = "0.3.4"
-unicode-script = "0.5.0"
-generational-arena = "0.2.7"
-lru = { version = "0.4.3", default-features = false }
-image = { version = "0.23.2", optional = true }
+unicode-segmentation = "1.6.0"
+generational-arena = "0.2.8"
+#rustybuzz = { git = "https://github.com/RazrFalcon/rustybuzz.git" }
+lru = { version = "0.5.3", default-features = false }
+image = { version = "0.23.6", optional = true }
+serde = { version = "1.0", optional = true, features = ["derive"] }
 
 # metal features
-metal = "*"
+metal = { git = "https://github.com/gfx-rs/metal-rs/", rev = "1fccbe2" }
 memoffset = "*"
-metalgear = { git = "https://github.com/adamnemecek/metalgear" }
+metalgear = { git = "https://github.com/adamnemecek/metalgear", rev = "d9152a2" }
 static_assertions = "*"
 winit = "0.22"
 cocoa = "0.20"
 core-graphics = "0.19"
+
 
 [dependencies.objc]
 version = "0.2.4"
@@ -43,11 +48,10 @@ image-loading = ["image"]
 
 [build-dependencies]
 gl_generator = "0.14.0"
-pkg-config = "0.3.17"
 
 [dev-dependencies]
-glutin = "0.22.0"
-euclid = "0.20.7"
+glutin = "0.24.1"
+euclid = "0.20.13"
 rand = "0.7"
-svg = "0.6.0"
-usvg = "0.9.0"
+svg = "0.8.0"
+usvg = "0.11.0"

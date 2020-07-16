@@ -1,7 +1,7 @@
-
 use std::u8;
 
 #[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Color {
     pub r: f32,
     pub g: f32,
@@ -46,7 +46,9 @@ impl Color {
     pub fn hsla(h: f32, s: f32, l: f32, a: f32) -> Self {
         let mut h = h % 1.0;
 
-        if h < 0.0 { h += 1.0; }
+        if h < 0.0 {
+            h += 1.0;
+        }
 
         let s = s.max(0.0).min(1.0);
         let l = l.max(0.0).min(1.0);
@@ -55,18 +57,16 @@ impl Color {
         let m1 = 2.0 * l - m2;
 
         Self {
-            r: hue(h + 1.0/3.0, m1, m2).max(0.0).min(1.0),
+            r: hue(h + 1.0 / 3.0, m1, m2).max(0.0).min(1.0),
             g: hue(h, m1, m2).max(0.0).min(1.0),
-            b: hue(h - 1.0/3.0, m1, m2).max(0.0).min(1.0),
+            b: hue(h - 1.0 / 3.0, m1, m2).max(0.0).min(1.0),
             a: a,
         }
     }
 
-    // TODO: Log error
     pub fn hex(raw_hex: &str) -> Self {
         let hex = raw_hex.trim_start_matches('#');
 
-        // TODO: 3len hex - #bab => #babbab
         if hex.len() == 8 {
             Self::rgba(
                 hex_to_u8(&hex[0..2]),
@@ -75,11 +75,7 @@ impl Color {
                 hex_to_u8(&hex[6..8]),
             )
         } else if hex.len() == 6 {
-            Self::rgb(
-                hex_to_u8(&hex[0..2]),
-                hex_to_u8(&hex[2..4]),
-                hex_to_u8(&hex[4..6]),
-            )
+            Self::rgb(hex_to_u8(&hex[0..2]), hex_to_u8(&hex[2..4]), hex_to_u8(&hex[4..6]))
         } else {
             Self::rgb(0, 0, 0)
         }
@@ -117,6 +113,10 @@ impl Color {
     pub fn to_array(self) -> [f32; 4] {
         [self.r, self.g, self.b, self.a]
     }
+
+    pub fn is_black(&self) -> bool {
+        self.r == 0.0 && self.g == 0.0 && self.b == 0.0 && self.a == 0.0
+    }
 }
 
 impl Default for Color {
@@ -131,19 +131,27 @@ impl Default for Color {
 }
 
 fn hue(mut h: f32, m1: f32, m2: f32) -> f32 {
-    if h < 0.0 { h += 1.0; }
-    if h > 1.0 { h -= 1.0; }
+    if h < 0.0 {
+        h += 1.0;
+    }
+    if h > 1.0 {
+        h -= 1.0;
+    }
 
-    if h < 1.0/6.0 { return m1 + (m2 - m1) * h * 6.0; }
-    if h < 3.0/6.0 { return m2; }
-    if h < 4.0/6.0 { return m1 + (m2 - m1) * (2.0/3.0 - h) * 6.0; }
+    if h < 1.0 / 6.0 {
+        return m1 + (m2 - m1) * h * 6.0;
+    }
+    if h < 3.0 / 6.0 {
+        return m2;
+    }
+    if h < 4.0 / 6.0 {
+        return m1 + (m2 - m1) * (2.0 / 3.0 - h) * 6.0;
+    }
 
     m1
 }
 
 // Convert a hex string to decimal. Eg. "00" -> 0. "FF" -> 255.
 fn hex_to_u8(hex_string: &str) -> u8 {
-    u8::from_str_radix(hex_string, 16)
-        .map(|o| o as u8)
-        .unwrap_or(0)
+    u8::from_str_radix(hex_string, 16).map(|o| o as u8).unwrap_or(0)
 }

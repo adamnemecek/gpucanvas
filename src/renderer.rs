@@ -1,19 +1,9 @@
 //! Module containing renderer implementations
 
-use rgb::RGBA8;
 use imgref::ImgVec;
+use rgb::RGBA8;
 
-use crate::{
-    Color,
-    Result,
-    FillRule,
-    ImageId,
-    ImageInfo,
-    ImageFlags,
-    ImageStore,
-    ImageSource,
-    CompositeOperationState
-};
+use crate::{Color, CompositeOperationState, ErrorKind, FillRule, ImageId, ImageInfo, ImageSource, ImageStore};
 
 mod opengl;
 pub use opengl::OpenGl;
@@ -36,29 +26,30 @@ pub struct Drawable {
 
 #[derive(Debug)]
 pub enum CommandType {
+    SetRenderTarget(RenderTarget),
     ClearRect {
         x: u32,
         y: u32,
         width: u32,
         height: u32,
-        color: Color
+        color: Color,
     },
     ConvexFill {
-        params: Params
+        params: Params,
     },
     ConcaveFill {
         stencil_params: Params,
         fill_params: Params,
     },
     Stroke {
-        params: Params
+        params: Params,
     },
     StencilStroke {
         params1: Params,
-        params2: Params
+        params2: Params,
     },
     Triangles {
-        params: Params
+        params: Params,
     },
 }
 
@@ -69,7 +60,7 @@ pub struct Command {
     pub(crate) image: Option<ImageId>,
     pub(crate) alpha_mask: Option<ImageId>,
     pub(crate) fill_rule: FillRule,
-    pub(crate) composite_operation: CompositeOperationState
+    pub(crate) composite_operation: CompositeOperationState,
 }
 
 impl Command {
@@ -81,7 +72,7 @@ impl Command {
             image: Default::default(),
             alpha_mask: Default::default(),
             fill_rule: Default::default(),
-            composite_operation: Default::default()
+            composite_operation: Default::default(),
         }
     }
 }
@@ -89,7 +80,7 @@ impl Command {
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum RenderTarget {
     Screen,
-    Image(ImageId)
+    Image(ImageId),
 }
 
 /// This is the main renderer trait that the [Canvas](../struct.Canvas.html) draws to.
@@ -100,15 +91,12 @@ pub trait Renderer {
 
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]);
 
-    fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image>;
-    fn update_image(&mut self, image: &mut Self::Image, data: ImageSource, x: usize, y: usize) -> Result<()>;
+    fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind>;
+    fn update_image(&mut self, image: &mut Self::Image, data: ImageSource, x: usize, y: usize)
+        -> Result<(), ErrorKind>;
     fn delete_image(&mut self, image: Self::Image);
 
-    fn set_target(&mut self, images: &ImageStore<Self::Image>, target: RenderTarget);
-
-    fn blur(&mut self, image: &mut Self::Image, passes: u8, x: usize, y: usize, width: usize, height: usize);
-
-    fn screenshot(&mut self) -> Result<ImgVec<RGBA8>>;
+    fn screenshot(&mut self) -> Result<ImgVec<RGBA8>, ErrorKind>;
 }
 
 /// Vertex struct for specifying triangle geometry
@@ -139,7 +127,9 @@ pub enum ShaderType {
 }
 
 impl Default for ShaderType {
-    fn default() -> Self { Self::FillGradient }
+    fn default() -> Self {
+        Self::FillGradient
+    }
 }
 
 impl ShaderType {

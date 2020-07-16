@@ -1,22 +1,11 @@
 #![allow(unused_variables)]
 
-use rgb::RGBA8;
 use imgref::ImgVec;
+use rgb::RGBA8;
 
-use crate::{
-    Result,
-    ErrorKind,
-    ImageInfo,
-    ImageStore,
-    ImageSource,
-};
+use crate::{ErrorKind, ImageInfo, ImageSource, ImageStore};
 
-use super::{
-    Renderer,
-    Command,
-    Vertex,
-    RenderTarget
-};
+use super::{Command, Renderer, Vertex};
 
 /// Void renderer used for testing
 pub struct Void;
@@ -28,13 +17,17 @@ impl Renderer for Void {
 
     fn render(&mut self, images: &ImageStore<VoidImage>, verts: &[Vertex], commands: &[Command]) {}
 
-    fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image> {
-        Ok(VoidImage {
-            info
-        })
+    fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
+        Ok(VoidImage { info })
     }
 
-    fn update_image(&mut self, image: &mut Self::Image, data: ImageSource, x: usize, y: usize) -> Result<()> {
+    fn update_image(
+        &mut self,
+        image: &mut Self::Image,
+        data: ImageSource,
+        x: usize,
+        y: usize,
+    ) -> Result<(), ErrorKind> {
         let size = data.dimensions();
 
         if x + size.0 > image.info.width() {
@@ -50,17 +43,11 @@ impl Renderer for Void {
 
     fn delete_image(&mut self, image: Self::Image) {}
 
-    fn set_target(&mut self, images: &ImageStore<Self::Image>, target: RenderTarget) {}
-
-    fn blur(&mut self, image: &mut Self::Image, passes: u8, x: usize, y: usize, width: usize, height: usize) {
-
-    }
-
-    fn screenshot(&mut self) -> Result<ImgVec<RGBA8>> {
+    fn screenshot(&mut self) -> Result<ImgVec<RGBA8>, ErrorKind> {
         Ok(ImgVec::new(Vec::new(), 0, 0))
     }
 }
 
 pub struct VoidImage {
-    info: ImageInfo
+    info: ImageInfo,
 }
