@@ -37,7 +37,7 @@ use metalgear::{
 };
 
 type VertexBuffer = GPUVec<Vertex>;
-type IndexBuffer = GPUVec<usize>;
+type IndexBuffer = GPUVec<u32>;
 type UniformBuffer = GPUVec<Params>;
 type ViewSizeBuffer = GPUVar<Size>;
 
@@ -127,26 +127,36 @@ impl From<CompositeOperationState> for Blend {
     }
 }
 
+// pub struct MTLBuffer {
+//     is_busy: bool,
+//     image: usize,
+//     command_buffer: metal::CommandBuffer,
+
+// }
+
 pub struct Mtl {
+    device: metal::Device, // not present in metal
+    // metal has debug and antialias in the flags, opengl
+    // has them as properties
     debug: bool,
     antialias: bool,
-    device: metal::Device,
-    // library: metal::Library,
+
     command_queue: metal::CommandQueue,
     layer: metal::CoreAnimationLayer,
+    // library: metal::Library,
+    render_encoder: Option<metal::RenderCommandEncoder>,
+
     frag_size: usize,
     index_size: usize,
+    // int flags?
+    clear_color: Color,
+    view_size_buffer: ViewSizeBuffer,
 
     vertex_descriptor: metal::VertexDescriptor,
 
-    frag_func: metal::Function,
-    vert_func: metal::Function,
-
-    pipeline_state: Option<metal::RenderPipelineState>,
-    stencil_only_pipeline_state: Option<metal::RenderPipelineState>,
     blend_func: Blend,
     clear_buffer_on_flush: bool,
-    pipeline_pixel_format: metal::MTLPixelFormat,
+
 
     ///
     /// fill and stroke have a stencil, anti_alias_stencil and shape_stencil
@@ -159,14 +169,22 @@ pub struct Mtl {
     stroke_anti_alias_stencil_state: metal::DepthStencilState,
     stroke_clear_stencil_state: metal::DepthStencilState,
 
-    clear_color: Color,
-    view_size_buffer: ViewSizeBuffer,
+    frag_func: metal::Function,
+    vert_func: metal::Function,
+
+    pipeline_pixel_format: metal::MTLPixelFormat,
+
+    pipeline_state: Option<metal::RenderPipelineState>,
+    stencil_only_pipeline_state: Option<metal::RenderPipelineState>,
+
     stencil_texture: StencilTexture,
     index_buffer: IndexBuffer,
     vertex_buffer: VertexBuffer,
     uniform_buffer: UniformBuffer,
     render_target: RenderTarget,
+    // todo
     pseudo_texture: MtlTexture,
+    // pseudo_sampler:
 }
 
 
@@ -317,6 +335,7 @@ impl Mtl {
             debug,
             antialias,
             blend_func,
+            render_encoder: None,
             // todo check what is this initialized to
             view_size_buffer: GPUVar::with_value(&device, Size::default()),
             command_queue,

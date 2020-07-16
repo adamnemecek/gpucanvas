@@ -10,19 +10,22 @@ use metal::{
 use rgb::ComponentBytes;
 
 
-
 // use super::gl;
 // use super::gl::types::*;
 
 pub struct MtlTexture {
-    pub device: metal::Device,
     pub id: usize,
     pub info: ImageInfo,
     pub tex: Texture,
     pub sampler: SamplerState,
+    // todo: texture has a device reference, use that
+    pub device: metal::Device,
 }
 
+
 impl MtlTexture {
+
+
     pub fn pseudo_texture(device: &metal::Device) -> Self {
         let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
         let sampler = metal::SamplerDescriptor::new();
@@ -30,7 +33,9 @@ impl MtlTexture {
         Self::new(device, info)
     }
 
+
     pub fn new(device: &metal::Device, info: ImageInfo) -> Self {
+
         //let size = src.dimensions();
 
         // let mut texture = Texture {
