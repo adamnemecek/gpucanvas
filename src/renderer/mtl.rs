@@ -702,17 +702,20 @@ impl Mtl {
 //             gl::Disable(gl::SCISSOR_TEST);
 //         }
     }
-
-    pub fn get_target(&self, images: &ImageStore<MtlTexture>) -> metal::TextureRef {
-        match self.render_target {
-            RenderTarget::Screen => {
-                todo!()
-            },
-            RenderTarget::Image(id) => {
-                todo!()
-            }
-        }
+    fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
+        todo!()
     }
+
+    // pub fn get_target(&self, images: &ImageStore<MtlTexture>) -> metal::TextureRef {
+    //     match self.render_target {
+    //         RenderTarget::Screen => {
+    //             todo!()
+    //         },
+    //         RenderTarget::Image(id) => {
+    //             todo!()
+    //         }
+    //     }
+    // }
 
     // pub fn reset(&mut self) {
 
@@ -851,6 +854,7 @@ impl Renderer for Mtl {
                 }
                 CommandType::SetRenderTarget(_) => {
 
+                    todo!()
                 }
             }
         }
@@ -878,8 +882,7 @@ impl Renderer for Mtl {
     }
 
     fn update_image(&mut self, image: &mut Self::Image, data: ImageSource, x: usize, y: usize) ->  Result<(), ErrorKind> {
-        // image.update(data, x, y)
-        todo!()
+        image.update(data, x, y)
     }
 
     fn delete_image(&mut self, image: Self::Image) {
@@ -889,109 +892,6 @@ impl Renderer for Mtl {
     // fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
     //     self.render_target = target;
     //     todo!();
-    // }
-
-    // fn blur(&mut self, texture: &mut MtlTexture, amount: u8, x: usize, y: usize, width: usize, height: usize) {
-        // todo!()
-        // let pingpong_fbo = [0; 2];
-        // let pingpong_tex = [0; 2];
-
-        // unsafe {
-        //     gl::GenFramebuffers(2, pingpong_fbo.as_ptr() as *mut GLuint);
-        //     gl::GenTextures(2, pingpong_tex.as_ptr() as *mut GLuint);
-
-        //     gl::Viewport(0, 0, texture.info().width() as i32, texture.info().height() as i32);
-        //     gl::Enable(gl::SCISSOR_TEST);
-
-        //     let padding = amount as i32 * 2;
-
-        //     gl::Scissor(
-        //         x as i32 - padding,
-        //         y as i32 - padding,
-        //         width as i32 + padding * 2,
-        //         height as i32 + padding * 2
-        //     );
-        // }
-
-        // let gl_format = match texture.info().format() {
-        //     ImageFormat::Rgb => gl::RGB,
-        //     ImageFormat::Rgba => gl::RGBA,
-        //     ImageFormat::Gray => gl::RED,
-        // };
-
-        // for (fbo, tex) in pingpong_fbo.iter().zip(pingpong_tex.iter()) {
-        //     unsafe {
-        //         gl::BindFramebuffer(gl::FRAMEBUFFER, *fbo);
-        //         gl::BindTexture(gl::TEXTURE_2D, *tex);
-        //         gl::TexImage2D(gl::TEXTURE_2D, 0, gl_format as i32, texture.info().width() as i32, texture.info().height() as i32, 0, gl_format, gl::UNSIGNED_BYTE, ptr::null());
-        //         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
-        //         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
-        //         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::CLAMP_TO_EDGE as i32);
-        //         gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::CLAMP_TO_EDGE as i32);
-
-        //         gl::FramebufferTexture2D(
-        //             gl::FRAMEBUFFER, gl::COLOR_ATTACHMENT0, gl::TEXTURE_2D, *tex, 0
-        //         );
-
-        //         if gl::CheckFramebufferStatus(gl::FRAMEBUFFER) != gl::FRAMEBUFFER_COMPLETE {
-        //             panic!("Framebuffer not complete!");
-        //         }
-        //     }
-        // }
-
-        // self.check_error("blur setup");
-
-        // let mut horizontal = true;
-        // let amount = (amount * 2.0) as usize;
-
-        // self.blur_program.bind();
-        // self.blur_program.set_image(0);
-        // self.blur_program.set_image_size([
-        //     texture.info().width() as f32,
-        //     texture.info().height() as f32
-        // ]);
-
-        // for i in 0..amount {
-        //     unsafe {
-        //         gl::BindFramebuffer(gl::FRAMEBUFFER, pingpong_fbo[horizontal as usize]);
-        //         self.blur_program.set_horizontal(horizontal);
-        //         gl::BindTexture(gl::TEXTURE_2D, if i == 0 { texture.id() } else { pingpong_tex[!horizontal as usize] });
-        //     }
-
-        //     self.render_quad();
-
-        //     horizontal = !horizontal;
-        // }
-
-        // self.check_error("blur render");
-
-        // self.blur_program.unbind();
-
-        // unsafe {
-        //     gl::BindTexture(gl::TEXTURE_2D, texture.id());
-        //     gl::CopyTexSubImage2D(
-        //         gl::TEXTURE_2D,
-        //         0,
-        //         x as i32,
-        //         y as i32,
-        //         x as i32,
-        //         y as i32,
-        //         width as i32,
-        //         height as i32
-        //     );
-
-        //     gl::BindFramebuffer(gl::FRAMEBUFFER, 0);
-
-        //     gl::Viewport(0, 0, self.view[0] as i32, self.view[1] as i32);
-        //     gl::Disable(gl::SCISSOR_TEST);
-        // }
-
-        // unsafe {
-        //     gl::DeleteTextures(2, pingpong_tex.as_ptr() as *mut GLuint);
-        //     gl::DeleteFramebuffers(2, pingpong_fbo.as_ptr() as *mut GLuint);
-        // }
-
-        // self.check_error("blur copy");
     // }
 
     fn screenshot(&mut self) -> Result<ImgVec<RGBA8>, ErrorKind> {
