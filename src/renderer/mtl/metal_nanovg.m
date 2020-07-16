@@ -189,7 +189,7 @@ typedef struct MNVGfragUniforms MNVGfragUniforms;
 - (MNVGtexture*)allocTexture;
 
 - (void)convexFill:(MNVGcall*)call;
-
+// called concave fill
 -(void)fill:(MNVGcall*)call;
 
 - (MNVGtexture*)findTexture:(int)id;

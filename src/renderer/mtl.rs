@@ -157,7 +157,6 @@ pub struct Mtl {
     blend_func: Blend,
     clear_buffer_on_flush: bool,
 
-
     ///
     /// fill and stroke have a stencil, anti_alias_stencil and shape_stencil
     ///
@@ -177,6 +176,7 @@ pub struct Mtl {
     pipeline_state: Option<metal::RenderPipelineState>,
     stencil_only_pipeline_state: Option<metal::RenderPipelineState>,
 
+    // these are from mvgbuffer
     stencil_texture: StencilTexture,
     index_buffer: IndexBuffer,
     vertex_buffer: VertexBuffer,
@@ -360,7 +360,7 @@ impl Mtl {
             vertex_descriptor: vertex_descriptor.to_owned(),
             pipeline_pixel_format: metal::MTLPixelFormat::Invalid,
             render_target: RenderTarget::Screen,
-            pseudo_texture,
+            pseudo_texture: pseudo_texture.unwrap(),
             clear_color: Color::black(),
             device,
         }
@@ -776,7 +776,7 @@ fn new_render_command_encoder<'a>(
         width: view_size.w as f64,
         height: view_size.h as f64,
         znear: 0.0,
-        zfar: 0.0,
+        zfar: 1.0,
     });
 
     encoder.set_vertex_buffer(0, Some(vertex_buffer.as_ref()), 0);
@@ -874,8 +874,7 @@ impl Renderer for Mtl {
     }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
-        // Ok(MtlTexture::new(&self.device, info))
-        todo!()
+        MtlTexture::new(&self.device, info)
     }
 
     fn update_image(&mut self, image: &mut Self::Image, data: ImageSource, x: usize, y: usize) ->  Result<(), ErrorKind> {
