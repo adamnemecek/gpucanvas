@@ -36,10 +36,10 @@ use metalgear::{
     GPUVar
 };
 
-type VertexBuffer = GPUVec<Vertex>;
-type IndexBuffer = GPUVec<u32>;
-type UniformBuffer = GPUVec<Params>;
-type ViewSizeBuffer = GPUVar<Size>;
+// type VertexBuffer = GPUVec<Vertex>;
+// type IndexBuffer = GPUVec<u32>;
+// type UniformBuffer = GPUVec<Params>;
+// type ViewSizeBuffer = GPUVar<Size>;
 
 pub struct PathsLength {
     pub vertex_count: usize,
@@ -150,7 +150,7 @@ pub struct Mtl {
     index_size: usize,
     // int flags?
     clear_color: Color,
-    view_size_buffer: ViewSizeBuffer,
+    view_size_buffer: GPUVar<Size>,
 
     vertex_descriptor: metal::VertexDescriptor,
 
@@ -178,9 +178,9 @@ pub struct Mtl {
 
     // these are from mvgbuffer
     stencil_texture: StencilTexture,
-    index_buffer: IndexBuffer,
-    vertex_buffer: VertexBuffer,
-    uniform_buffer: UniformBuffer,
+    index_buffer: GPUVec<u32>,
+    vertex_buffer: GPUVec<Vertex>,
+    uniform_buffer: GPUVec<Params>,
     render_target: RenderTarget,
     // todo
     pseudo_texture: MtlTexture,
@@ -354,9 +354,9 @@ impl Mtl {
             index_size: 4, // MTLIndexTypeUInt32
             stencil_only_pipeline_state: None,
             stencil_texture,
-            index_buffer: IndexBuffer::with_capacity(&device, 32),
-            vertex_buffer: VertexBuffer::with_capacity(&device, 32),
-            uniform_buffer: UniformBuffer::with_capacity(&device, 2),
+            index_buffer: GPUVec::with_capacity(&device, 32),
+            vertex_buffer: GPUVec::with_capacity(&device, 32),
+            uniform_buffer: GPUVec::with_capacity(&device, 2),
             vertex_descriptor: vertex_descriptor.to_owned(),
             pipeline_pixel_format: metal::MTLPixelFormat::Invalid,
             render_target: RenderTarget::Screen,
@@ -680,6 +680,7 @@ impl Mtl {
     // Well, as I think we discussed previously, scissor state doesn’t affect clear load actions in Metal, but you can simulate this by drawing a rect with a solid color with depth read disabled and depth write enabled and forcing the depth to the clear depth value (assuming you’re using a depth buffer)
     // Looks like in this case the depth buffer is irrelevant. Stencil buffer contents can be cleared similarly to the depth buffer, though
 
+    // mnvgclearwithcolor
     pub fn clear_rect(
         &mut self,
         encoder: &metal::RenderCommandEncoderRef,
@@ -742,10 +743,10 @@ fn new_render_command_encoder<'a>(
     clear_color: Color,
     stencil_texture: &StencilTexture,
     // view_size: Size,
-    vertex_buffer: &VertexBuffer,
-    view_size_buffer: &ViewSizeBuffer,
+    vertex_buffer: &GPUVec<Vertex>,
+    view_size_buffer: &GPUVar<Size>,
     // index_buffer: &IndexBuffer,
-    uniform_buffer: &UniformBuffer,
+    uniform_buffer: &GPUVec<Params>,
     clear_buffer_on_flush: bool
 ) -> &'a metal::RenderCommandEncoderRef {
 
