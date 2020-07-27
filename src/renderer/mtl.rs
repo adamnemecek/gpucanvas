@@ -36,11 +36,6 @@ use metalgear::{
     GPUVar
 };
 
-// type VertexBuffer = GPUVec<Vertex>;
-// type IndexBuffer = GPUVec<u32>;
-// type UniformBuffer = GPUVec<Params>;
-// type ViewSizeBuffer = GPUVar<Size>;
-
 pub struct PathsLength {
     pub vertex_count: usize,
     pub index_count: usize,
@@ -135,7 +130,7 @@ impl From<CompositeOperationState> for Blend {
 // }
 
 pub struct Mtl {
-    device: metal::Device, // not present in metal
+    device: metal::Device, // not present in metalnanovg
     // metal has debug and antialias in the flags, opengl
     // has them as properties
     debug: bool,
@@ -689,7 +684,7 @@ impl Mtl {
         width: u32,
         height: u32,
         color: Color) {
-            // self.clear_color = color;
+            self.clear_color = color;
             // self.clear_color = metal::MTLClearColor::new(color.r, color.g, color.b, color.a);
             self.clear_buffer_on_flush = true;
             // todo!()

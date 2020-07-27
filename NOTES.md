@@ -21,11 +21,11 @@ params.userPtr = (__bridge_retained void*)mtl;
 params.edgeAntiAlias = flags & NVG_ANTIALIAS ? 1 : 0;
 ```
 
+The second type are called `fill`, `convexFill`, `stroke` & `triangles`.
+These are used in the `renderFlush` function. They set the state on the encoder.
+Each function takes a `MNVGcall` argument.
 
-These functions only.
-
-The second type are called `fill`, `convexFill`, `stroke`, `triangles`, `stroke`.
-These are used in the `renderFlush` function and only really set the state on the encoder.
+I guess gpucanvas only requires you do implement the second type.
 
 ```c++
 if (call->type == MNVG_FILL)
@@ -38,6 +38,14 @@ else if (call->type == MNVG_TRIANGLES)
     [self triangles:call];
 ```
 
+```rust
+// Create indices for a triangle fan. (This is OK because the clipped quad should always be
+// convex.)
+let mut indices: Vec<u32> = vec![];
+for index in 1..(quad_positions.len() as u32 - 1) {
+    indices.extend_from_slice(&[0, index as u32, index + 1]);
+}
+```
 
 # TODO
 * [ ] investigate setViewport vs uniforms
