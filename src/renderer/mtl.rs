@@ -853,9 +853,9 @@ impl Renderer for Mtl {
                 CommandType::ClearRect { x, y, width, height, color } => {
                     self.clear_rect(&encoder, x, y, width, height, color);
                 }
-                CommandType::SetRenderTarget(_) => {
+                CommandType::SetRenderTarget(target) => {
+                    self.set_target(images, target);
 
-                    todo!()
                 }
             }
         }
