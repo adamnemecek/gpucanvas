@@ -2,6 +2,11 @@ use rgb::RGBA8;
 use imgref::ImgVec;
 use core_graphics::geometry::CGSize;
 
+use metalgear::{
+    GPUVec,
+    GPUVar
+};
+
 use crate::{
     Size,
     Color,
@@ -29,11 +34,6 @@ use mtl_texture::MtlTexture;
 
 mod stencil_texture;
 use stencil_texture::StencilTexture;
-
-use metalgear::{
-    GPUVec,
-    GPUVar
-};
 
 pub struct PathsLength {
     pub vertex_count: usize,
@@ -201,6 +201,7 @@ pub struct Mtl {
     // uniform_buffer: GPUVec<Params>,
     uniform_buffer: GPUVar<Params>,
     render_target: RenderTarget,
+
     // todo
     // pseudo_texture: MtlTexture,
     // pseudo_sampler:
@@ -680,6 +681,8 @@ impl Mtl {
         // self.uniform_buffer.push(paint);
         // let offset = len * std::mem::size_of::<Params>();
         // encoder.set_fragment_buffer_offset(0, offset as u64);
+        // todo!();
+        // let arr = UniformArray::from(paint);
         todo!();
 
 
@@ -736,7 +739,7 @@ impl Mtl {
 //         }
     }
     fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
-        todo!()
+        self.render_target = target;
     }
 
     // pub fn get_target(&self, images: &ImageStore<MtlTexture>) -> metal::TextureRef {
@@ -842,6 +845,15 @@ impl Renderer for Mtl {
         /// build indices
         self.index_buffer.clear();
 
+        match self.render_target {
+            RenderTarget::Screen => {
+
+            }
+            RenderTarget::Image(id) => {
+
+            }
+        }
+
         let clear_color: Color = self.clear_color;
 
         let command_buffer = self.command_queue.new_command_buffer().to_owned();
@@ -888,7 +900,6 @@ impl Renderer for Mtl {
                 }
                 CommandType::SetRenderTarget(target) => {
                     self.set_target(images, target);
-
                 }
             }
         }

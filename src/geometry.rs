@@ -232,6 +232,10 @@ impl Size {
     pub fn contains(&self, other: &Self) -> bool {
         self.w > other.w && self.h > other.h
     }
+
+    pub fn zero() -> Self {
+        Self { w: 0.0, h: 0.0 }
+    }
 }
 
 impl std::ops::Mul<f32> for Size {
