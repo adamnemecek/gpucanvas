@@ -19,13 +19,13 @@ pub struct MtlTexture {
 
 
 impl MtlTexture {
-    pub fn pseudo_texture(device: &metal::Device) -> Result<Self, ErrorKind> {
-        let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
-        let sampler = metal::SamplerDescriptor::new();
+    // pub fn pseudo_texture(device: &metal::Device) -> Result<Self, ErrorKind> {
+    //     let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
+    //     let sampler = metal::SamplerDescriptor::new();
 
-        // Self::new(device, info)
-        todo!()
-    }
+    //     // Self::new(device, info)
+    //     todo!()
+    // }
 
 
     pub fn new(device: &metal::Device, info: ImageInfo) -> Result<Self, ErrorKind> {

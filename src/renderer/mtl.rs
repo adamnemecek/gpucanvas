@@ -201,7 +201,7 @@ pub struct Mtl {
     uniform_buffer: GPUVec<Params>,
     render_target: RenderTarget,
     // todo
-    pseudo_texture: MtlTexture,
+    // pseudo_texture: MtlTexture,
     // pseudo_sampler:
 }
 
@@ -276,7 +276,7 @@ impl Mtl {
         };
 
         // pseudosampler sescriptor
-        let pseudo_texture = MtlTexture::pseudo_texture(&device);
+        // let pseudo_texture = MtlTexture::pseudo_texture(&device);
         let stencil_texture = StencilTexture::new(&device, drawable_size.into());
 
         // Initializes default blend states.
@@ -386,7 +386,7 @@ impl Mtl {
             vertex_descriptor: vertex_descriptor.to_owned(),
             pipeline_pixel_format: metal::MTLPixelFormat::Invalid,
             render_target: RenderTarget::Screen,
-            pseudo_texture: pseudo_texture.unwrap(),
+            // pseudo_texture: pseudo_texture.unwrap(),
             clear_color: Color::black(),
             device,
         }
@@ -681,7 +681,8 @@ impl Mtl {
             images.get(id).unwrap()
         }
         else {
-            &self.pseudo_texture
+            // &self.pseudo_texture
+            todo!()
         };
 
         encoder.set_fragment_texture(0, Some(&tex.tex));
