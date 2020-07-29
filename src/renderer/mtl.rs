@@ -228,12 +228,20 @@ impl VertexOffsets {
 
 
 impl Mtl {
+    pub fn size(&self) -> Size {
+        *self.view_size_buffer
+    }
+}
+
+impl Mtl {
     pub fn new(
         layer: &metal::CoreAnimationLayerRef,
     ) -> Self {
 
         let device = metal::Device::system_default().unwrap();
-        let library = device.new_library_with_file("shaders.metallib").expect("library not found");
+        let library_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("src/renderer/mtl/shaders.metallib");
+        let library = device.new_library_with_file(library_path).expect("library not found");
         let command_queue = device.new_command_queue();
 
         let debug = true;

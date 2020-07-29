@@ -1,3 +1,4 @@
+
 use std::time::Instant;
 use std::f32::consts::PI;
 use cocoa::{
@@ -185,17 +186,22 @@ fn main() {
 
                 // let dpi_factor = windowed_context.window().scale_factor();
                 // let size = windowed_context.window().inner_size();
-                let width: u32 = todo!();
-                let height: u32 = todo!();
+                // let size = renderer.size();
+
+                let size = layer.drawable_size();
+                // let size = Size::new(size.width, size.height);
+                let width = size.width;
+                let height= size.height;
+
                 let dpi_factor: f32 = 1.0;//todo
 
                 let t = start.elapsed().as_secs_f32();
 
-                canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
-                canvas.clear_rect(0, 0, size.width as u32, size.height as u32, Color::rgbf(0.3, 0.3, 0.32));
+                canvas.set_size(width as u32, height as u32, dpi_factor as f32);
+                canvas.clear_rect(0, 0, width as u32, height as u32, Color::rgbf(0.3, 0.3, 0.32));
 
-                let height = size.height as f32;
-                let width = size.width as f32;
+                let height = height as f32;
+                let width = width as f32;
 
                 let pt = canvas.transform().inversed().transform_point(mousex, mousey);
                 let mousex = pt.0;
@@ -293,8 +299,8 @@ fn main() {
                 */
 
                 if let Some(image_id) = screenshot_image_id {
-                    let x = size.width as f32 - 512.0;
-                    let y = size.height as f32 - 512.0;
+                    let x = width - 512.0;
+                    let y = height - 512.0;
 
                     let paint = Paint::image(image_id, x, y, 512.0, 512.0, 0.0, 1.0);
 

@@ -1,4 +1,3 @@
-
 use crate::{ErrorKind, ImageFlags, ImageInfo, ImageSource, PixelFormat};
 
 use image::{DynamicImage, GenericImageView};
@@ -8,10 +7,6 @@ use metal::{
 };
 
 use rgb::ComponentBytes;
-
-
-// use super::gl;
-// use super::gl::types::*;
 
 pub struct MtlTexture {
     pub id: usize,
@@ -24,8 +19,6 @@ pub struct MtlTexture {
 
 
 impl MtlTexture {
-
-
     pub fn pseudo_texture(device: &metal::Device) -> Result<Self, ErrorKind> {
         let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
         let sampler = metal::SamplerDescriptor::new();
