@@ -2,8 +2,11 @@ use crate::{ErrorKind, ImageFlags, ImageInfo, ImageSource, PixelFormat};
 
 use image::{DynamicImage, GenericImageView};
 use metal::{
+    MTLSamplerAddressMode,
+    MTLSamplerMinMagFilter,
+    MTLSamplerMipFilter,
+    SamplerState,
     Texture,
-    SamplerState
 };
 
 use rgb::ComponentBytes;
@@ -42,6 +45,7 @@ impl MtlTexture {
     // called renderCreateTextureWithType...
     pub fn new(
         device: &metal::Device,
+        command_queue: &metal::CommandQueue,
         info: ImageInfo
     ) -> Result<Self, ErrorKind> {
         // println!("{:?}", info.format());
@@ -148,8 +152,42 @@ impl MtlTexture {
             },
         }
 
-        let tex: Texture = todo!();
+        let tex = device.new_texture(&desc);
         let sampler: SamplerState = todo!();
+
+        if generate_mipmaps {
+            let command_buffer = command_queue.new_command_buffer();
+            let encoder = command_buffer.new_blit_command_encoder();
+            // encoder.generate_mipmaps(tex);
+            todo!("generate mipmaps");
+            encoder.end_encoding();
+            command_buffer.commit();
+            command_buffer.wait_until_completed();
+        }
+
+        let sampler_desc = metal::SamplerDescriptor::new();
+
+        if nearest {
+            sampler_desc.set_min_filter(MTLSamplerMinMagFilter::Nearest);
+            sampler_desc.set_mag_filter(MTLSamplerMinMagFilter::Nearest);
+            if generate_mipmaps {
+                sampler_desc.set_mip_filter(MTLSamplerMipFilter::Nearest);
+            }
+        } else {
+            sampler_desc.set_min_filter(MTLSamplerMinMagFilter::Linear);
+            sampler_desc.set_mag_filter(MTLSamplerMinMagFilter::Linear);
+            if generate_mipmaps {
+                sampler_desc.set_mip_filter(MTLSamplerMipFilter::Linear);
+            }
+        }
+
+        if repeatx {
+
+        } else {
+
+        }
+
+        let sampler = device.new_sampler(&sampler_desc);
 
         // let flags = texture.info.flags();
 

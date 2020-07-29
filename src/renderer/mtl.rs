@@ -683,8 +683,7 @@ impl Mtl {
 
         let tex = if let Some(id) = image_tex {
             images.get(id).unwrap()
-        }
-        else {
+        } else {
             // &self.pseudo_texture
             todo!()
         };
@@ -911,7 +910,7 @@ impl Renderer for Mtl {
     }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
-        MtlTexture::new(&self.device, info)
+        MtlTexture::new(&self.device, &self.command_queue, info)
     }
 
     fn update_image(&mut self, image: &mut Self::Image, data: ImageSource, x: usize, y: usize) ->  Result<(), ErrorKind> {
