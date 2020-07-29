@@ -297,8 +297,7 @@ impl MtlTexture {
     }
 
     pub fn info(&self) -> ImageInfo {
-        // self.info
-        todo!()
+        self.info
     }
 }
 

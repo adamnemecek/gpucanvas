@@ -235,17 +235,17 @@ impl Mtl {
 
 impl Mtl {
     pub fn new(
+        device: &metal::DeviceRef,
         layer: &metal::CoreAnimationLayerRef,
     ) -> Self {
+        let debug = cfg!(debug_assertions);
+        let antialias = true;
 
-        let device = metal::Device::system_default().unwrap();
         let library_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("src/renderer/mtl/shaders.metallib");
         let library = device.new_library_with_file(library_path).expect("library not found");
         let command_queue = device.new_command_queue();
 
-        let debug = true;
-        let antialias = true;
 
         let vert_func = library.get_function("vertexShader", None).expect("vert shader not found");
 
@@ -392,7 +392,7 @@ impl Mtl {
             render_target: RenderTarget::Screen,
             // pseudo_texture: pseudo_texture.unwrap(),
             clear_color: Color::black(),
-            device,
+            device: device.to_owned(),
         }
     }
 

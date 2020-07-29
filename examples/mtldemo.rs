@@ -87,7 +87,7 @@ fn main() {
     // let library = device.new_library_with_source(
     //     shader_code,
     // );
-    let renderer = Mtl::new(&layer);
+    let renderer = Mtl::new(&device, &layer);
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
     let fonts = Fonts {
