@@ -198,7 +198,8 @@ pub struct Mtl {
     stencil_texture: StencilTexture,
     index_buffer: GPUVec<u32>,
     vertex_buffer: GPUVec<Vertex>,
-    uniform_buffer: GPUVec<Params>,
+    // uniform_buffer: GPUVec<Params>,
+    uniform_buffer: GPUVar<Params>,
     render_target: RenderTarget,
     // todo
     // pseudo_texture: MtlTexture,
@@ -386,7 +387,7 @@ impl Mtl {
             stencil_texture,
             index_buffer: GPUVec::with_capacity(&device, 32),
             vertex_buffer: GPUVec::with_capacity(&device, 32),
-            uniform_buffer: GPUVec::with_capacity(&device, 2),
+            uniform_buffer: GPUVar::with_value(&device, Default::default()),
             vertex_descriptor: vertex_descriptor.to_owned(),
             pipeline_pixel_format: metal::MTLPixelFormat::Invalid,
             render_target: RenderTarget::Screen,
@@ -675,10 +676,11 @@ impl Mtl {
         ///
         /// https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1515917-setfragmentbufferoffset?language=objc
         ///
-        let len = self.uniform_buffer.len();
-        self.uniform_buffer.push(paint);
-        let offset = len * std::mem::size_of::<Params>();
-        encoder.set_fragment_buffer_offset(0, offset as u64);
+        // let len = self.uniform_buffer.len();
+        // self.uniform_buffer.push(paint);
+        // let offset = len * std::mem::size_of::<Params>();
+        // encoder.set_fragment_buffer_offset(0, offset as u64);
+        todo!();
 
 
         let tex = if let Some(id) = image_tex {
@@ -776,7 +778,7 @@ fn new_render_command_encoder<'a>(
     vertex_buffer: &GPUVec<Vertex>,
     view_size_buffer: &GPUVar<Size>,
     // index_buffer: &IndexBuffer,
-    uniform_buffer: &GPUVec<Params>,
+    uniform_buffer: &GPUVar<Params>,
     clear_buffer_on_flush: bool
 ) -> &'a metal::RenderCommandEncoderRef {
 
