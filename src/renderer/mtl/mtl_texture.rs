@@ -12,7 +12,6 @@ use metal::{
 use rgb::ComponentBytes;
 
 pub struct MtlTexture {
-    pub id: u32,
     pub info: ImageInfo,
     pub tex: Texture,
     pub sampler: SamplerState,
@@ -20,18 +19,6 @@ pub struct MtlTexture {
     pub device: metal::Device,
 }
 
-fn mipmap_for_size(width: usize, height: usize) -> usize {
-	(width.max(height) as f64).log2().ceil() as usize
-}
-
-static mut TEXTURE_ID: u32 = 0;
-fn alloc_texture_id() -> u32 {
-    unsafe {
-        let id = TEXTURE_ID;
-        TEXTURE_ID += 1;
-        id
-    }
-}
 
 impl MtlTexture {
     // pub fn pseudo_texture(device: &metal::Device) -> Result<Self, ErrorKind> {
@@ -66,13 +53,17 @@ impl MtlTexture {
 
         desc.set_width(info.width() as u64);
         desc.set_height(info.height() as u64);
-        let mipmap_level_count = if generate_mipmaps {
-            mipmap_for_size(info.width(), info.height())
-        } else {
-            1
-        };
-        desc.set_mipmap_level_count(mipmap_level_count as u64);
 
+        if generate_mipmaps {
+            let size = metal::MTLSize {
+                width: info.width() as u64,
+                height: info.height() as u64,
+                depth: 1
+            };
+            desc.set_mipmap_level_count_for_size(size);
+        } else {
+            desc.set_mipmap_level_count(1);
+        };
 
         // todo if macos
         // desc.set_resource_options(metal::MTLResourceOptions::StorageModePrivate);
@@ -80,7 +71,7 @@ impl MtlTexture {
                         metal::MTLTextureUsage::ShaderWrite |
                         metal::MTLTextureUsage::ShaderRead);
 
-        let id = alloc_texture_id();
+        // let id = alloc_texture_id();
         //let size = src.dimensions();
 
         // let mut texture = Texture {
@@ -158,8 +149,8 @@ impl MtlTexture {
         if generate_mipmaps {
             let command_buffer = command_queue.new_command_buffer();
             let encoder = command_buffer.new_blit_command_encoder();
-            // encoder.generate_mipmaps(tex);
-            todo!("generate mipmaps");
+            encoder.generate_mipmaps(&tex);
+
             encoder.end_encoding();
             command_buffer.commit();
             command_buffer.wait_until_completed();
@@ -196,7 +187,6 @@ impl MtlTexture {
         let sampler = device.new_sampler(&sampler_desc);
 
         Ok(Self {
-            id,
             info,
             tex,
             sampler,
@@ -204,9 +194,9 @@ impl MtlTexture {
         })
     }
 
-    pub fn id(&self) -> u32 {
-        self.id
-    }
+    // pub fn id(&self) -> u32 {
+    //     self.id
+    // }
 
     pub fn replace_region(
         &self,
