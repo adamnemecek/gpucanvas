@@ -182,62 +182,18 @@ impl MtlTexture {
         }
 
         if repeatx {
-
+            sampler_desc.set_address_mode_s(MTLSamplerAddressMode::Repeat);
         } else {
+            sampler_desc.set_address_mode_s(MTLSamplerAddressMode::ClampToEdge);
+        }
 
+        if repeaty {
+            sampler_desc.set_address_mode_t(MTLSamplerAddressMode::Repeat);
+        } else {
+            sampler_desc.set_address_mode_t(MTLSamplerAddressMode::ClampToEdge);
         }
 
         let sampler = device.new_sampler(&sampler_desc);
-
-        // let flags = texture.info.flags();
-
-        // if flags.contains(ImageFlags::GENERATE_MIPMAPS) {
-        //     if flags.contains(ImageFlags::NEAREST) {
-        //         unsafe { gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::NEAREST_MIPMAP_NEAREST as i32); }
-        //     } else {
-        //         unsafe { gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR_MIPMAP_LINEAR as i32); }
-        //     }
-        // } else {
-        //     if flags.contains(ImageFlags::NEAREST) {
-        //         unsafe { gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::NEAREST as i32); }
-        //     } else {
-        //         unsafe { gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32); }
-        //     }
-        // }
-
-        // if flags.contains(ImageFlags::NEAREST) {
-        //     unsafe { gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::NEAREST as i32); }
-        // } else {
-        //     unsafe { gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32); }
-        // }
-
-        // if flags.contains(ImageFlags::REPEAT_X) {
-        //     unsafe { gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32); }
-        // } else {
-        //     unsafe { gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::CLAMP_TO_EDGE as i32); }
-        // }
-
-        // if flags.contains(ImageFlags::REPEAT_Y) {
-        //     unsafe { gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32); }
-        // } else {
-        //     unsafe { gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::CLAMP_TO_EDGE as i32); }
-        // }
-
-        // unsafe {
-        //     gl::PixelStorei(gl::UNPACK_ALIGNMENT, 4);
-        //     gl::PixelStorei(gl::UNPACK_ROW_LENGTH, 0);
-        //     gl::PixelStorei(gl::UNPACK_SKIP_PIXELS, 0);
-        //     gl::PixelStorei(gl::UNPACK_SKIP_ROWS, 0);
-        // }
-
-        // if flags.contains(ImageFlags::GENERATE_MIPMAPS) {
-        //     unsafe {
-        //         gl::GenerateMipmap(gl::TEXTURE_2D);
-        //         //gl::TexParameteri(gl::TEXTURE_2D, gl::GENERATE_MIPMAP, gl::TRUE);
-        //     }
-        // }
-
-        // unsafe { gl::BindTexture(gl::TEXTURE_2D, 0); }
 
         Ok(Self {
             id,
