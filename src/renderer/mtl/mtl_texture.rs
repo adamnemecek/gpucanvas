@@ -9,7 +9,7 @@ use metal::{
 use rgb::ComponentBytes;
 
 pub struct MtlTexture {
-    pub id: usize,
+    pub id: u32,
     pub info: ImageInfo,
     pub tex: Texture,
     pub sampler: SamplerState,
@@ -17,6 +17,18 @@ pub struct MtlTexture {
     pub device: metal::Device,
 }
 
+fn mipmap_for_size(width: usize, height: usize) -> usize {
+	(width.max(height) as f64).log2().ceil() as usize
+}
+
+static mut TEXTURE_ID: u32 = 0;
+fn alloc_texture_id() -> u32 {
+    unsafe {
+        let id = TEXTURE_ID;
+        TEXTURE_ID += 1;
+        id
+    }
+}
 
 impl MtlTexture {
     // pub fn pseudo_texture(device: &metal::Device) -> Result<Self, ErrorKind> {
@@ -27,9 +39,44 @@ impl MtlTexture {
     //     todo!()
     // }
 
+    // called renderCreateTextureWithType...
+    pub fn new(
+        device: &metal::Device,
+        info: ImageInfo
+    ) -> Result<Self, ErrorKind> {
+        // println!("{:?}", info.format());
+        let generate_mipmaps = info.flags().contains(ImageFlags::GENERATE_MIPMAPS);
+        let nearest = info.flags().contains(ImageFlags::NEAREST);
+        let repeatx = info.flags().contains(ImageFlags::REPEAT_X);
+        let repeaty = info.flags().contains(ImageFlags::REPEAT_Y);
 
-    pub fn new(device: &metal::Device, info: ImageInfo) -> Result<Self, ErrorKind> {
+        let pixel_format = match info.format() {
+            PixelFormat::Rgba8 => metal::MTLPixelFormat::R8Unorm,
+            PixelFormat::Rgb8 => metal::MTLPixelFormat::R8Unorm,
+            PixelFormat::Gray8 => todo!(),
+        };
 
+        let desc = metal::TextureDescriptor::new();
+        desc.set_texture_type(metal::MTLTextureType::D2);
+        desc.set_pixel_format(pixel_format);
+
+        desc.set_width(info.width() as u64);
+        desc.set_height(info.height() as u64);
+        let mipmap_level_count = if generate_mipmaps {
+            mipmap_for_size(info.width(), info.height())
+        } else {
+            1
+        };
+        desc.set_mipmap_level_count(mipmap_level_count as u64);
+
+
+        // todo if macos
+        // desc.set_resource_options(metal::MTLResourceOptions::StorageModePrivate);
+        desc.set_usage(metal::MTLTextureUsage::RenderTarget |
+                        metal::MTLTextureUsage::ShaderWrite |
+                        metal::MTLTextureUsage::ShaderRead);
+
+        let id = alloc_texture_id();
         //let size = src.dimensions();
 
         // let mut texture = Texture {
@@ -51,7 +98,7 @@ impl MtlTexture {
 
         match info.format() {
             PixelFormat::Gray8 => {
-                todo!()
+                todo!("mtltexture::new grey8");
                 // let format = if opengles { gl::LUMINANCE } else { gl::RED };
 
                 // gl::TexImage2D(
@@ -83,7 +130,7 @@ impl MtlTexture {
                 // );
             },
             PixelFormat::Rgba8 => {
-                todo!()
+                todo!("mtltexture::new Rgba8");
                 // stride = 4 * self.width();
                 // data_offset = y * stride + x * 4;
                 // gl::TexImage2D(
@@ -100,6 +147,14 @@ impl MtlTexture {
                 // );
             },
         }
+
+        let ret = Self {
+            id,
+            info: todo!(),
+            tex: todo!(),
+            sampler: todo!(),
+            device: todo!(),
+        };
 
         // let flags = texture.info.flags();
 
@@ -155,7 +210,7 @@ impl MtlTexture {
         todo!()
     }
 
-    pub fn id(&self) -> usize {
+    pub fn id(&self) -> u32 {
         self.id
     }
 

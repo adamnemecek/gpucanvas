@@ -6,7 +6,6 @@ pub fn create_stencil_texture_descriptor(size: Size) -> metal::TextureDescriptor
     let desc = metal::TextureDescriptor::new();
     desc.set_texture_type(metal::MTLTextureType::D2);
     desc.set_pixel_format(metal::MTLPixelFormat::Stencil8);
-    desc.set_resource_options(metal::MTLResourceOptions::CPUCacheModeDefaultCache);
 
     desc.set_width(size.w as u64);
     desc.set_height(size.h as u64);

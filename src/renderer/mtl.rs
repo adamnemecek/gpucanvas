@@ -262,7 +262,8 @@ impl Mtl {
         let vertex_descriptor = {
             let desc = metal::VertexDescriptor::new();
             let offsets = VertexOffsets::new();
-            let attrs = desc.attributes().object_at(0).unwrap()
+
+            let attrs = desc.attributes().object_at(0).unwrap();
             attrs.set_format(metal::MTLVertexFormat::Float2);
             attrs.set_buffer_index(0);
             attrs.set_offset(offsets.x as u64);
