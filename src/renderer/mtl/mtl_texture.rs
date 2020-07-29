@@ -218,8 +218,8 @@ impl MtlTexture {
         self.tex.replace_region(
             region,
             mipmap_level as u64,
+            data.as_ptr() as *const _,
             stride as u64,
-            data.as_ptr() as *const _
         )
     }
 

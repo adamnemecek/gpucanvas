@@ -133,6 +133,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "cocoa-foundation"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "block 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
+ "core-foundation 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "core-graphics-types 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "foreign-types 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.71 (registry+https://github.com/rust-lang/crates.io-index)",
+ "objc 0.2.7 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "color_quant"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -156,6 +170,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "core-foundation"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "core-foundation-sys 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.71 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "core-foundation-sys"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -163,6 +186,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 [[package]]
 name = "core-foundation-sys"
 version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[[package]]
+name = "core-foundation-sys"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
@@ -183,6 +211,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "core-foundation 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "foreign-types 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.71 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "core-graphics-types"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+dependencies = [
+ "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "core-foundation 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "foreign-types 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.71 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -517,8 +556,8 @@ dependencies = [
  "imgref 1.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "lru 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "memoffset 0.5.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "metal 0.18.0 (git+https://github.com/gfx-rs/metal-rs/?rev=1fccbe2)",
- "metalgear 0.1.0 (git+https://github.com/adamnemecek/metalgear?rev=d9152a2)",
+ "metal 0.20.0 (git+https://github.com/gfx-rs/metal-rs/?rev=4a643b8)",
+ "metalgear 0.1.0 (git+https://github.com/adamnemecek/metalgear?rev=16748ea)",
  "objc 0.2.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "owned_ttf_parser 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -744,13 +783,12 @@ dependencies = [
 
 [[package]]
 name = "metal"
-version = "0.18.0"
-source = "git+https://github.com/gfx-rs/metal-rs/?rev=1fccbe2#1fccbe251118e15de04f2ef49abca52f9532d17c"
+version = "0.20.0"
+source = "git+https://github.com/gfx-rs/metal-rs/?rev=4a643b8#4a643b822956a2d9e6442e4ee1efd734e1046500"
 dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "block 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
- "cocoa 0.20.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "core-graphics 0.19.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "cocoa-foundation 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "foreign-types 0.3.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "objc 0.2.7 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -759,10 +797,10 @@ dependencies = [
 [[package]]
 name = "metalgear"
 version = "0.1.0"
-source = "git+https://github.com/adamnemecek/metalgear?rev=d9152a2#d9152a280554b4606789c83b3ec2782ff7160ed7"
+source = "git+https://github.com/adamnemecek/metalgear?rev=16748ea#16748ea1c34a1c11cbf148f0c07aaf8d6d4a8838"
 dependencies = [
  "lazy_static 1.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "metal 0.18.0 (git+https://github.com/gfx-rs/metal-rs/?rev=1fccbe2)",
+ "metal 0.20.0 (git+https://github.com/gfx-rs/metal-rs/?rev=4a643b8)",
 ]
 
 [[package]]
@@ -1605,13 +1643,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum cloudabi 0.0.3 (registry+https://github.com/rust-lang/crates.io-index)" = "ddfc5b9aa5d4507acaf872de71051dfd0e309860e88966e1051e462a077aac4f"
 "checksum cmake 0.1.42 (registry+https://github.com/rust-lang/crates.io-index)" = "81fb25b677f8bf1eb325017cb6bb8452f87969db0fedb4f757b297bee78a7c62"
 "checksum cocoa 0.20.1 (registry+https://github.com/rust-lang/crates.io-index)" = "8f7b6f3f7f4f0b3ec5c5039aaa9e8c3cef97a7a480a400fd62944841314f293d"
+"checksum cocoa-foundation 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "7ade49b65d560ca58c403a479bb396592b155c0185eada742ee323d1d68d6318"
 "checksum color_quant 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)" = "0dbbb57365263e881e805dc77d94697c9118fd94d8da011240555aa7b23445bd"
 "checksum core-foundation 0.6.4 (registry+https://github.com/rust-lang/crates.io-index)" = "25b9e03f145fd4f2bf705e07b900cd41fc636598fe5dc452fd0db1441c3f496d"
 "checksum core-foundation 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "57d24c7a13c43e870e37c1556b74555437870a04514f7685f5b354e090567171"
+"checksum core-foundation 0.9.0 (registry+https://github.com/rust-lang/crates.io-index)" = "3b5ed8e7e76c45974e15e41bfa8d5b0483cd90191639e01d8f5f1e606299d3fb"
 "checksum core-foundation-sys 0.6.2 (registry+https://github.com/rust-lang/crates.io-index)" = "e7ca8a5221364ef15ce201e8ed2f609fc312682a8f4e0e3d4aa5879764e0fa3b"
 "checksum core-foundation-sys 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "b3a71ab494c0b5b860bdc8407ae08978052417070c2ced38573a9157ad75b8ac"
+"checksum core-foundation-sys 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)" = "9a21fa21941700a3cd8fcb4091f361a6a712fac632f85d9f487cc892045d55c6"
 "checksum core-graphics 0.17.3 (registry+https://github.com/rust-lang/crates.io-index)" = "56790968ab1c8a1202a102e6de05fc6e1ec87da99e4e93e9a7d13efbfc1e95a9"
 "checksum core-graphics 0.19.0 (registry+https://github.com/rust-lang/crates.io-index)" = "59e78b2e0aaf43f08e7ae0d6bc96895ef72ff0921c7d4ff4762201b2dba376dd"
+"checksum core-graphics-types 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "e92f5d519093a4178296707dbaa3880eae85a5ef5386675f361a1cf25376e93c"
 "checksum core-text 13.3.2 (registry+https://github.com/rust-lang/crates.io-index)" = "db84654ad95211c082cf9795f6f83dc17d0ae6c985ac1b906369dc7384ed346d"
 "checksum core-video-sys 0.1.4 (registry+https://github.com/rust-lang/crates.io-index)" = "34ecad23610ad9757664d644e369246edde1803fcb43ed72876565098a5d3828"
 "checksum crc32fast 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)" = "ba125de2af0df55319f41944744ad91c71113bf74a4646efff39afe1f6842db1"
@@ -1675,8 +1717,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum memmap 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "6585fd95e7bb50d6cc31e20d4cf9afb4e2ba16c5846fc76793f11218da9c475b"
 "checksum memmap2 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d9b70ca2a6103ac8b665dc150b142ef0e4e89df640c9e6cf295d189c3caebe5a"
 "checksum memoffset 0.5.4 (registry+https://github.com/rust-lang/crates.io-index)" = "b4fc2c02a7e374099d4ee95a193111f72d2110197fe200272371758f6c3643d8"
-"checksum metal 0.18.0 (git+https://github.com/gfx-rs/metal-rs/?rev=1fccbe2)" = "<none>"
-"checksum metalgear 0.1.0 (git+https://github.com/adamnemecek/metalgear?rev=d9152a2)" = "<none>"
+"checksum metal 0.20.0 (git+https://github.com/gfx-rs/metal-rs/?rev=4a643b8)" = "<none>"
+"checksum metalgear 0.1.0 (git+https://github.com/adamnemecek/metalgear?rev=16748ea)" = "<none>"
 "checksum miniz_oxide 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)" = "aa679ff6578b1cddee93d7e82e263b94a575e0bfced07284eb0c037c1d2416a5"
 "checksum mio 0.6.21 (registry+https://github.com/rust-lang/crates.io-index)" = "302dec22bcf6bae6dfb69c647187f4b4d0fb6f535521f7bc022430ce8e12008f"
 "checksum mio-extras 2.0.6 (registry+https://github.com/rust-lang/crates.io-index)" = "52403fe290012ce777c4626790c8951324a2b9e3316b3143779c72b029742f19"

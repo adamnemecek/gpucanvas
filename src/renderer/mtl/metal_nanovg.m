@@ -125,17 +125,21 @@ typedef struct MNVGfragUniforms MNVGfragUniforms;
   int image;
   id<MTLBuffer> viewSizeBuffer;
   id<MTLTexture> stencilTexture;
+
   MNVGcall* calls;
   int ccalls;
   int ncalls;
+
   id<MTLBuffer> indexBuffer;
   uint32_t* indexes;
   int cindexes;
   int nindexes;
+
   id<MTLBuffer> vertBuffer;
   struct NVGvertex* verts;
   int cverts;
   int nverts;
+
   id<MTLBuffer> uniformBuffer;
   unsigned char* uniforms;
   int cuniforms;

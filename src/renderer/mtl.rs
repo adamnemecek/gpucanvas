@@ -1,10 +1,12 @@
 use rgb::RGBA8;
 use imgref::ImgVec;
-use core_graphics::geometry::CGSize;
+// use core_graphics::geometry::CGSize;
+
+use metal::CGSize;
 
 use metalgear::{
     GPUVec,
-    GPUVar
+    GPUVar,
 };
 
 use crate::{
@@ -528,8 +530,8 @@ impl Mtl {
                 /// offset is in bytes
                 let index_buffer_offset = start * self.index_size;
 
-                /// draw fans
-                todo!()
+                // draw fans
+
                 // encoder.draw_indexed_primitives(
                 //     metal::MTLPrimitiveType::Triangle,
                 //     count as u64,
