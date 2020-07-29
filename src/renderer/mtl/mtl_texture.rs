@@ -148,13 +148,8 @@ impl MtlTexture {
             },
         }
 
-        let ret = Self {
-            id,
-            info: todo!(),
-            tex: todo!(),
-            sampler: todo!(),
-            device: todo!(),
-        };
+        let tex: Texture = todo!();
+        let sampler: SamplerState = todo!();
 
         // let flags = texture.info.flags();
 
@@ -206,8 +201,13 @@ impl MtlTexture {
 
         // unsafe { gl::BindTexture(gl::TEXTURE_2D, 0); }
 
-        // Ok(texture)
-        todo!()
+        Ok(Self {
+            id,
+            info,
+            tex,
+            sampler,
+            device: device.to_owned(),
+        })
     }
 
     pub fn id(&self) -> u32 {
