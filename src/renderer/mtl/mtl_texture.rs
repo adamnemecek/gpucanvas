@@ -1,20 +1,12 @@
 use crate::{ErrorKind, ImageFlags, ImageInfo, ImageSource, PixelFormat};
 
 use image::{DynamicImage, GenericImageView};
-use metal::{
-    MTLSamplerAddressMode,
-    MTLSamplerMinMagFilter,
-    MTLSamplerMipFilter,
-    SamplerState,
-    Texture,
-};
-
 use rgb::ComponentBytes;
 
 pub struct MtlTexture {
     pub info: ImageInfo,
-    pub tex: Texture,
-    pub sampler: SamplerState,
+    pub tex: metal::Texture,
+    pub sampler: metal::SamplerState,
     // todo: texture has a device reference, use that
     pub device: metal::Device,
 }
@@ -144,7 +136,6 @@ impl MtlTexture {
         }
 
         let tex = device.new_texture(&desc);
-        let sampler: SamplerState = todo!();
 
         if generate_mipmaps {
             let command_buffer = command_queue.new_command_buffer();
@@ -159,29 +150,29 @@ impl MtlTexture {
         let sampler_desc = metal::SamplerDescriptor::new();
 
         if nearest {
-            sampler_desc.set_min_filter(MTLSamplerMinMagFilter::Nearest);
-            sampler_desc.set_mag_filter(MTLSamplerMinMagFilter::Nearest);
+            sampler_desc.set_min_filter(metal::MTLSamplerMinMagFilter::Nearest);
+            sampler_desc.set_mag_filter(metal::MTLSamplerMinMagFilter::Nearest);
             if generate_mipmaps {
-                sampler_desc.set_mip_filter(MTLSamplerMipFilter::Nearest);
+                sampler_desc.set_mip_filter(metal::MTLSamplerMipFilter::Nearest);
             }
         } else {
-            sampler_desc.set_min_filter(MTLSamplerMinMagFilter::Linear);
-            sampler_desc.set_mag_filter(MTLSamplerMinMagFilter::Linear);
+            sampler_desc.set_min_filter(metal::MTLSamplerMinMagFilter::Linear);
+            sampler_desc.set_mag_filter(metal::MTLSamplerMinMagFilter::Linear);
             if generate_mipmaps {
-                sampler_desc.set_mip_filter(MTLSamplerMipFilter::Linear);
+                sampler_desc.set_mip_filter(metal::MTLSamplerMipFilter::Linear);
             }
         }
 
         if repeatx {
-            sampler_desc.set_address_mode_s(MTLSamplerAddressMode::Repeat);
+            sampler_desc.set_address_mode_s(metal::MTLSamplerAddressMode::Repeat);
         } else {
-            sampler_desc.set_address_mode_s(MTLSamplerAddressMode::ClampToEdge);
+            sampler_desc.set_address_mode_s(metal::MTLSamplerAddressMode::ClampToEdge);
         }
 
         if repeaty {
-            sampler_desc.set_address_mode_t(MTLSamplerAddressMode::Repeat);
+            sampler_desc.set_address_mode_t(metal::MTLSamplerAddressMode::Repeat);
         } else {
-            sampler_desc.set_address_mode_t(MTLSamplerAddressMode::ClampToEdge);
+            sampler_desc.set_address_mode_t(metal::MTLSamplerAddressMode::ClampToEdge);
         }
 
         let sampler = device.new_sampler(&sampler_desc);
@@ -202,8 +193,8 @@ impl MtlTexture {
         &self,
         region: metal::MTLRegion,
         mipmap_level: usize,
+        data: &[u8],
         stride: usize,
-        data: &[u8]
     ) {
         self.tex.replace_region(
             region,
@@ -271,16 +262,15 @@ impl MtlTexture {
 
         self.replace_region(
             region,
-            0,
+            1,
+            &data[data_offset..],
             stride,
-            &data[data_offset..]
         );
         Ok(())
     }
 
 
     pub fn delete(self) {
-        todo!()
         // unsafe {
         //     gl::DeleteTextures(1, &self.id);
         // }
