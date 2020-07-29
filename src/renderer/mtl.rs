@@ -262,16 +262,19 @@ impl Mtl {
         let vertex_descriptor = {
             let desc = metal::VertexDescriptor::new();
             let offsets = VertexOffsets::new();
-            desc.attributes().object_at(0).unwrap().set_format(metal::MTLVertexFormat::Float2);
-            desc.attributes().object_at(0).unwrap().set_buffer_index(0);
-            desc.attributes().object_at(0).unwrap().set_offset(offsets.x as u64);
+            let attrs = desc.attributes().object_at(0).unwrap()
+            attrs.set_format(metal::MTLVertexFormat::Float2);
+            attrs.set_buffer_index(0);
+            attrs.set_offset(offsets.x as u64);
 
-            desc.attributes().object_at(1).unwrap().set_format(metal::MTLVertexFormat::Float2);
-            desc.attributes().object_at(1).unwrap().set_buffer_index(0);
-            desc.attributes().object_at(1).unwrap().set_offset(offsets.u as u64);
+            let attrs = desc.attributes().object_at(1).unwrap();
+            attrs.set_format(metal::MTLVertexFormat::Float2);
+            attrs.set_buffer_index(0);
+            attrs.set_offset(offsets.u as u64);
 
-            desc.layouts().object_at(0).unwrap().set_stride(std::mem::size_of::<Vertex>() as u64);
-            desc.layouts().object_at(0).unwrap().set_step_function(metal::MTLVertexStepFunction::PerVertex);
+            let layout = desc.layouts().object_at(0).unwrap();
+            layout.set_stride(std::mem::size_of::<Vertex>() as u64);
+            layout.set_step_function(metal::MTLVertexStepFunction::PerVertex);
             desc
         };
 
