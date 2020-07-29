@@ -47,6 +47,26 @@ for index in 1..(quad_positions.len() as u32 - 1) {
 }
 ```
 
+# triangle fan
+* based on pathfinder
+```rust
+// https://www.gamedev.net/forums/topic/643945-how-to-generate-a-triangle-fan-index-list-for-a-circle-shape/
+
+fn triangle_fan_indices(len: usize) -> Vec<u32> {
+	let mut indices: Vec<u32> = vec![];
+	for index in 1..(len as u32 - 1) {
+		indices.extend_from_slice(&[0, index as u32, index + 1]);
+	}
+
+	indices
+}
+
+fn main() {
+	let indices = triangle_fan_indices(10);
+	println!("{:?}", indices);
+}
+```
+
 # TODO
 * [ ] investigate setViewport vs uniforms
 * [ ] indexed rendering

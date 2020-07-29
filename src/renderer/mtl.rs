@@ -21,7 +21,6 @@ use super::{
     Renderer,
     Command,
     CommandType,
-
     RenderTarget
 };
 
@@ -72,7 +71,12 @@ impl PathsLength {
             }
         }
 
-        Self { vertex_count, index_count, stroke_count, triangle_count }
+        Self {
+            vertex_count,
+            index_count,
+            stroke_count,
+            triangle_count
+        }
     }
 }
 
@@ -83,6 +87,25 @@ impl PathsLength {
 // #[allow(clippy::all)]
 // mod gl {
 //     include!(concat!(env!("OUT_DIR"), "/gl_bindings.rs"));
+// }
+
+
+/// Creates an indidex buffer which can be used to "fake" triangle fans
+/// Based on pathfinder.
+/// https://www.gamedev.net/forums/topic/643945-how-to-generate-a-triangle-fan-index-list-for-a-circle-shape/
+
+fn triangle_fan_indices(quad_len: usize) -> Vec<u32> {
+	let mut indices: Vec<u32> = vec![];
+	for index in 1..(quad_len as u32 - 1) {
+		indices.extend_from_slice(&[0, index as u32, index + 1]);
+	}
+
+	indices
+}
+
+// fn main() {
+// 	let indices = triangle_fan_indices(10);
+// 	println!("{:?}", indices);
 // }
 
 
@@ -139,7 +162,7 @@ pub struct Mtl {
     command_queue: metal::CommandQueue,
     layer: metal::CoreAnimationLayer,
     // library: metal::Library,
-    render_encoder: Option<metal::RenderCommandEncoder>,
+    // render_encoder: Option<metal::RenderCommandEncoder>,
 
     frag_size: usize,
     index_size: usize,
@@ -330,7 +353,7 @@ impl Mtl {
             debug,
             antialias,
             blend_func,
-            render_encoder: None,
+            // render_encoder: None,
             // todo check what is this initialized to
             view_size_buffer: GPUVar::with_value(&device, Size::default()),
             command_queue,
@@ -795,7 +818,7 @@ impl Renderer for Mtl {
 
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
-        let lens = PathsLength::new(commands);
+        // let lens = PathsLength::new(commands);
 
         self.vertex_buffer.clear();
         self.vertex_buffer.extend_from_slice(verts);
@@ -909,3 +932,15 @@ impl Renderer for Mtl {
     }
 }
 
+
+mod tests {
+    use super::triangle_fan_indices;
+
+    #[test]
+    fn test_triangle_fan_indices() {
+        let expected: Vec<u32> = vec![0, 1, 2, 0, 2, 3, 0, 3, 4];
+        let result = triangle_fan_indices(5);
+        assert!(expected == result);
+
+    }
+}
