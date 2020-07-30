@@ -1,5 +1,4 @@
 use crate::{ErrorKind, ImageFlags, ImageInfo, ImageSource, PixelFormat};
-
 use image::{DynamicImage, GenericImageView};
 use rgb::ComponentBytes;
 
@@ -20,6 +19,7 @@ pub struct MtlTexture {
     pub sampler: metal::SamplerState,
     // todo: texture has a device reference, use that
     pub device: metal::Device,
+    pub command_queue: metal::CommandQueue,
 }
 
 impl MtlTexture {
@@ -75,7 +75,7 @@ impl MtlTexture {
         let tex = device.new_texture(&desc);
 
         if generate_mipmaps {
-            crate::generate_mipmaps(command_queue, &tex);
+            super::generate_mipmaps(command_queue, &tex);
         }
 
         let sampler_desc = metal::SamplerDescriptor::new();
@@ -113,6 +113,7 @@ impl MtlTexture {
             tex,
             sampler,
             device: device.to_owned(),
+            command_queue: command_queue.to_owned()
         })
     }
 
@@ -127,22 +128,6 @@ impl MtlTexture {
 
     pub fn update(&mut self, src: ImageSource, x: usize, y: usize) -> Result<(), ErrorKind> {
         let (width, height) = src.dimensions();
-        let origin = metal::MTLOrigin {
-            x: x as u64,
-            y: y as u64,
-            z: 0,
-        };
-        let size = metal::MTLSize {
-            width: width as u64,
-            height: height as u64,
-            depth: 0,
-        };
-        let region = metal::MTLRegion { origin, size };
-
-        let data_offset: usize;
-        let stride: usize;
-        let data;
-
         if x + width > self.info.width() {
             return Err(ErrorKind::ImageUpdateOutOfBounds);
         }
@@ -155,39 +140,49 @@ impl MtlTexture {
             return Err(ErrorKind::ImageUpdateWithDifferentFormat);
         }
 
-        // unsafe {
-        //     gl::BindTexture(gl::TEXTURE_2D, self.id);
-        //     gl::PixelStorei(gl::UNPACK_ALIGNMENT, 1);
-        //     gl::PixelStorei(gl::UNPACK_ROW_LENGTH, size.0 as i32);
-        // }
+        let generate_mipmaps = self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS);
+
+        let origin = metal::MTLOrigin {
+            x: x as u64,
+            y: y as u64,
+            z: 0,
+        };
+        let size = metal::MTLSize {
+            width: width as u64,
+            height: height as u64,
+            depth: 1,
+        };
+        let region = metal::MTLRegion { origin, size };
+
+        let stride: usize;
+        let data_offset: usize;
+        let data;
 
         match src {
             ImageSource::Gray(data_) => {
                 stride = width;
-                data_offset = todo!();
-                data = data_.buf().as_bytes();
-            }
-            ImageSource::Rgb(data_) => {
-                stride = todo!();
-                data_offset = todo!();
-                data = data_.buf().as_bytes();
-            }
-            ImageSource::Rgba(data_) => {
-                stride = 4 * width;
                 data_offset = y * stride + x;
                 data = data_.buf().as_bytes();
             }
-        }
-
-        if self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS) {
-            todo!()
-            // unsafe {
-            //     gl::GenerateMipmap(gl::TEXTURE_2D);
-            //     //gl::TexParameteri(gl::TEXTURE_2D, gl::GENERATE_MIPMAP, gl::TRUE);
-            // }
+            ImageSource::Rgb(data_) => {
+                todo!()
+                // stride = todo!();
+                // data_offset = todo!();
+                // data = data_.buf().as_bytes();
+            }
+            ImageSource::Rgba(data_) => {
+                stride = 4 * width;
+                data_offset = y * stride + x * 4;
+                data = data_.buf().as_bytes();
+            }
         }
 
         self.replace_region(region, 1, &data[data_offset..], stride);
+
+        if self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS) {
+            super::generate_mipmaps(&self.command_queue, &self.tex);
+        }
+
         Ok(())
     }
 

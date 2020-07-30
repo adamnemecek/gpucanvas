@@ -21,7 +21,7 @@ mod stencil_texture;
 use stencil_texture::StencilTexture;
 
 mod mtl_ext;
-pub(crate) use mtl_ext::generate_mipmaps;
+pub use mtl_ext::generate_mipmaps;
 
 pub struct PathsLength {
     pub vertex_count: usize,
