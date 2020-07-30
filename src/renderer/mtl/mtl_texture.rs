@@ -13,6 +13,21 @@ impl From<PixelFormat> for metal::MTLPixelFormat {
         }
     }
 }
+
+fn MTLRegionMake2D(x: usize, y: usize, width: usize, height: usize) -> metal::MTLRegion {
+    let origin = metal::MTLOrigin {
+        x: x as u64,
+        y: y as u64,
+        z: 0,
+    };
+    let size = metal::MTLSize {
+        width: width as u64,
+        height: height as u64,
+        depth: 1,
+    };
+    metal::MTLRegion { origin, size }
+}
+
 pub struct MtlTexture {
     pub info: ImageInfo,
     pub tex: metal::Texture,
@@ -124,9 +139,10 @@ impl MtlTexture {
     //     self.id
     // }
 
-    pub fn replace_region(&self, region: metal::MTLRegion, mipmap_level: usize, data: &[u8], stride: usize) {
+    #[inline]
+    pub fn replace_region(&self, region: metal::MTLRegion, data: &[u8], stride: usize) {
         self.tex
-            .replace_region(region, mipmap_level as u64, data.as_ptr() as *const _, stride as u64)
+            .replace_region(region, 1, data.as_ptr() as *const _, stride as u64)
     }
 
     pub fn update(&mut self, src: ImageSource, x: usize, y: usize) -> Result<(), ErrorKind> {
@@ -147,31 +163,21 @@ impl MtlTexture {
 
         let generate_mipmaps = self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS);
 
-        let origin = metal::MTLOrigin {
-            x: x as u64,
-            y: y as u64,
-            z: 0,
-        };
-        let size = metal::MTLSize {
-            width: width as u64,
-            height: height as u64,
-            depth: 1,
-        };
-        let region = metal::MTLRegion { origin, size };
+        let region = MTLRegionMake2D(x, y, width, height);
 
         let stride: usize;
-        let data_offset: usize;
+        // let data_offset: usize;
         let data;
 
         match src {
             ImageSource::Gray(data_) => {
                 stride = width;
-                data_offset = y * stride + x;
+                // data_offset = y * stride + x;
                 data = data_.buf().as_bytes();
             }
             ImageSource::Rgba(data_) => {
                 stride = 4 * width;
-                data_offset = y * stride + x * 4;
+                // data_offset = y * stride + x * 4;
                 data = data_.buf().as_bytes();
             }
             ImageSource::Rgb(_) => {
@@ -181,7 +187,9 @@ impl MtlTexture {
             }
         }
 
-        self.replace_region(region, 1, &data[data_offset..], stride);
+        println!("before replace");
+        self.replace_region(region, data, stride);
+        println!("after replace");
 
         if self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS) {
             super::generate_mipmaps(&self.command_queue, &self.tex);
