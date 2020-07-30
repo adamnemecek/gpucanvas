@@ -2,7 +2,6 @@ use cocoa::{appkit::NSView, base::id as cocoa_id, foundation::NSRange};
 use std::f32::consts::PI;
 use std::time::Instant;
 
-use core_graphics::geometry::CGSize;
 use metal::*;
 use objc::runtime::YES;
 use std::mem;

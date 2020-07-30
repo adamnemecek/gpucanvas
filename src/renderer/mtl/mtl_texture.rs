@@ -28,6 +28,7 @@ impl MtlTexture {
         command_queue: &metal::CommandQueueRef,
     ) -> Result<Self, ErrorKind> {
         let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
+        println!("image_info: {:?}", info);
         Self::new(device, command_queue, info)
     }
 
@@ -37,13 +38,16 @@ impl MtlTexture {
         command_queue: &metal::CommandQueueRef,
         info: ImageInfo,
     ) -> Result<Self, ErrorKind> {
-        // println!("{:?}", info.format());
+        println!("format: {:?}", info.format());
+        assert!(info.format() != PixelFormat::Rgb8);
+
         let generate_mipmaps = info.flags().contains(ImageFlags::GENERATE_MIPMAPS);
         let nearest = info.flags().contains(ImageFlags::NEAREST);
         let repeatx = info.flags().contains(ImageFlags::REPEAT_X);
         let repeaty = info.flags().contains(ImageFlags::REPEAT_Y);
 
         let pixel_format = info.format().into();
+
 
         let desc = metal::TextureDescriptor::new();
         desc.set_texture_type(metal::MTLTextureType::D2);
@@ -127,6 +131,8 @@ impl MtlTexture {
     }
 
     pub fn update(&mut self, src: ImageSource, x: usize, y: usize) -> Result<(), ErrorKind> {
+        assert!(src.format() != PixelFormat::Rgb8);
+
         let (width, height) = src.dimensions();
         if x + width > self.info.width() {
             return Err(ErrorKind::ImageUpdateOutOfBounds);
@@ -164,16 +170,13 @@ impl MtlTexture {
                 data_offset = y * stride + x;
                 data = data_.buf().as_bytes();
             }
-            ImageSource::Rgb(data_) => {
-                todo!()
-                // stride = todo!();
-                // data_offset = todo!();
-                // data = data_.buf().as_bytes();
-            }
             ImageSource::Rgba(data_) => {
                 stride = 4 * width;
                 data_offset = y * stride + x * 4;
                 data = data_.buf().as_bytes();
+            }
+            ImageSource::Rgb(_) => {
+                unimplemented!("Metal backend doesn't support rgb. Image should have been converted in load_image_file");
             }
         }
 

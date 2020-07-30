@@ -45,7 +45,7 @@ impl ImageSource<'_> {
     pub fn format(&self) -> PixelFormat {
         match self {
             Self::Rgb(_) => PixelFormat::Rgb8,
-            Self::Rgba(_) => PixelFormat::Rgb8,
+            Self::Rgba(_) => PixelFormat::Rgba8,
             Self::Gray(_) => PixelFormat::Gray8,
         }
     }
@@ -78,6 +78,16 @@ impl<'a> From<ImgRef<'a, GRAY8>> for ImageSource<'a> {
     }
 }
 
+// pub fn dump_image_type(img: &DynamicImage) {
+//     let ty = match img {
+//         ::image::DynamicImage::ImageLuma8(_) => "ImageLuma8",
+//         ::image::DynamicImage::ImageRgb8(_) => "ImageRgb8",
+//         ::image::DynamicImage::ImageRgba8(_) => "ImageRgba8",
+//         _ => "unknown"
+//     };
+//     println!("try_from {}", ty);
+// }
+
 #[cfg(feature = "image-loading")]
 impl<'a> TryFrom<&'a DynamicImage> for ImageSource<'a> {
     type Error = ErrorKind;
@@ -105,7 +115,7 @@ impl<'a> TryFrom<&'a DynamicImage> for ImageSource<'a> {
     }
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Debug)]
 pub struct ImageInfo {
     flags: ImageFlags,
     width: usize,

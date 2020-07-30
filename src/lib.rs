@@ -415,12 +415,29 @@ where
         filename: P,
         flags: ImageFlags,
     ) -> Result<ImageId, ErrorKind> {
-        let image = ::image::open(filename)?;
+        use ::image::DynamicImage;
 
+        fn convert_rgb_if_needed(img: DynamicImage) -> DynamicImage {
+            #[cfg(not(feature = "convert-rgb"))] {
+                println!("not-convert-rgb");
+                img
+            }
+            #[cfg(feature = "convert-rgb")] {
+                println!("convert-rgb");
+                match img {
+                    DynamicImage::ImageRgb8(_) => {
+                        DynamicImage::ImageRgba8(img.to_rgba())
+                    },
+                    _ => img
+                }
+            }
+        }
+
+        let image = convert_rgb_if_needed(::image::open(filename)?);
         use std::convert::TryFrom;
 
         let src = ImageSource::try_from(&image)?;
-
+        println!("src fmt: {:?}", src.format());
         self.create_image(src, flags)
     }
 

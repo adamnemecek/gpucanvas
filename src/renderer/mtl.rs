@@ -1,7 +1,5 @@
 use imgref::ImgVec;
 use rgb::RGBA8;
-// use core_graphics::geometry::CGSize;
-
 use metal::CGSize;
 
 use metalgear::{GPUVar, GPUVec};
