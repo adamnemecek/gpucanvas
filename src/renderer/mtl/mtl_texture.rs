@@ -7,8 +7,8 @@ use rgb::ComponentBytes;
 impl From<PixelFormat> for metal::MTLPixelFormat {
     fn from(a: PixelFormat) -> Self {
         match a {
-            PixelFormat::Rgba8 => metal::MTLPixelFormat::RGBA8Unorm,
-            PixelFormat::Rgb8 => todo!(),//metal::MTLPixelFormat::RGB8Unorm,
+            PixelFormat::Rgba8 | PixelFormat::Rgb8
+                 => metal::MTLPixelFormat::RGBA8Unorm,
             PixelFormat::Gray8 => metal::MTLPixelFormat::R8Unorm,
         }
     }
@@ -43,11 +43,7 @@ impl MtlTexture {
         let repeatx = info.flags().contains(ImageFlags::REPEAT_X);
         let repeaty = info.flags().contains(ImageFlags::REPEAT_Y);
 
-        let pixel_format = match info.format() {
-            PixelFormat::Rgba8 => metal::MTLPixelFormat::R8Unorm,
-            PixelFormat::Rgb8 => metal::MTLPixelFormat::R8Unorm,
-            PixelFormat::Gray8 => todo!(),
-        };
+        let pixel_format = info.format().into();
 
         let desc = metal::TextureDescriptor::new();
         desc.set_texture_type(metal::MTLTextureType::D2);
