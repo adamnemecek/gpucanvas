@@ -241,20 +241,14 @@ impl Size {
 impl std::ops::Mul<f32> for Size {
     type Output = Self;
     fn mul(self, rhs: f32) -> Self::Output {
-        Self::new(
-            self.w * rhs,
-            self.h * rhs
-        )
+        Self::new(self.w * rhs, self.h * rhs)
     }
 }
 
 impl std::ops::Div<f32> for Size {
     type Output = Self;
     fn div(self, rhs: f32) -> Self::Output {
-        Self::new(
-            self.w / rhs,
-            self.h / rhs
-        )
+        Self::new(self.w / rhs, self.h / rhs)
     }
 }
 

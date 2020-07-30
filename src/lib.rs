@@ -56,10 +56,8 @@ pub use path::{Path, Solidity};
 #[macro_use]
 extern crate static_assertions;
 
-
 #[macro_use]
 extern crate memoffset;
-
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]

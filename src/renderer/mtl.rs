@@ -1,41 +1,27 @@
-use rgb::RGBA8;
 use imgref::ImgVec;
+use rgb::RGBA8;
 // use core_graphics::geometry::CGSize;
 
 use metal::CGSize;
 
-use metalgear::{
-    GPUVec,
-    GPUVar,
-};
+use metalgear::{GPUVar, GPUVec};
 
 use crate::{
-    Size,
-    Color,
-    ImageStore,
-    ImageSource,
-    ImageInfo,
-    FillRule,
-    CompositeOperationState,
-    BlendFactor,
-    renderer::{Vertex, ImageId},
     image::ImageFlags,
-    ErrorKind
+    renderer::{ImageId, Vertex},
+    BlendFactor, Color, CompositeOperationState, ErrorKind, FillRule, ImageInfo, ImageSource, ImageStore, Size,
 };
 
-use super::{
-    Params,
-    Renderer,
-    Command,
-    CommandType,
-    RenderTarget
-};
+use super::{Command, CommandType, Params, RenderTarget, Renderer};
 
 mod mtl_texture;
 use mtl_texture::MtlTexture;
 
 mod stencil_texture;
 use stencil_texture::StencilTexture;
+
+mod mtl_ext;
+pub(crate) use mtl_ext::generate_mipmaps;
 
 pub struct PathsLength {
     pub vertex_count: usize,
@@ -77,11 +63,10 @@ impl PathsLength {
             vertex_count,
             index_count,
             stroke_count,
-            triangle_count
+            triangle_count,
         }
     }
 }
-
 
 // mod uniform_array;
 // use uniform_array::UniformArray;
@@ -91,25 +76,23 @@ impl PathsLength {
 //     include!(concat!(env!("OUT_DIR"), "/gl_bindings.rs"));
 // }
 
-
 /// Creates an indidex buffer which can be used to "fake" triangle fans
 /// Based on pathfinder.
 /// https://www.gamedev.net/forums/topic/643945-how-to-generate-a-triangle-fan-index-list-for-a-circle-shape/
 
 fn triangle_fan_indices(quad_len: usize) -> Vec<u32> {
-	let mut indices: Vec<u32> = vec![];
-	for index in 1..(quad_len as u32 - 1) {
-		indices.extend_from_slice(&[0, index as u32, index + 1]);
-	}
+    let mut indices: Vec<u32> = vec![];
+    for index in 1..(quad_len as u32 - 1) {
+        indices.extend_from_slice(&[0, index as u32, index + 1]);
+    }
 
-	indices
+    indices
 }
 
 // fn main() {
 // 	let indices = triangle_fan_indices(10);
 // 	println!("{:?}", indices);
 // }
-
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub struct Blend {
@@ -134,7 +117,6 @@ fn convert_blend_factor(factor: BlendFactor) -> metal::MTLBlendFactor {
         BlendFactor::SrcAlphaSaturate => metal::MTLBlendFactor::SourceAlphaSaturated,
     }
 }
-
 
 impl From<CompositeOperationState> for Blend {
     fn from(v: CompositeOperationState) -> Self {
@@ -165,7 +147,6 @@ pub struct Mtl {
     layer: metal::CoreAnimationLayer,
     // library: metal::Library,
     // render_encoder: Option<metal::RenderCommandEncoder>,
-
     frag_size: usize,
     index_size: usize,
     // int flags?
@@ -209,7 +190,6 @@ pub struct Mtl {
     // pseudo_sampler:
 }
 
-
 impl From<CGSize> for Size {
     fn from(v: CGSize) -> Self {
         Self::new(v.width as f32, v.height as f32)
@@ -230,7 +210,6 @@ impl VertexOffsets {
     }
 }
 
-
 impl Mtl {
     pub fn size(&self) -> Size {
         *self.view_size_buffer
@@ -238,25 +217,27 @@ impl Mtl {
 }
 
 impl Mtl {
-    pub fn new(
-        device: &metal::DeviceRef,
-        layer: &metal::CoreAnimationLayerRef,
-    ) -> Self {
+    pub fn new(device: &metal::DeviceRef, layer: &metal::CoreAnimationLayerRef) -> Self {
         let debug = cfg!(debug_assertions);
         let antialias = true;
 
-        let library_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("src/renderer/mtl/shaders.metallib");
+        let library_path =
+            std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src/renderer/mtl/shaders.metallib");
         let library = device.new_library_with_file(library_path).expect("library not found");
         let command_queue = device.new_command_queue();
 
-
-        let vert_func = library.get_function("vertexShader", None).expect("vert shader not found");
+        let vert_func = library
+            .get_function("vertexShader", None)
+            .expect("vert shader not found");
 
         let frag_func: metal::Function = if antialias {
-            library.get_function("fragmentShader", None).expect("frag shader not found")
+            library
+                .get_function("fragmentShader", None)
+                .expect("frag shader not found")
         } else {
-            library.get_function("fragmentShaderAA", None).expect("frag shader not found")
+            library
+                .get_function("fragmentShaderAA", None)
+                .expect("frag shader not found")
         };
 
         let clear_buffer_on_flush = false;
@@ -418,20 +399,19 @@ impl Mtl {
     //     }
     // }
 
-
-
     /// updaterenderpipelinstateforblend
     pub fn set_composite_operation(
         &mut self,
         blend_func: CompositeOperationState,
-        pixel_format: metal::MTLPixelFormat
+        pixel_format: metal::MTLPixelFormat,
     ) {
         let blend_func: Blend = blend_func.into();
 
-        if self.pipeline_state.is_some() &&
-            self.stencil_only_pipeline_state.is_some() &&
-            self.pipeline_pixel_format == pixel_format &&
-            self.blend_func == blend_func {
+        if self.pipeline_state.is_some()
+            && self.stencil_only_pipeline_state.is_some()
+            && self.pipeline_pixel_format == pixel_format
+            && self.blend_func == blend_func
+        {
             return;
         }
 
@@ -460,14 +440,14 @@ impl Mtl {
         self.stencil_only_pipeline_state = Some(stencil_only_pipeline_state);
 
         // self.pipeline_pixel_format = pixel_format;
-//         unsafe {
-//             gl::BlendFuncSeparate(
-//                 Self::gl_factor(blend_state.src_rgb),
-//                 Self::gl_factor(blend_state.dst_rgb),
-//                 Self::gl_factor(blend_state.src_alpha),
-//                 Self::gl_factor(blend_state.dst_alpha)
-//             );
-//         }
+        //         unsafe {
+        //             gl::BlendFuncSeparate(
+        //                 Self::gl_factor(blend_state.src_rgb),
+        //                 Self::gl_factor(blend_state.dst_rgb),
+        //                 Self::gl_factor(blend_state.src_alpha),
+        //                 Self::gl_factor(blend_state.dst_alpha)
+        //             );
+        //         }
         // self.pipeline
     }
 
@@ -477,7 +457,7 @@ impl Mtl {
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
-        gpu_paint: Params
+        gpu_paint: Params,
     ) {
         self.set_uniforms(encoder, images, gpu_paint, cmd.image, cmd.alpha_mask);
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
@@ -498,13 +478,9 @@ impl Mtl {
                 todo!()
             }
 
-             // Draw fringes
+            // Draw fringes
             if let Some((start, count)) = drawable.stroke_verts {
-                encoder.draw_primitives(
-                    metal::MTLPrimitiveType::TriangleStrip,
-                    start as u64,
-                    count as u64
-                )
+                encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
             }
         }
     }
@@ -516,7 +492,7 @@ impl Mtl {
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
         stencil_paint: Params,
-        fill_paint: Params
+        fill_paint: Params,
     ) {
         encoder.set_cull_mode(metal::MTLCullMode::None);
         encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
@@ -553,11 +529,7 @@ impl Mtl {
             for drawable in &cmd.drawables {
                 if let Some((start, count)) = drawable.stroke_verts {
                     /// draw fans
-                    encoder.draw_primitives(
-                        metal::MTLPrimitiveType::TriangleStrip,
-                        start as u64,
-                        count as u64
-                    );
+                    encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64);
                 }
             }
         }
@@ -565,11 +537,7 @@ impl Mtl {
         // Draws fill.
         encoder.set_depth_stencil_state(&self.fill_stencil_state);
         if let Some((start, count)) = cmd.triangles_verts {
-            encoder.draw_primitives(
-                metal::MTLPrimitiveType::TriangleStrip,
-                start as u64,
-                count as u64
-            );
+            encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64);
         }
         encoder.set_depth_stencil_state(&self.default_stencil_state);
     }
@@ -580,16 +548,12 @@ impl Mtl {
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
-        paint: Params
+        paint: Params,
     ) {
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
-                encoder.draw_primitives(
-                    metal::MTLPrimitiveType::TriangleStrip,
-                    start as u64,
-                    count as u64
-                )
+                encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
             }
         }
     }
@@ -601,7 +565,7 @@ impl Mtl {
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
         paint1: Params,
-        paint2: Params
+        paint2: Params,
     ) {
         /// Fills the stroke base without overlap.
         self.set_uniforms(encoder, images, paint2, cmd.image, cmd.alpha_mask);
@@ -610,11 +574,7 @@ impl Mtl {
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
-                encoder.draw_primitives(
-                    metal::MTLPrimitiveType::TriangleStrip,
-                    start as u64,
-                    count as u64
-                )
+                encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
             }
         }
 
@@ -625,11 +585,7 @@ impl Mtl {
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
                 // unsafe { gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32); }
-                encoder.draw_primitives(
-                    metal::MTLPrimitiveType::TriangleStrip,
-                    start as u64,
-                    count as u64
-                );
+                encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64);
             }
         }
 
@@ -639,11 +595,7 @@ impl Mtl {
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
-                encoder.draw_primitives(
-                    metal::MTLPrimitiveType::TriangleStrip,
-                    start as u64,
-                    count as u64
-                );
+                encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64);
             }
         }
         encoder.set_depth_stencil_state(&self.default_stencil_state);
@@ -655,16 +607,12 @@ impl Mtl {
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
-        paint: Params
+        paint: Params,
     ) {
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
         if let Some((start, count)) = cmd.triangles_verts {
-            encoder.draw_primitives(
-                metal::MTLPrimitiveType::Triangle,
-                start as u64,
-                count as u64
-            );
+            encoder.draw_primitives(metal::MTLPrimitiveType::Triangle, start as u64, count as u64);
         }
     }
 
@@ -674,7 +622,7 @@ impl Mtl {
         images: &ImageStore<MtlTexture>,
         paint: Params,
         image_tex: Option<ImageId>,
-        alpha_tex: Option<ImageId>
+        alpha_tex: Option<ImageId>,
     ) {
         ///
         /// https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1515917-setfragmentbufferoffset?language=objc
@@ -724,20 +672,21 @@ impl Mtl {
         y: u32,
         width: u32,
         height: u32,
-        color: Color) {
-            self.clear_color = color;
-            // self.clear_color = metal::MTLClearColor::new(color.r, color.g, color.b, color.a);
-            self.clear_buffer_on_flush = true;
-            // todo!()
-            // let scissor_rect: metal::MTLScissorRect = todo!();
-            // encoder.set_viewport(viewport);
-//         unsafe {
-//             gl::Enable(gl::SCISSOR_TEST);
-//             gl::Scissor(x as i32, self.view[1] as i32 - (height as i32 + y as i32), width as i32, height as i32);
-//             gl::ClearColor(color.r, color.g, color.b, color.a);
-//             gl::Clear(gl::COLOR_BUFFER_BIT | gl::STENCIL_BUFFER_BIT);
-//             gl::Disable(gl::SCISSOR_TEST);
-//         }
+        color: Color,
+    ) {
+        self.clear_color = color;
+        // self.clear_color = metal::MTLClearColor::new(color.r, color.g, color.b, color.a);
+        self.clear_buffer_on_flush = true;
+        // todo!()
+        // let scissor_rect: metal::MTLScissorRect = todo!();
+        // encoder.set_viewport(viewport);
+        //         unsafe {
+        //             gl::Enable(gl::SCISSOR_TEST);
+        //             gl::Scissor(x as i32, self.view[1] as i32 - (height as i32 + y as i32), width as i32, height as i32);
+        //             gl::ClearColor(color.r, color.g, color.b, color.a);
+        //             gl::Clear(gl::COLOR_BUFFER_BIT | gl::STENCIL_BUFFER_BIT);
+        //             gl::Disable(gl::SCISSOR_TEST);
+        //         }
     }
     fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
         self.render_target = target;
@@ -783,9 +732,8 @@ fn new_render_command_encoder<'a>(
     view_size_buffer: &GPUVar<Size>,
     // index_buffer: &IndexBuffer,
     uniform_buffer: &GPUVar<Params>,
-    clear_buffer_on_flush: bool
+    clear_buffer_on_flush: bool,
 ) -> &'a metal::RenderCommandEncoderRef {
-
     let load_action = if clear_buffer_on_flush {
         metal::MTLLoadAction::Clear
     } else {
@@ -847,12 +795,8 @@ impl Renderer for Mtl {
         self.index_buffer.clear();
 
         match self.render_target {
-            RenderTarget::Screen => {
-
-            }
-            RenderTarget::Image(id) => {
-
-            }
+            RenderTarget::Screen => {}
+            RenderTarget::Image(id) => {}
         }
 
         let clear_color: Color = self.clear_color;
@@ -881,22 +825,23 @@ impl Renderer for Mtl {
             self.set_composite_operation(cmd.composite_operation, pixel_format);
 
             match cmd.cmd_type {
-                CommandType::ConvexFill { params } => {
-                    self.convex_fill(&encoder, images, cmd, params)
-                },
-                CommandType::ConcaveFill { stencil_params, fill_params } => {
-                    self.concave_fill(&encoder, images, cmd, stencil_params, fill_params)
-                },
-                CommandType::Stroke { params } => {
-                    self.stroke(&encoder, images, cmd, params)
-                },
+                CommandType::ConvexFill { params } => self.convex_fill(&encoder, images, cmd, params),
+                CommandType::ConcaveFill {
+                    stencil_params,
+                    fill_params,
+                } => self.concave_fill(&encoder, images, cmd, stencil_params, fill_params),
+                CommandType::Stroke { params } => self.stroke(&encoder, images, cmd, params),
                 CommandType::StencilStroke { params1, params2 } => {
                     self.stencil_stroke(&encoder, images, cmd, params1, params2)
-                },
-                CommandType::Triangles { params } => {
-                    self.triangles(&encoder, images, cmd, params)
-                },
-                CommandType::ClearRect { x, y, width, height, color } => {
+                }
+                CommandType::Triangles { params } => self.triangles(&encoder, images, cmd, params),
+                CommandType::ClearRect {
+                    x,
+                    y,
+                    width,
+                    height,
+                    color,
+                } => {
                     self.clear_rect(&encoder, x, y, width, height, color);
                 }
                 CommandType::SetRenderTarget(target) => {
@@ -927,7 +872,13 @@ impl Renderer for Mtl {
         MtlTexture::new(&self.device, &self.command_queue, info)
     }
 
-    fn update_image(&mut self, image: &mut Self::Image, data: ImageSource, x: usize, y: usize) ->  Result<(), ErrorKind> {
+    fn update_image(
+        &mut self,
+        image: &mut Self::Image,
+        data: ImageSource,
+        x: usize,
+        y: usize,
+    ) -> Result<(), ErrorKind> {
         image.update(data, x, y)
     }
 
@@ -946,7 +897,19 @@ impl Renderer for Mtl {
         let w = size.w as usize;
         let h = size.h as usize;
 
-        let mut image = ImgVec::new(vec![RGBA8 {r:255, g:255, b:255, a: 255}; w*h], w, h);
+        let mut image = ImgVec::new(
+            vec![
+                RGBA8 {
+                    r: 255,
+                    g: 255,
+                    b: 255,
+                    a: 255
+                };
+                w * h
+            ],
+            w,
+            h,
+        );
         todo!()
         // unsafe {
         //     gl::ReadPixels(0, 0, self.view[0] as i32, self.view[1] as i32, gl::RGBA, gl::UNSIGNED_BYTE, image.buf_mut().as_ptr() as *mut GLvoid);
@@ -959,7 +922,6 @@ impl Renderer for Mtl {
     }
 }
 
-
 mod tests {
     use super::triangle_fan_indices;
 
@@ -968,6 +930,5 @@ mod tests {
         let expected: Vec<u32> = vec![0, 1, 2, 0, 2, 3, 0, 3, 4];
         let result = triangle_fan_indices(5);
         assert!(expected == result);
-
     }
 }

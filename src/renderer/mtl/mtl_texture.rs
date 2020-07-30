@@ -3,12 +3,11 @@ use crate::{ErrorKind, ImageFlags, ImageInfo, ImageSource, PixelFormat};
 use image::{DynamicImage, GenericImageView};
 use rgb::ComponentBytes;
 
-
 impl From<PixelFormat> for metal::MTLPixelFormat {
     fn from(a: PixelFormat) -> Self {
         match a {
             // PixelFormat::Rgba8 | PixelFormat::Rgb8
-                //  => metal::MTLPixelFormat::RGBA8Unorm,
+            //  => metal::MTLPixelFormat::RGBA8Unorm,
             PixelFormat::Rgba8 => metal::MTLPixelFormat::RGBA8Unorm,
             PixelFormat::Rgb8 => todo!(),
             PixelFormat::Gray8 => metal::MTLPixelFormat::R8Unorm,
@@ -26,7 +25,7 @@ pub struct MtlTexture {
 impl MtlTexture {
     pub fn pseudo_texture(
         device: &metal::DeviceRef,
-        command_queue: &metal::CommandQueueRef
+        command_queue: &metal::CommandQueueRef,
     ) -> Result<Self, ErrorKind> {
         let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
         Self::new(device, command_queue, info)
@@ -36,7 +35,7 @@ impl MtlTexture {
     pub fn new(
         device: &metal::DeviceRef,
         command_queue: &metal::CommandQueueRef,
-        info: ImageInfo
+        info: ImageInfo,
     ) -> Result<Self, ErrorKind> {
         // println!("{:?}", info.format());
         let generate_mipmaps = info.flags().contains(ImageFlags::GENERATE_MIPMAPS);
@@ -57,16 +56,18 @@ impl MtlTexture {
             let size = metal::MTLSize {
                 width: info.width() as u64,
                 height: info.height() as u64,
-                depth: 1
+                depth: 1,
             };
             desc.set_mipmap_level_count_for_size(size);
         } else {
             desc.set_mipmap_level_count(1);
         };
 
-        desc.set_usage(metal::MTLTextureUsage::RenderTarget |
-                        metal::MTLTextureUsage::ShaderWrite |
-                        metal::MTLTextureUsage::ShaderRead);
+        desc.set_usage(
+            metal::MTLTextureUsage::RenderTarget
+                | metal::MTLTextureUsage::ShaderWrite
+                | metal::MTLTextureUsage::ShaderRead,
+        );
 
         // todo if simulator
         // desc.set_resource_options(metal::MTLResourceOptions::StorageModePrivate);
@@ -74,13 +75,7 @@ impl MtlTexture {
         let tex = device.new_texture(&desc);
 
         if generate_mipmaps {
-            let command_buffer = command_queue.new_command_buffer();
-            let encoder = command_buffer.new_blit_command_encoder();
-            encoder.generate_mipmaps(&tex);
-
-            encoder.end_encoding();
-            command_buffer.commit();
-            command_buffer.wait_until_completed();
+            crate::generate_mipmaps(command_queue, &tex);
         }
 
         let sampler_desc = metal::SamplerDescriptor::new();
@@ -125,25 +120,23 @@ impl MtlTexture {
     //     self.id
     // }
 
-    pub fn replace_region(
-        &self,
-        region: metal::MTLRegion,
-        mipmap_level: usize,
-        data: &[u8],
-        stride: usize,
-    ) {
-        self.tex.replace_region(
-            region,
-            mipmap_level as u64,
-            data.as_ptr() as *const _,
-            stride as u64,
-        )
+    pub fn replace_region(&self, region: metal::MTLRegion, mipmap_level: usize, data: &[u8], stride: usize) {
+        self.tex
+            .replace_region(region, mipmap_level as u64, data.as_ptr() as *const _, stride as u64)
     }
 
     pub fn update(&mut self, src: ImageSource, x: usize, y: usize) -> Result<(), ErrorKind> {
         let (width, height) = src.dimensions();
-        let origin = metal::MTLOrigin { x: x as u64, y: y as u64, z: 0 };
-        let size = metal::MTLSize { width: width as u64, height: height as u64, depth: 0 };
+        let origin = metal::MTLOrigin {
+            x: x as u64,
+            y: y as u64,
+            z: 0,
+        };
+        let size = metal::MTLSize {
+            width: width as u64,
+            height: height as u64,
+            depth: 0,
+        };
         let region = metal::MTLRegion { origin, size };
 
         let data_offset: usize;
@@ -168,7 +161,6 @@ impl MtlTexture {
         //     gl::PixelStorei(gl::UNPACK_ROW_LENGTH, size.0 as i32);
         // }
 
-
         match src {
             ImageSource::Gray(data_) => {
                 stride = width;
@@ -187,7 +179,6 @@ impl MtlTexture {
             }
         }
 
-
         if self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS) {
             todo!()
             // unsafe {
@@ -196,15 +187,9 @@ impl MtlTexture {
             // }
         }
 
-        self.replace_region(
-            region,
-            1,
-            &data[data_offset..],
-            stride,
-        );
+        self.replace_region(region, 1, &data[data_offset..], stride);
         Ok(())
     }
-
 
     pub fn delete(self) {
         // unsafe {
@@ -216,7 +201,6 @@ impl MtlTexture {
         self.info
     }
 }
-
 
 // this is from nvg-metal
 // pub struct Texture {
@@ -302,7 +286,6 @@ impl MtlTexture {
 //                 metal::MTLSamplerAddressMode::ClampToEdge
 //             };
 //         sampler_desc.set_address_mode_s(address_mode_s);
-
 
 //         let address_mode_t =
 //             if flags.contains(nvg::ImageFlags::REPEATX) {

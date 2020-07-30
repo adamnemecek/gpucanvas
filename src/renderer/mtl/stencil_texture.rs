@@ -1,6 +1,4 @@
-use crate::{
-    Size
-};
+use crate::Size;
 
 pub fn create_stencil_texture_descriptor(size: Size) -> metal::TextureDescriptor {
     let desc = metal::TextureDescriptor::new();
@@ -52,8 +50,6 @@ impl StencilTexture {
     // pub fn into_(&self) -> &'_ metal::TextureRef {
     //     todo!()
     // }
-
-
 }
 
 // impl<'a> AsRef<metal::Texture> for &'a StencilTexture {
@@ -61,9 +57,6 @@ impl StencilTexture {
 //         todo!()
 //     }
 // }
-
-
-
 
 // impl<'a> Into<&'a metal::TextureRef> for StencilTexture<'a> {
 //     fn into(self) -> &'a metal::TextureRef {

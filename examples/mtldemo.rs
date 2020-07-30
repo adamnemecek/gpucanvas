@@ -1,47 +1,31 @@
-
-use std::time::Instant;
+use cocoa::{appkit::NSView, base::id as cocoa_id, foundation::NSRange};
 use std::f32::consts::PI;
-use cocoa::{
-    appkit::{NSView},
-    base::id as cocoa_id,
-    foundation::{NSRange},
-};
+use std::time::Instant;
 
 use core_graphics::geometry::CGSize;
-use objc::runtime::YES;
 use metal::*;
-use winit::platform::macos::WindowExtMacOS;
+use objc::runtime::YES;
 use std::mem;
+use winit::platform::macos::WindowExtMacOS;
 
 use winit::{
     event::{
         ElementState,
-        Event, WindowEvent,
-        MouseScrollDelta,
+        Event,
         // WindowEvent::{
-            KeyboardInput, VirtualKeyCode,
-            MouseButton,
+        KeyboardInput,
+        MouseButton,
         // }
+        MouseScrollDelta,
+        VirtualKeyCode,
+        WindowEvent,
     },
-    event_loop::ControlFlow
+    event_loop::ControlFlow,
 };
 
 use gpucanvas::{
-    Align,
-    Baseline,
-    Canvas,
-    Color,
-    FillRule,
-    FontId,
-    ImageFlags,
-    ImageId,
-    LineCap,
-    LineJoin,
-    Paint,
-    Path,
-    Renderer,
-    Solidity,
-    renderer::Mtl
+    renderer::Mtl, Align, Baseline, Canvas, Color, FillRule, FontId, ImageFlags, ImageId, LineCap, LineJoin, Paint,
+    Path, Renderer, Solidity,
 };
 
 pub fn quantize(a: f32, d: f32) -> f32 {
@@ -53,7 +37,6 @@ struct Fonts {
     bold: FontId,
     icons: FontId,
 }
-
 
 fn main() {
     let events_loop = winit::event_loop::EventLoop::new();
@@ -83,7 +66,6 @@ fn main() {
 
     // let shader_code = include_bytes!("src/renderer/mtl/shaders.metal");
 
-
     // let library = device.new_library_with_source(
     //     shader_code,
     // );
@@ -101,13 +83,13 @@ fn main() {
     };
 
     let images: Vec<ImageId> = (1..=12)
-    .map(|i| {
-        let name = format!("examples/assets/images/image{}.jpg", i);
-        canvas
-            .load_image_file(name, ImageFlags::empty())
-            .expect("cannot load image")
-    })
-    .collect();
+        .map(|i| {
+            let name = format!("examples/assets/images/image{}.jpg", i);
+            canvas
+                .load_image_file(name, ImageFlags::empty())
+                .expect("cannot load image")
+        })
+        .collect();
 
     //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
 
@@ -130,40 +112,54 @@ fn main() {
 
         match event {
             // Event::LoopDestroyed => return,
-            Event::WindowEvent {  event, .. } => match event {
+            Event::WindowEvent { event, .. } => match event {
                 WindowEvent::Resized(physical_size) => {
                     layer.set_drawable_size(CGSize::new(size.width as f64, size.height as f64));
-                },
-                WindowEvent::CursorMoved { device_id: _, position, ..} => {
+                }
+                WindowEvent::CursorMoved {
+                    device_id: _, position, ..
+                } => {
                     if dragging {
                         let p0 = canvas.transform().inversed().transform_point(mousex, mousey);
-                        let p1 = canvas.transform().inversed().transform_point(position.x as f32, position.y as f32);
+                        let p1 = canvas
+                            .transform()
+                            .inversed()
+                            .transform_point(position.x as f32, position.y as f32);
 
-                        canvas.translate(
-                            p1.0 - p0.0,
-                            p1.1 - p0.1,
-                        );
+                        canvas.translate(p1.0 - p0.0, p1.1 - p0.1);
                     }
 
                     mousex = position.x as f32;
                     mousey = position.y as f32;
-                },
-                WindowEvent::MouseWheel { device_id: _, delta, .. } => match delta {
+                }
+                WindowEvent::MouseWheel {
+                    device_id: _, delta, ..
+                } => match delta {
                     MouseScrollDelta::LineDelta(_, y) => {
                         let pt = canvas.transform().inversed().transform_point(mousex, mousey);
                         canvas.translate(pt.0, pt.1);
                         canvas.scale(1.0 + (y / 10.0), 1.0 + (y / 10.0));
                         canvas.translate(-pt.0, -pt.1);
-                    },
-                    _ => ()
-                },
-                WindowEvent::MouseInput { button: MouseButton::Left, state, .. } => {
-                    match state {
-                        ElementState::Pressed => dragging = true,
-                        ElementState::Released => dragging = false,
                     }
+                    _ => (),
                 },
-                WindowEvent::KeyboardInput { input: KeyboardInput { virtual_keycode: Some(VirtualKeyCode::S), state: ElementState::Pressed, .. }, .. } => {
+                WindowEvent::MouseInput {
+                    button: MouseButton::Left,
+                    state,
+                    ..
+                } => match state {
+                    ElementState::Pressed => dragging = true,
+                    ElementState::Released => dragging = false,
+                },
+                WindowEvent::KeyboardInput {
+                    input:
+                        KeyboardInput {
+                            virtual_keycode: Some(VirtualKeyCode::S),
+                            state: ElementState::Pressed,
+                            ..
+                        },
+                    ..
+                } => {
                     if let Some(screenshot_image_id) = screenshot_image_id {
                         canvas.delete_image(screenshot_image_id);
                     }
@@ -171,10 +167,8 @@ fn main() {
                     if let Ok(image) = canvas.screenshot() {
                         screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
                     }
-                },
-                WindowEvent::CloseRequested => {
-                    *control_flow = ControlFlow::Exit
                 }
+                WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                 _ => (),
             },
             Event::RedrawRequested(_) => {
@@ -191,9 +185,9 @@ fn main() {
                 let size = layer.drawable_size();
                 // let size = Size::new(size.width, size.height);
                 let width = size.width;
-                let height= size.height;
+                let height = size.height;
 
-                let dpi_factor: f32 = 1.0;//todo
+                let dpi_factor: f32 = 1.0; //todo
 
                 let t = start.elapsed().as_secs_f32();
 
