@@ -26,7 +26,7 @@ pub struct MtlTexture {
 impl MtlTexture {
     pub fn pseudo_texture(
         device: &metal::DeviceRef,
-        command_queue: &metal::CommandQueue
+        command_queue: &metal::CommandQueueRef
     ) -> Result<Self, ErrorKind> {
         let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
         Self::new(device, command_queue, info)
@@ -34,8 +34,8 @@ impl MtlTexture {
 
     // called renderCreateTextureWithType...
     pub fn new(
-        device: &metal::Device,
-        command_queue: &metal::CommandQueue,
+        device: &metal::DeviceRef,
+        command_queue: &metal::CommandQueueRef,
         info: ImageInfo
     ) -> Result<Self, ErrorKind> {
         // println!("{:?}", info.format());
@@ -64,82 +64,12 @@ impl MtlTexture {
             desc.set_mipmap_level_count(1);
         };
 
-        // todo if macos
-        // desc.set_resource_options(metal::MTLResourceOptions::StorageModePrivate);
         desc.set_usage(metal::MTLTextureUsage::RenderTarget |
                         metal::MTLTextureUsage::ShaderWrite |
                         metal::MTLTextureUsage::ShaderRead);
 
-        //let size = src.dimensions();
-
-        // let mut texture = Texture {
-        //     id: 0,
-        //     info: info
-        // };
-
-        // unsafe {
-        //     gl::GenTextures(1, &mut texture.id);
-        //     gl::BindTexture(gl::TEXTURE_2D, texture.id);
-        //     gl::PixelStorei(gl::UNPACK_ALIGNMENT, 1);
-        //     gl::PixelStorei(gl::UNPACK_ROW_LENGTH, texture.info.width() as i32);
-        //     gl::PixelStorei(gl::UNPACK_SKIP_PIXELS, 0);
-        //     gl::PixelStorei(gl::UNPACK_SKIP_ROWS, 0);
-        // }
-
-        let data_offset: usize;
-        let stride: usize;
-
-        match info.format() {
-            PixelFormat::Gray8 => {
-                todo!("mtltexture::new grey8");
-                // let format = if opengles { gl::LUMINANCE } else { gl::RED };
-
-                // gl::TexImage2D(
-                //     gl::TEXTURE_2D,
-                //     0,
-                //     format as i32,
-                //     texture.info.width() as i32,
-                //     texture.info.height() as i32,
-                //     0,
-                //     format,
-                //     gl::UNSIGNED_BYTE,
-                //     ptr::null()
-                //     //data.buf().as_ptr() as *const GLvoid
-                // );
-            },
-            PixelFormat::Rgb8 => {
-                todo!()
-                // gl::TexImage2D(
-                //     gl::TEXTURE_2D,
-                //     0,
-                //     gl::RGB as i32,
-                //     texture.info.width() as i32,
-                //     texture.info.height() as i32,
-                //     0,
-                //     gl::RGB,
-                //     gl::UNSIGNED_BYTE,
-                //     ptr::null(),
-                //     //data.buf().as_ptr() as *const GLvoid
-                // );
-            },
-            PixelFormat::Rgba8 => {
-                todo!("mtltexture::new Rgba8");
-                // stride = 4 * self.width();
-                // data_offset = y * stride + x * 4;
-                // gl::TexImage2D(
-                //     gl::TEXTURE_2D,
-                //     0,
-                //     gl::RGBA as i32,
-                //     texture.info.width() as i32,
-                //     texture.info.height() as i32,
-                //     0,
-                //     gl::RGBA,
-                //     gl::UNSIGNED_BYTE,
-                //     ptr::null(),
-                //     //data.buf().as_ptr() as *const GLvoid
-                // );
-            },
-        }
+        // todo if simulator
+        // desc.set_resource_options(metal::MTLResourceOptions::StorageModePrivate);
 
         let tex = device.new_texture(&desc);
 

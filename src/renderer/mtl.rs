@@ -284,7 +284,7 @@ impl Mtl {
         };
 
         // pseudosampler sescriptor
-        let pseudo_texture = MtlTexture::pseudo_texture(device).unwrap();
+        let pseudo_texture = MtlTexture::pseudo_texture(device, &command_queue).unwrap();
         let stencil_texture = StencilTexture::new(&device, drawable_size.into());
 
         // Initializes default blend states.
