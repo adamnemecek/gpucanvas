@@ -37,7 +37,6 @@ winit = "0.22"
 cocoa = "0.20"
 core-graphics = "0.19"
 
-
 [dependencies.objc]
 version = "0.2.4"
 features = ["objc_exception"]

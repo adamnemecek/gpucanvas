@@ -3,6 +3,16 @@ use crate::{ErrorKind, ImageFlags, ImageInfo, ImageSource, PixelFormat};
 use image::{DynamicImage, GenericImageView};
 use rgb::ComponentBytes;
 
+
+impl From<PixelFormat> for metal::MTLPixelFormat {
+    fn from(a: PixelFormat) -> Self {
+        match a {
+            PixelFormat::Rgba8 => metal::MTLPixelFormat::RGBA8Unorm,
+            PixelFormat::Rgb8 => todo!(),//metal::MTLPixelFormat::RGB8Unorm,
+            PixelFormat::Gray8 => metal::MTLPixelFormat::R8Unorm,
+        }
+    }
+}
 pub struct MtlTexture {
     pub info: ImageInfo,
     pub tex: metal::Texture,
@@ -13,13 +23,13 @@ pub struct MtlTexture {
 
 
 impl MtlTexture {
-    // pub fn pseudo_texture(device: &metal::Device) -> Result<Self, ErrorKind> {
-    //     let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
-    //     let sampler = metal::SamplerDescriptor::new();
+    pub fn pseudo_texture(device: &metal::DeviceRef) -> Result<Self, ErrorKind> {
+        let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
+        let sampler = metal::SamplerDescriptor::new();
 
-    //     // Self::new(device, info)
-    //     todo!()
-    // }
+        // Self::new(device, info)
+        todo!()
+    }
 
     // called renderCreateTextureWithType...
     pub fn new(
@@ -63,7 +73,6 @@ impl MtlTexture {
                         metal::MTLTextureUsage::ShaderWrite |
                         metal::MTLTextureUsage::ShaderRead);
 
-        // let id = alloc_texture_id();
         //let size = src.dimensions();
 
         // let mut texture = Texture {

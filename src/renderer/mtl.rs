@@ -205,7 +205,7 @@ pub struct Mtl {
     render_target: RenderTarget,
 
     // todo
-    // pseudo_texture: MtlTexture,
+    pseudo_texture: MtlTexture,
     // pseudo_sampler:
 }
 
@@ -284,7 +284,7 @@ impl Mtl {
         };
 
         // pseudosampler sescriptor
-        // let pseudo_texture = MtlTexture::pseudo_texture(&device);
+        let pseudo_texture = MtlTexture::pseudo_texture(device).unwrap();
         let stencil_texture = StencilTexture::new(&device, drawable_size.into());
 
         // Initializes default blend states.
@@ -394,7 +394,7 @@ impl Mtl {
             vertex_descriptor: vertex_descriptor.to_owned(),
             pipeline_pixel_format: metal::MTLPixelFormat::Invalid,
             render_target: RenderTarget::Screen,
-            // pseudo_texture: pseudo_texture.unwrap(),
+            pseudo_texture,
             clear_color: Color::black(),
             device: device.to_owned(),
         }
@@ -687,7 +687,6 @@ impl Mtl {
         // let arr = UniformArray::from(paint);
         todo!();
 
-
         let tex = if let Some(id) = image_tex {
             images.get(id).unwrap()
         } else {
@@ -698,19 +697,19 @@ impl Mtl {
         encoder.set_fragment_texture(0, Some(&tex.tex));
         encoder.set_fragment_sampler_state(0, Some(&tex.sampler));
 
-//         unsafe {
-//             gl::ActiveTexture(gl::TEXTURE0);
-//             gl::BindTexture(gl::TEXTURE_2D, tex);
-//         }
+        // unsafe {
+        //     gl::ActiveTexture(gl::TEXTURE0);
+        //     gl::BindTexture(gl::TEXTURE_2D, tex);
+        // }
 
-//         let masktex = alpha_tex.and_then(|id| images.get(id)).map_or(0, |tex| tex.id());
+        // let masktex = alpha_tex.and_then(|id| images.get(id)).map_or(0, |tex| tex.id());
 
-//         unsafe {
-//             gl::ActiveTexture(gl::TEXTURE0 + 1);
-//             gl::BindTexture(gl::TEXTURE_2D, masktex);
-//         }
+        // unsafe {
+        //     gl::ActiveTexture(gl::TEXTURE0 + 1);
+        //     gl::BindTexture(gl::TEXTURE_2D, masktex);
+        // }
 
-//         self.check_error("set_uniforms texture");
+        // self.check_error("set_uniforms texture");
     }
 
     // from warrenmoore
