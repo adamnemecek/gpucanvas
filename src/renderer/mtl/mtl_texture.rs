@@ -161,10 +161,7 @@ impl MtlTexture {
             return Err(ErrorKind::ImageUpdateWithDifferentFormat);
         }
 
-        let generate_mipmaps = self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS);
-
         let region = MTLRegionMake2D(x, y, width, height);
-
         let stride: usize;
         // let data_offset: usize;
         let data;
@@ -182,14 +179,15 @@ impl MtlTexture {
             }
             ImageSource::Rgb(_) => {
                 unimplemented!(
-                    "Metal backend doesn't support rgb. Image should have been converted in load_image_file"
+                    "Metal backend doesn't support RGB pixel format. Image should have been converted in load_image_file"
                 );
             }
         }
 
         self.replace_region(region, data, stride);
 
-        if self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS) {
+        let generate_mipmaps = self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS);
+        if generate_mipmaps {
             super::generate_mipmaps(&self.command_queue, &self.tex);
         }
 
