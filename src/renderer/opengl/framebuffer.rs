@@ -1,5 +1,5 @@
 
-use super::{gl, gl::types::*, Texture};
+use super::{gl, gl::types::*, GlTexture};
 
 use crate::ErrorKind;
 
@@ -9,7 +9,7 @@ pub struct Framebuffer {
 }
 
 impl Framebuffer {
-    pub fn new(texture: &Texture) -> Result<Self, ErrorKind> {
+    pub fn new(texture: &GlTexture) -> Result<Self, ErrorKind> {
         let mut fbo = 0;
 
         unsafe {
