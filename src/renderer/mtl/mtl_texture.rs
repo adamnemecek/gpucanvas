@@ -23,14 +23,13 @@ pub struct MtlTexture {
     pub device: metal::Device,
 }
 
-
 impl MtlTexture {
-    pub fn pseudo_texture(device: &metal::DeviceRef) -> Result<Self, ErrorKind> {
+    pub fn pseudo_texture(
+        device: &metal::DeviceRef,
+        command_queue: &metal::CommandQueue
+    ) -> Result<Self, ErrorKind> {
         let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
-        let sampler = metal::SamplerDescriptor::new();
-
-        // Self::new(device, info)
-        todo!()
+        Self::new(device, command_queue, info)
     }
 
     // called renderCreateTextureWithType...
