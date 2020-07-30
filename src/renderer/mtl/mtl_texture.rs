@@ -48,7 +48,6 @@ impl MtlTexture {
 
         let pixel_format = info.format().into();
 
-
         let desc = metal::TextureDescriptor::new();
         desc.set_texture_type(metal::MTLTextureType::D2);
         desc.set_pixel_format(pixel_format);
@@ -117,7 +116,7 @@ impl MtlTexture {
             tex,
             sampler,
             device: device.to_owned(),
-            command_queue: command_queue.to_owned()
+            command_queue: command_queue.to_owned(),
         })
     }
 
@@ -176,7 +175,9 @@ impl MtlTexture {
                 data = data_.buf().as_bytes();
             }
             ImageSource::Rgb(_) => {
-                unimplemented!("Metal backend doesn't support rgb. Image should have been converted in load_image_file");
+                unimplemented!(
+                    "Metal backend doesn't support rgb. Image should have been converted in load_image_file"
+                );
             }
         }
 

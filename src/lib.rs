@@ -418,17 +418,17 @@ where
         use ::image::DynamicImage;
 
         fn convert_rgb_if_needed(img: DynamicImage) -> DynamicImage {
-            #[cfg(not(feature = "convert-rgb"))] {
+            #[cfg(not(feature = "convert-rgb"))]
+            {
                 println!("not-convert-rgb");
                 img
             }
-            #[cfg(feature = "convert-rgb")] {
+            #[cfg(feature = "convert-rgb")]
+            {
                 println!("convert-rgb");
                 match img {
-                    DynamicImage::ImageRgb8(_) => {
-                        DynamicImage::ImageRgba8(img.to_rgba())
-                    },
-                    _ => img
+                    DynamicImage::ImageRgb8(_) => DynamicImage::ImageRgba8(img.to_rgba()),
+                    _ => img,
                 }
             }
         }
