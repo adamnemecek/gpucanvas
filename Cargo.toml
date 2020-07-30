@@ -31,7 +31,7 @@ serde = { version = "1.0", optional = true, features = ["derive"] }
 # metal features
 metal = { git = "https://github.com/gfx-rs/metal-rs/", rev = "4a643b8" }
 memoffset = "*"
-metalgear = { git = "https://github.com/adamnemecek/metalgear", rev = "16748ea" }
+metalgear = { git = "https://github.com/adamnemecek/metalgear", rev = "32bf494" }
 static_assertions = "*"
 winit = "0.22"
 cocoa = "0.20"

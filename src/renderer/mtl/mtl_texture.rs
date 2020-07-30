@@ -7,8 +7,10 @@ use rgb::ComponentBytes;
 impl From<PixelFormat> for metal::MTLPixelFormat {
     fn from(a: PixelFormat) -> Self {
         match a {
-            PixelFormat::Rgba8 | PixelFormat::Rgb8
-                 => metal::MTLPixelFormat::RGBA8Unorm,
+            // PixelFormat::Rgba8 | PixelFormat::Rgb8
+                //  => metal::MTLPixelFormat::RGBA8Unorm,
+            PixelFormat::Rgba8 => metal::MTLPixelFormat::RGBA8Unorm,
+            PixelFormat::Rgb8 => todo!(),
             PixelFormat::Gray8 => metal::MTLPixelFormat::R8Unorm,
         }
     }
