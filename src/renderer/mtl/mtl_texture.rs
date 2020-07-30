@@ -142,7 +142,7 @@ impl MtlTexture {
     #[inline]
     pub fn replace_region(&self, region: metal::MTLRegion, data: &[u8], stride: usize) {
         self.tex
-            .replace_region(region, 1, data.as_ptr() as *const _, stride as u64)
+            .replace_region(region, 0, data.as_ptr() as *const _, stride as u64)
     }
 
     pub fn update(&mut self, src: ImageSource, x: usize, y: usize) -> Result<(), ErrorKind> {
@@ -187,9 +187,7 @@ impl MtlTexture {
             }
         }
 
-        println!("before replace");
         self.replace_region(region, data, stride);
-        println!("after replace");
 
         if self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS) {
             super::generate_mipmaps(&self.command_queue, &self.tex);
