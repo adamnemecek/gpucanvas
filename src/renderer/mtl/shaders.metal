@@ -26,18 +26,31 @@
 
 using namespace metal;
 
-typedef struct {
+struct Vertex {
   float2 pos [[attribute(0)]];
   float2 tcoord [[attribute(1)]];
-} Vertex;
+};
 
-typedef struct {
-  float4 pos  [[position]];
+struct RasterizerData {
+  float4 pos [[position]];
   float2 fpos;
   float2 ftcoord;
-} RasterizerData;
+};
 
-typedef struct  {
+// float scissorMat[12]; // matrices are actually 3 vec4s
+// float paintMat[12];
+// struct NVGcolor innerCol;
+// struct NVGcolor outerCol;
+// float scissorExt[2];
+// float scissorScale[2];
+// float extent[2];
+// float radius;
+// float feather;
+// float strokeMult;
+// float strokeThr;
+// float texType;
+// float type;
+struct Uniforms {
   float3x3 scissorMat;
   float3x3 paintMat;
   float4 innerCol;
@@ -51,9 +64,7 @@ typedef struct  {
   float strokeThr;
   int texType;
   int type;
-  float hasMask;
-  float padding[19];
-} Uniforms;
+};
 
 float scissorMask(constant Uniforms& uniforms, float2 p);
 float sdroundrect(constant Uniforms& uniforms, float2 pt);

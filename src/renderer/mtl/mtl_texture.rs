@@ -53,7 +53,7 @@ impl MtlTexture {
         command_queue: &metal::CommandQueueRef,
         info: ImageInfo,
     ) -> Result<Self, ErrorKind> {
-        println!("format: {:?}", info.format());
+        // println!("format: {:?}", info.format());
         assert!(info.format() != PixelFormat::Rgb8);
 
         let generate_mipmaps = info.flags().contains(ImageFlags::GENERATE_MIPMAPS);

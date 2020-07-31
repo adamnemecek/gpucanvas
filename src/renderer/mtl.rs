@@ -21,50 +21,50 @@ use stencil_texture::StencilTexture;
 mod mtl_ext;
 pub use mtl_ext::generate_mipmaps;
 
-pub struct PathsLength {
-    pub vertex_count: usize,
-    pub index_count: usize,
-    pub stroke_count: usize,
-    pub triangle_count: usize,
-}
+// pub struct PathsLength {
+//     pub vertex_count: usize,
+//     pub index_count: usize,
+//     pub stroke_count: usize,
+//     pub triangle_count: usize,
+// }
 
-impl PathsLength {
-    pub fn new(cmds: &[Command]) -> Self {
-        let mut vertex_count = 0;
-        let mut index_count = 0;
-        let mut stroke_count = 0;
-        let mut triangle_count = 0;
+// impl PathsLength {
+//     pub fn new(cmds: &[Command]) -> Self {
+//         let mut vertex_count = 0;
+//         let mut index_count = 0;
+//         let mut stroke_count = 0;
+//         let mut triangle_count = 0;
 
-        for cmd in cmds {
-            for drawable in &cmd.drawables {
-                if let Some((start, count)) = drawable.fill_verts {
-                    if count > 2 {
-                        vertex_count += count;
-                        index_count += (count - 2) * 3;
-                    }
-                }
+//         for cmd in cmds {
+//             for drawable in &cmd.drawables {
+//                 if let Some((start, count)) = drawable.fill_verts {
+//                     if count > 2 {
+//                         vertex_count += count;
+//                         index_count += (count - 2) * 3;
+//                     }
+//                 }
 
-                if let Some((start, count)) = drawable.stroke_verts {
-                    if count > 0 {
-                        vertex_count += count + 2;
-                        stroke_count += count;
-                    }
-                }
-            }
+//                 if let Some((start, count)) = drawable.stroke_verts {
+//                     if count > 0 {
+//                         vertex_count += count + 2;
+//                         stroke_count += count;
+//                     }
+//                 }
+//             }
 
-            if let Some((start, count)) = cmd.triangles_verts {
-                triangle_count += count;
-            }
-        }
+//             if let Some((start, count)) = cmd.triangles_verts {
+//                 triangle_count += count;
+//             }
+//         }
 
-        Self {
-            vertex_count,
-            index_count,
-            stroke_count,
-            triangle_count,
-        }
-    }
-}
+//         Self {
+//             vertex_count,
+//             index_count,
+//             stroke_count,
+//             triangle_count,
+//         }
+//     }
+// }
 
 // mod uniform_array;
 // use uniform_array::UniformArray;
@@ -154,7 +154,7 @@ pub struct Mtl {
     vertex_descriptor: metal::VertexDescriptor,
 
     blend_func: Blend,
-    clear_buffer_on_flush: bool,
+    // clear_buffer_on_flush: bool,
 
     ///
     /// fill and stroke have a stencil, anti_alias_stencil and shape_stencil
@@ -201,7 +201,7 @@ pub struct VertexOffsets {
 
 impl VertexOffsets {
     pub fn new() -> Self {
-        use Vertex;
+        // use Vertex;
         let x = offset_of!(Vertex, x);
         let u = offset_of!(Vertex, u);
         Self { x, u }
@@ -238,7 +238,7 @@ impl Mtl {
                 .expect("frag shader not found")
         };
 
-        let clear_buffer_on_flush = false;
+        // let clear_buffer_on_flush = false;
 
         let drawable_size = layer.drawable_size();
 
@@ -355,7 +355,7 @@ impl Mtl {
             frag_func,
             vert_func,
             pipeline_state: None,
-            clear_buffer_on_flush,
+            // clear_buffer_on_flush,
             default_stencil_state,
             fill_shape_stencil_state,
             fill_anti_alias_stencil_state,
@@ -465,7 +465,7 @@ impl Mtl {
                 /// offset is in bytes
                 let index_buffer_offset = start * self.index_size;
 
-                /// original uses fans
+                // original uses fans
                 // encoder.draw_indexed_primitives(
                 //     metal::MTLPrimitiveType::Triangle,
                 //     count as u64,
@@ -473,7 +473,7 @@ impl Mtl {
                 //     self.index_buffer.as_ref(),
                 //     index_buffer_offset as u64,
                 // );
-                todo!()
+                // todo!()
             }
 
             // Draw fringes
@@ -631,31 +631,19 @@ impl Mtl {
         // encoder.set_fragment_buffer_offset(0, offset as u64);
         // todo!();
         // let arr = UniformArray::from(paint);
-        todo!();
+        // encoder.set_fragment_buffer(index, buffer, offset)
+
 
         let tex = if let Some(id) = image_tex {
             images.get(id).unwrap()
         } else {
-            // &self.pseudo_texture
-            todo!()
+            &self.pseudo_texture
         };
 
         encoder.set_fragment_texture(0, Some(&tex.tex));
         encoder.set_fragment_sampler_state(0, Some(&tex.sampler));
 
-        // unsafe {
-        //     gl::ActiveTexture(gl::TEXTURE0);
-        //     gl::BindTexture(gl::TEXTURE_2D, tex);
-        // }
-
-        // let masktex = alpha_tex.and_then(|id| images.get(id)).map_or(0, |tex| tex.id());
-
-        // unsafe {
-        //     gl::ActiveTexture(gl::TEXTURE0 + 1);
-        //     gl::BindTexture(gl::TEXTURE_2D, masktex);
-        // }
-
-        // self.check_error("set_uniforms texture");
+        // todo alpha mask
     }
 
     // from warrenmoore
@@ -673,8 +661,10 @@ impl Mtl {
         color: Color,
     ) {
         self.clear_color = color;
+
+        // encoder.set_scissor()
         // self.clear_color = metal::MTLClearColor::new(color.r, color.g, color.b, color.a);
-        self.clear_buffer_on_flush = true;
+        // self.clear_buffer_on_flush = true;
         // todo!()
         // let scissor_rect: metal::MTLScissorRect = todo!();
         // encoder.set_viewport(viewport);
@@ -730,13 +720,14 @@ fn new_render_command_encoder<'a>(
     view_size_buffer: &GPUVar<Size>,
     // index_buffer: &IndexBuffer,
     uniform_buffer: &GPUVar<Params>,
-    clear_buffer_on_flush: bool,
+    // clear_buffer_on_flush: bool,
 ) -> &'a metal::RenderCommandEncoderRef {
-    let load_action = if clear_buffer_on_flush {
-        metal::MTLLoadAction::Clear
-    } else {
-        metal::MTLLoadAction::Load
-    };
+    let load_action = 
+    // if clear_buffer_on_flush {
+        // metal::MTLLoadAction::Clear
+    // } else {
+        metal::MTLLoadAction::Load;
+    // };
     let desc = metal::RenderPassDescriptor::new();
 
     let view_size = &*view_size_buffer;
@@ -815,9 +806,9 @@ impl Renderer for Mtl {
             &self.vertex_buffer,
             &self.view_size_buffer,
             &self.uniform_buffer,
-            self.clear_buffer_on_flush,
+            // self.clear_buffer_on_flush,
         );
-        self.clear_buffer_on_flush = false;
+        // self.clear_buffer_on_flush = false;
 
         for cmd in commands {
             self.set_composite_operation(cmd.composite_operation, pixel_format);
