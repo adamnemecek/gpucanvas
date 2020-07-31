@@ -676,7 +676,7 @@ impl Mtl {
         //             gl::Disable(gl::SCISSOR_TEST);
         //         }
     }
-    fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
+    pub fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
         self.render_target = target;
     }
 
@@ -806,7 +806,6 @@ impl Renderer for Mtl {
             }
         };
 
-
         // todo: this should be calling get_target
         // let drawable = self.layer.next_drawable().unwrap().to_owned();
         // let color_texture = drawable.texture();
@@ -854,10 +853,10 @@ impl Renderer for Mtl {
                     height,
                     color,
                 } => {
-                    // self.clear_rect(&encoder, x, y, width, height, color);
+                    self.clear_rect(&encoder, x, y, width, height, color);
                 }
                 CommandType::SetRenderTarget(target) => {
-                    // self.set_target(images, target);
+                    self.set_target(images, target);
                 }
             }
         }
