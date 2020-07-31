@@ -7,9 +7,11 @@ use metalgear::{GPUVar, GPUVec};
 use crate::{
     image::ImageFlags,
     renderer::{ImageId, Vertex},
+    Rect,
     BlendFactor, Color, CompositeOperationState, ErrorKind, FillRule, ImageInfo, ImageSource, ImageStore, Size,
-};
 
+};
+use super::mtl::mtl_ext::RenderCommandEncoderExt;
 use super::{Command, CommandType, Params, RenderTarget, Renderer};
 
 mod mtl_texture;
@@ -20,6 +22,8 @@ use stencil_texture::StencilTexture;
 
 mod mtl_ext;
 pub use mtl_ext::generate_mipmaps;
+
+
 
 // pub trait VecExt<T> {
 //     fn push_ext(&mut self, value: T) -> usize;
@@ -112,6 +116,13 @@ fn triangle_fan_indices(quad_len: usize) -> Vec<u32> {
 // 	println!("{:?}", indices);
 // }
 
+#[repr(C)]
+#[derive(Copy, Clone, Default, Debug, PartialEq, PartialOrd)]
+struct ClearRect {
+    rect: Rect,
+    color: Color,
+}
+
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub struct Blend {
     pub src_rgb: metal::MTLBlendFactor,
@@ -187,8 +198,8 @@ pub struct Mtl {
     stroke_anti_alias_stencil_state: metal::DepthStencilState,
     stroke_clear_stencil_state: metal::DepthStencilState,
 
-    frag_func: metal::Function,
     vert_func: metal::Function,
+    frag_func: metal::Function,
 
     pipeline_pixel_format: metal::MTLPixelFormat,
 
@@ -205,6 +216,10 @@ pub struct Mtl {
     // todo
     pseudo_texture: MtlTexture,
     // pseudo_sampler:
+
+    // clear_rect
+    clear_rect_vert_func: metal::Function,
+    clear_rect_frag_func: metal::Function,
 }
 
 impl From<CGSize> for Size {
@@ -256,6 +271,14 @@ impl Mtl {
                 .get_function("fragmentShaderAA", None)
                 .expect("frag shader not found")
         };
+
+        let clear_rect_vert_func = library
+            .get_function("clear_rect_vertex", None)
+            .expect("vert shader not found");
+
+        let clear_rect_frag_func = library
+            .get_function("clear_rect_fragment", None)
+            .expect("vert shader not found");
 
         // let clear_buffer_on_flush = false;
 
@@ -395,6 +418,9 @@ impl Mtl {
             pseudo_texture,
             clear_color: Color::black(),
             device: device.to_owned(),
+
+            clear_rect_vert_func,
+            clear_rect_frag_func
         }
     }
 
@@ -652,12 +678,13 @@ impl Mtl {
         // let arr = UniformArray::from(paint);
         // encoder.set_fragment_buffer(index, buffer, offset)
         // self.uniform_buffer[0] = paint;
-        let ptr = &paint as *const Params;
-        encoder.set_vertex_bytes(
-            0,
-            std::mem::size_of::<Params>() as u64,
-            ptr as *const _
-        );
+        // let ptr = &paint as *const Params;
+        // encoder.set_vertex_bytes(
+        //     0,
+        //     std::mem::size_of::<Params>() as u64,
+        //     ptr as *const _
+        // );
+        encoder.set_vertex_value(0, &paint);
 
         let tex = if let Some(id) = image_tex {
             images.get(id).unwrap()
@@ -694,8 +721,12 @@ impl Mtl {
             height: height as _,
         });
 
+        let clear_rect = ClearRect {
+            rect: Rect { x: -1.0, y: -1.0, w: 2.0, h: 2.0 },
+            color
+        };
 
-
+        encoder.set_vertex_value(0, &clear_rect);
 
         // reset scissor rect
         let size = *self.view_size_buffer;

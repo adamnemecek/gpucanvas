@@ -1,5 +1,6 @@
 use std::u8;
 
+#[repr(C)]
 #[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub struct Color {
