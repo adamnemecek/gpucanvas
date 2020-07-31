@@ -1,7 +1,7 @@
 use crate::{Color, ImageFlags, ImageStore, Paint, PaintFlavor, PixelFormat, Scissor, Transform2D};
 
 use super::ShaderType;
-
+#[repr(C)]
 #[derive(Copy, Clone, Debug, Default)]
 pub struct Params {
     pub(crate) scissor_mat: [f32; 12],

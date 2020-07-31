@@ -50,9 +50,15 @@ struct RasterizerData {
 // float strokeThr;
 // float texType;
 // float type;
+
+#define STATIC_ASSERT(COND,MSG) typedef char static_assertion_##MSG[(!!(COND))*2-1]
+#define COMPILE_TIME_ASSERT3(X,L) STATIC_ASSERT(X,static_assertion_at_line_##L)
+#define COMPILE_TIME_ASSERT2(X,L) COMPILE_TIME_ASSERT3(X,L)
+#define COMPILE_TIME_ASSERT(X)    COMPILE_TIME_ASSERT2(X,__LINE__)
+
 struct Uniforms {
-  float3x3 scissorMat;
-  float3x3 paintMat;
+  float3x4 scissorMat;
+  float3x4 paintMat;
   float4 innerCol;
   float4 outerCol;
   float2 scissorExt;
@@ -64,7 +70,11 @@ struct Uniforms {
   float strokeThr;
   int texType;
   int type;
+  float hasMask;
+  float padding[19];
 };
+
+COMPILE_TIME_ASSERT(sizeof(Uniforms) == 256);
 
 float scissorMask(constant Uniforms& uniforms, float2 p);
 float sdroundrect(constant Uniforms& uniforms, float2 pt);
