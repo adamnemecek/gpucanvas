@@ -844,7 +844,7 @@ impl Renderer for Mtl {
                     // self.stencil_stroke(&encoder, images, cmd, params1, params2)
                 }
                 CommandType::Triangles { params } => {
-                    // self.triangles(&encoder, images, cmd, params)
+                    self.triangles(&encoder, images, cmd, params)
                 },
                 CommandType::ClearRect {
                     x,
