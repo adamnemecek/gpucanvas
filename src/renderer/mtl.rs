@@ -639,7 +639,7 @@ impl Mtl {
         images: &ImageStore<MtlTexture>,
         paint: Params,
         image_tex: Option<ImageId>,
-        alpha_tex: Option<ImageId>,
+        _alpha_tex: Option<ImageId>,
     ) {
         //
         // https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1515917-setfragmentbufferoffset?language=objc
@@ -652,7 +652,12 @@ impl Mtl {
         // let arr = UniformArray::from(paint);
         // encoder.set_fragment_buffer(index, buffer, offset)
         // self.uniform_buffer[0] = paint;
-        // encoder.set_vertex_bytes(0, mem::sizeof::<Param>(), );
+        let ptr = &paint as *const Params;
+        encoder.set_vertex_bytes(
+            0,
+            std::mem::size_of::<Params>() as u64,
+            ptr as *const _
+        );
 
         let tex = if let Some(id) = image_tex {
             images.get(id).unwrap()
@@ -680,7 +685,32 @@ impl Mtl {
         height: u32,
         color: Color,
     ) {
-        self.clear_color = color;
+        // self.clear_color = color;
+
+        encoder.set_scissor_rect(metal::MTLScissorRect {
+            x: x as _,
+            y: y as _,
+            width: width as _,
+            height: height as _,
+        });
+
+
+
+
+        // reset scissor rect
+        let size = *self.view_size_buffer;
+        encoder.set_scissor_rect(metal::MTLScissorRect {
+            x: 0,
+            y: 0,
+            width: size.w as _,
+            height: size.h as _,
+        });
+        // encoder.set_scissor_rect(metal::MTLScissorRect {
+        //     x: x as _,
+        //     y: y as _,
+        //     width: width as _,
+        //     height: height as _,
+        // });
 
         // encoder.set_scissor()
         // self.clear_color = metal::MTLClearColor::new(color.r, color.g, color.b, color.a);
@@ -825,6 +855,10 @@ impl Renderer for Mtl {
                 images.get(id).unwrap().tex.to_owned()
             }
         };
+
+        let size = Size::new(color_texture.width() as _,
+                                color_texture.height() as _);
+        self.stencil_texture.resize(size);
 
         // todo: this should be calling get_target
         // let drawable = self.layer.next_drawable().unwrap().to_owned();
