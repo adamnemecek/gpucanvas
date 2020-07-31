@@ -9,16 +9,17 @@ pub fn create_stencil_texture_descriptor(size: Size) -> metal::TextureDescriptor
     desc.set_height(size.h as u64);
     desc.set_mipmap_level_count(1);
 
-    // todo if macos
-    desc.set_resource_options(metal::MTLResourceOptions::StorageModePrivate);
+    #[cfg(target_os = "macos")] {
+        desc.set_resource_options(metal::MTLResourceOptions::StorageModePrivate);
+    }
     desc.set_usage(metal::MTLTextureUsage::RenderTarget);
     desc
 }
 
 pub struct StencilTexture {
-    pub device: metal::Device,
-    pub tex: metal::Texture,
-    pub size: Size,
+    device: metal::Device,
+    tex: metal::Texture,
+    size: Size,
 }
 
 impl StencilTexture {
@@ -30,6 +31,10 @@ impl StencilTexture {
             tex,
             size,
         }
+    }
+
+    pub fn tex(&self) -> &metal::TextureRef {
+        &self.tex
     }
 
     pub fn resize(&mut self, size: Size) {

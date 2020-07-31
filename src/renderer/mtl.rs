@@ -742,7 +742,7 @@ fn new_render_command_encoder<'a>(
     stencil_attachment.set_clear_stencil(0);
     stencil_attachment.set_load_action(metal::MTLLoadAction::Clear);
     stencil_attachment.set_store_action(metal::MTLStoreAction::DontCare);
-    stencil_attachment.set_texture(Some(&stencil_texture.tex));
+    stencil_attachment.set_texture(Some(&stencil_texture.tex()));
 
     let encoder = command_buffer.new_render_command_encoder(&desc);
 
@@ -783,19 +783,33 @@ impl Renderer for Mtl {
         /// build indices
         self.index_buffer.clear();
 
-        match self.render_target {
-            RenderTarget::Screen => {}
-            RenderTarget::Image(id) => {}
-        }
 
         let clear_color: Color = self.clear_color;
 
         let command_buffer = self.command_queue.new_command_buffer().to_owned();
         command_buffer.enqueue();
+        // let block = block::ConcreteBlock::new(move |buffer: &metal::CommandBufferRef| {
+        //     // println!("{}", buffer.label());
+        //     // self.vertex_buffer.clear();
+        // }).copy();
+        // command_buffer.add_completed_handler(&block);
+        let mut drawable: Option<metal::CoreAnimationDrawable> = None;
+        let color_texture = match self.render_target {
+            RenderTarget::Screen => {
+                let d = self.layer.next_drawable().unwrap().to_owned();
+                let tex = d.texture().to_owned();
+                drawable = Some(d);//;.to_owned();
+                tex
+            }
+            RenderTarget::Image(id) => {
+                images.get(id).unwrap().tex.to_owned()
+            }
+        };
+
 
         // todo: this should be calling get_target
-        let drawable = self.layer.next_drawable().unwrap().to_owned();
-        let color_texture = drawable.texture();
+        // let drawable = self.layer.next_drawable().unwrap().to_owned();
+        // let color_texture = drawable.texture();
         let pixel_format = color_texture.pixel_format();
 
         let encoder = new_render_command_encoder(
@@ -808,6 +822,7 @@ impl Renderer for Mtl {
             &self.uniform_buffer,
             // self.clear_buffer_on_flush,
         );
+        // self.stencil_texture.resize();
         // self.clear_buffer_on_flush = false;
 
         for cmd in commands {
@@ -839,34 +854,41 @@ impl Renderer for Mtl {
                     height,
                     color,
                 } => {
-                    self.clear_rect(&encoder, x, y, width, height, color);
+                    // self.clear_rect(&encoder, x, y, width, height, color);
                 }
                 CommandType::SetRenderTarget(target) => {
-                    self.set_target(images, target);
+                    // self.set_target(images, target);
                 }
             }
         }
 
         encoder.end_encoding();
-        if !self.layer.presents_with_transaction() {
+
+        if let Some(drawable) = drawable {
             command_buffer.present_drawable(&drawable);
         }
 
-        #[cfg(target_os = "macos")]
-        {
-            let blit = command_buffer.new_blit_command_encoder();
-            blit.synchronize_resource(color_texture);
-            blit.end_encoding();
+        #[cfg(target_os = "macos")] {
+            if self.render_target ==  RenderTarget::Screen {
+                let blit = command_buffer.new_blit_command_encoder();
+                blit.synchronize_resource(&color_texture);
+                blit.end_encoding();
+            }
         }
 
-        if self.layer.presents_with_transaction() {
-            command_buffer.wait_until_scheduled();
-            drawable.present();
-        }
+        command_buffer.commit();
+        // if !self.layer.presents_with_transaction() {
+        //     command_buffer.present_drawable(&drawable);
+        // }
+
+        // if self.layer.presents_with_transaction() {
+        //     command_buffer.wait_until_scheduled();
+        //     // drawable.present();
+        // }
     }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
-        MtlTexture::new(&self.device, &self.command_queue, info)
+        Self::Image::new(&self.device, &self.command_queue, info)
     }
 
     fn update_image(
