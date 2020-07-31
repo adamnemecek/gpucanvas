@@ -14,20 +14,6 @@ impl From<PixelFormat> for metal::MTLPixelFormat {
     }
 }
 
-fn MTLRegionMake2D(x: usize, y: usize, width: usize, height: usize) -> metal::MTLRegion {
-    let origin = metal::MTLOrigin {
-        x: x as u64,
-        y: y as u64,
-        z: 0,
-    };
-    let size = metal::MTLSize {
-        width: width as u64,
-        height: height as u64,
-        depth: 1,
-    };
-    metal::MTLRegion { origin, size }
-}
-
 pub struct MtlTexture {
     pub info: ImageInfo,
     pub tex: metal::Texture,
@@ -161,7 +147,7 @@ impl MtlTexture {
             return Err(ErrorKind::ImageUpdateWithDifferentFormat);
         }
 
-        let region = MTLRegionMake2D(x, y, width, height);
+        let region = metal::MTLRegion::new_2d(x as _, y as _, width as _, height as _);
         let stride: usize;
         // let data_offset: usize;
         let data;
