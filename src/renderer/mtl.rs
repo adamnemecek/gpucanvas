@@ -21,6 +21,26 @@ use stencil_texture::StencilTexture;
 mod mtl_ext;
 pub use mtl_ext::generate_mipmaps;
 
+// pub trait VecExt<T> {
+//     fn push_ext(&mut self, value: T) -> usize;
+// }
+
+// impl<T> VecExt<T> for Vec<T> {
+//     fn push_ext(&mut self, value: T) -> usize {
+//         let l = self.len();
+//         self.push(value);
+//         l
+//     }
+// }
+
+// impl<T: Copy> VecExt<T> for GPUVec<T> {
+//     fn push_ext(&mut self, value: T) -> usize {
+//         let l = self.len();
+//         self.push(value);
+//         l
+//     }
+// }
+
 // pub struct PathsLength {
 //     pub vertex_count: usize,
 //     pub index_count: usize,
@@ -180,7 +200,6 @@ pub struct Mtl {
     index_buffer: GPUVec<u32>,
     vertex_buffer: GPUVec<Vertex>,
     // uniform_buffer: GPUVec<Params>,
-    uniform_buffer: GPUVar<Params>,
     render_target: RenderTarget,
 
     // todo
@@ -369,7 +388,7 @@ impl Mtl {
             stencil_texture,
             index_buffer: GPUVec::with_capacity(&device, 32),
             vertex_buffer: GPUVec::with_capacity(&device, 32),
-            uniform_buffer: GPUVar::with_value(&device, Default::default()),
+            // uniform_buffer: GPUVec::with_capacity(&device, 2),
             vertex_descriptor: vertex_descriptor.to_owned(),
             pipeline_pixel_format: metal::MTLPixelFormat::Invalid,
             render_target: RenderTarget::Screen,
@@ -632,7 +651,8 @@ impl Mtl {
         // todo!();
         // let arr = UniformArray::from(paint);
         // encoder.set_fragment_buffer(index, buffer, offset)
-        *self.uniform_buffer = paint;
+        // self.uniform_buffer[0] = paint;
+        // encoder.set_vertex_bytes(0, mem::sizeof::<Param>(), );
 
         let tex = if let Some(id) = image_tex {
             images.get(id).unwrap()
@@ -719,7 +739,7 @@ fn new_render_command_encoder<'a>(
     vertex_buffer: &GPUVec<Vertex>,
     view_size_buffer: &GPUVar<Size>,
     // index_buffer: &IndexBuffer,
-    uniform_buffer: &GPUVar<Params>,
+    // uniform_buffer: &GPUVec<Params>,
     // clear_buffer_on_flush: bool,
 ) -> &'a metal::RenderCommandEncoderRef {
     let load_action =
@@ -760,7 +780,7 @@ fn new_render_command_encoder<'a>(
 
     encoder.set_vertex_buffer(0, Some(vertex_buffer.as_ref()), 0);
     encoder.set_vertex_buffer(1, Some(view_size_buffer.as_ref()), 0);
-    encoder.set_fragment_buffer(0, Some(uniform_buffer.as_ref()), 0);
+    // encoder.set_fragment_buffer(0, Some(uniform_buffer.as_ref()), 0);
 
     encoder
 }
@@ -818,7 +838,7 @@ impl Renderer for Mtl {
             &self.stencil_texture,
             &self.vertex_buffer,
             &self.view_size_buffer,
-            &self.uniform_buffer,
+            // &self.uniform_buffer,
             // self.clear_buffer_on_flush,
         );
         // self.stencil_texture.resize();
@@ -911,24 +931,49 @@ impl Renderer for Mtl {
 
     fn screenshot(&mut self) -> Result<ImgVec<RGBA8>, ErrorKind> {
         // todo!()
+        // look at headless renderer in metal-rs
         let size = *self.view_size_buffer;
-        let w = size.w as usize;
-        let h = size.h as usize;
+        let width = size.w as u64;
+        let height = size.h as u64;
 
-        let mut image = ImgVec::new(
-            vec![
-                RGBA8 {
-                    r: 255,
-                    g: 255,
-                    b: 255,
-                    a: 255
-                };
-                w * h
-            ],
-            w,
-            h,
-        );
-        todo!()
+        let mut buffer = vec![
+            RGBA8 {
+                r: 255,
+                g: 255,
+                b: 255,
+                a: 255
+            };
+            (width * height) as usize
+        ];
+
+        // texture.get_bytes(
+        //     buffer.as_mut_ptr() as *mut std::ffi::c_void,
+        //     width * 4,
+        //     metal::MTLRegion {
+        //         origin: metal::MTLOrigin::default(),
+        //         size: metal::MTLSize {
+        //             width,
+        //             height,
+        //             depth: 1,
+        //         },
+        //     },
+        //     0,
+        // );
+
+        // let mut image = ImgVec::new(
+        //     vec![
+        //         RGBA8 {
+        //             r: 255,
+        //             g: 255,
+        //             b: 255,
+        //             a: 255
+        //         };
+        //         w * h
+        //     ],
+        //     w,
+        //     h,
+        // );
+        // todo!()
         // unsafe {
         //     gl::ReadPixels(0, 0, self.view[0] as i32, self.view[1] as i32, gl::RGBA, gl::UNSIGNED_BYTE, image.buf_mut().as_ptr() as *mut GLvoid);
         // }
@@ -937,6 +982,7 @@ impl Renderer for Mtl {
         //image = image::imageops::flip_vertical(&image);
 
         // Ok(image)
+        todo!()
     }
 }
 

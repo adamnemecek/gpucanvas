@@ -52,20 +52,4 @@ impl StencilTexture {
         self.size = Size::default();
     }
 
-    // pub fn into_(&self) -> &'_ metal::TextureRef {
-    //     todo!()
-    // }
 }
-
-// impl<'a> AsRef<metal::Texture> for &'a StencilTexture {
-//     fn as_ref(self) -> &'a metal::TextureRef {
-//         todo!()
-//     }
-// }
-
-// impl<'a> Into<&'a metal::TextureRef> for StencilTexture<'a> {
-//     fn into(self) -> &'a metal::TextureRef {
-//         // self.tex.as_ref()
-//         todo!()
-//     }
-// }

@@ -130,17 +130,21 @@ typedef struct MNVGfragUniforms MNVGfragUniforms;
 @property (nonatomic, strong) id<MTLCommandBuffer> commandBuffer;
 @property (nonatomic, strong) id<MTLBuffer> viewSizeBuffer;
 @property (nonatomic, strong) id<MTLTexture> stencilTexture;
+
 @property (nonatomic, assign) MNVGcall* calls;
 @property (nonatomic, assign) int ccalls;
 @property (nonatomic, assign) int ncalls;
+
 @property (nonatomic, strong) id<MTLBuffer> indexBuffer;
 @property (nonatomic, assign) uint32_t* indexes;
 @property (nonatomic, assign) int cindexes;
 @property (nonatomic, assign) int nindexes;
+
 @property (nonatomic, strong) id<MTLBuffer> vertBuffer;
 @property (nonatomic, assign) struct NVGvertex* verts;
 @property (nonatomic, assign) int cverts;
 @property (nonatomic, assign) int nverts;
+
 @property (nonatomic, strong) id<MTLBuffer> uniformBuffer;
 @property (nonatomic, assign) unsigned char* uniforms;
 @property (nonatomic, assign) int cuniforms;
@@ -1196,7 +1200,7 @@ static void mtlnvg__renderFlush(void* uptr) {
       buffers.nindexes = 0;
       buffers.nverts = 0;
       buffers.ncalls = 0;
-      printf("%d\n", buffers.nuniforms);
+      // printf("%d\n", buffers.nuniforms);
       buffers.nuniforms = 0;
       dispatch_semaphore_signal(mtl.semaphore);
   }];
