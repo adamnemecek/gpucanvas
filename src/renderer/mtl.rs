@@ -622,9 +622,9 @@ impl Mtl {
         image_tex: Option<ImageId>,
         alpha_tex: Option<ImageId>,
     ) {
-        ///
-        /// https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1515917-setfragmentbufferoffset?language=objc
-        ///
+        //
+        // https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1515917-setfragmentbufferoffset?language=objc
+        //
         // let len = self.uniform_buffer.len();
         // self.uniform_buffer.push(paint);
         // let offset = len * std::mem::size_of::<Params>();
@@ -632,7 +632,7 @@ impl Mtl {
         // todo!();
         // let arr = UniformArray::from(paint);
         // encoder.set_fragment_buffer(index, buffer, offset)
-
+        *self.uniform_buffer = paint;
 
         let tex = if let Some(id) = image_tex {
             images.get(id).unwrap()
@@ -722,7 +722,7 @@ fn new_render_command_encoder<'a>(
     uniform_buffer: &GPUVar<Params>,
     // clear_buffer_on_flush: bool,
 ) -> &'a metal::RenderCommandEncoderRef {
-    let load_action = 
+    let load_action =
     // if clear_buffer_on_flush {
         // metal::MTLLoadAction::Clear
     // } else {
@@ -818,12 +818,20 @@ impl Renderer for Mtl {
                 CommandType::ConcaveFill {
                     stencil_params,
                     fill_params,
-                } => self.concave_fill(&encoder, images, cmd, stencil_params, fill_params),
-                CommandType::Stroke { params } => self.stroke(&encoder, images, cmd, params),
+                } => {
+                    // self.concave_fill(&encoder, images, cmd, stencil_params, fill_params)
+
+                },
+                CommandType::Stroke { params } => {
+                    // self.stroke(&encoder, images, cmd, params)
+
+                },
                 CommandType::StencilStroke { params1, params2 } => {
-                    self.stencil_stroke(&encoder, images, cmd, params1, params2)
+                    // self.stencil_stroke(&encoder, images, cmd, params1, params2)
                 }
-                CommandType::Triangles { params } => self.triangles(&encoder, images, cmd, params),
+                CommandType::Triangles { params } => {
+                    // self.triangles(&encoder, images, cmd, params)
+                },
                 CommandType::ClearRect {
                     x,
                     y,
