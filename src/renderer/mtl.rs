@@ -250,6 +250,11 @@ impl Mtl {
         let debug = cfg!(debug_assertions);
         let antialias = true;
 
+        // #[cfg(target_os = "macos")] {
+        //     layer.set_opaque(false);
+        // }
+
+
         let library_path =
             std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src/renderer/mtl/shaders.metallib");
         let library = device.new_library_with_file(library_path).expect("library not found");

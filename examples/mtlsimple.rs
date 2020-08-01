@@ -305,7 +305,7 @@ fn main() {
                 //     canvas.stroke_path(&mut path, Paint::color(Color::hex("454545")));
                 // }
 
-                // draw_clear_rect2(&mut canvas, 20, 10, 50, 50);
+                draw_clear_rect2(&mut canvas, 20, 10, 50, 50);
                 // render_clear_rect(&mut );
 
                 // if true {
