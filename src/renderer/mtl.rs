@@ -693,7 +693,7 @@ impl Mtl {
     pub fn clear_rect(
         &mut self,
         encoder: &metal::RenderCommandEncoderRef,
-        _images: &ImageStore<MtlTexture>, // todo remove this argument
+        // _images: &ImageStore<MtlTexture>, // todo remove this argument
         x: u32,
         y: u32,
         width: u32,
@@ -983,7 +983,7 @@ impl Renderer for Mtl {
                     height,
                     color,
                 } => {
-                    self.clear_rect(&encoder, images, x, y, width, height, color);
+                    self.clear_rect(&encoder, x, y, width, height, color);
                 }
                 CommandType::SetRenderTarget(target) => {
                     self.set_target(images, target);

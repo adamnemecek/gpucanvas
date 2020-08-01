@@ -227,7 +227,7 @@ where
         let mut canvas = Self {
             width: 0,
             height: 0,
-            renderer: renderer,
+            renderer,
             text_context: Default::default(),
             current_render_target: RenderTarget::Screen,
             state_stack: Default::default(),
