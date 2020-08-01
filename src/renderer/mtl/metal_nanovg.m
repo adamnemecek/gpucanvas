@@ -1187,8 +1187,6 @@ static void mtlnvg__renderFlush(void* uptr) {
 
   __weak MNVGbuffers* buffers = mtl.buffers;
   id <MTLCommandBuffer> commandBuffer = [mtl.commandQueue commandBuffer];
-  id<MTLTexture> colorTexture = nil;;
-  vector_uint2 textureSize;
 
   buffers.commandBuffer = commandBuffer;
   [buffers.commandBuffer enqueue];
@@ -1204,6 +1202,9 @@ static void mtlnvg__renderFlush(void* uptr) {
       buffers.nuniforms = 0;
       dispatch_semaphore_signal(mtl.semaphore);
   }];
+
+  id<MTLTexture> colorTexture = nil;;
+  vector_uint2 textureSize;
 
   if (s_framebuffer == NULL ||
       nvgInternalParams(s_framebuffer->ctx)->userPtr != uptr) {

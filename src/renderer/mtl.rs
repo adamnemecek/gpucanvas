@@ -112,6 +112,7 @@ fn triangle_fan_indices(quad_len: usize) -> Vec<u32> {
 // 	println!("{:?}", indices);
 // }
 
+
 #[repr(C)]
 #[derive(Copy, Clone, Default, Debug, PartialEq, PartialOrd)]
 struct ClearRect {
@@ -439,6 +440,8 @@ impl Mtl {
     //     }
     // }
 
+    
+
     /// updaterenderpipelinstateforblend
     pub fn set_composite_operation(
         &mut self,
@@ -481,17 +484,18 @@ impl Mtl {
 
         let clear_rect_pipeline_state = {
             let desc = metal::RenderPipelineDescriptor::new();
-            let color_attachment_desc = desc.color_attachments().object_at(0).unwrap();
-            color_attachment_desc.set_pixel_format(pixel_format);
+            let color_attachment_desc2 = desc.color_attachments().object_at(0).unwrap();
+            color_attachment_desc2.set_pixel_format(pixel_format);
+            // color_attachent_desc.set_pixel_format(metal::MTLPixelFormat::BGRA8Unorm);;
 
             desc.set_fragment_function(Some(&self.clear_rect_frag_func));
             desc.set_vertex_function(Some(&self.clear_rect_vert_func));
 
-            color_attachment_desc.set_blending_enabled(true);
-            color_attachment_desc.set_source_rgb_blend_factor(blend_func.src_rgb);
-            color_attachment_desc.set_source_alpha_blend_factor(blend_func.src_alpha);
-            color_attachment_desc.set_destination_rgb_blend_factor(blend_func.dst_rgb);
-            color_attachment_desc.set_destination_alpha_blend_factor(blend_func.dst_alpha);
+            color_attachment_desc2.set_blending_enabled(true);
+            color_attachment_desc2.set_source_rgb_blend_factor(blend_func.src_rgb);
+            color_attachment_desc2.set_source_alpha_blend_factor(blend_func.src_alpha);
+            color_attachment_desc2.set_destination_rgb_blend_factor(blend_func.dst_rgb);
+            color_attachment_desc2.set_destination_alpha_blend_factor(blend_func.dst_alpha);
 
             self.device.new_render_pipeline_state(&desc).unwrap()
         };
@@ -674,12 +678,14 @@ impl Mtl {
         encoder.set_fragment_value(0, &paint);
 
         let tex = if let Some(id) = image_tex {
+            // println!("found texture");
             images.get(id).unwrap()
         } else {
+            // println!("pseudo texture");
             &self.pseudo_texture
         };
 
-        encoder.set_fragment_texture(0, Some(&tex.tex));
+        encoder.set_fragment_texture(0, Some(&tex.tex()));
         encoder.set_fragment_sampler_state(0, Some(&tex.sampler));
 
         // todo alpha mask
@@ -693,7 +699,6 @@ impl Mtl {
     pub fn clear_rect(
         &mut self,
         encoder: &metal::RenderCommandEncoderRef,
-        // _images: &ImageStore<MtlTexture>, // todo remove this argument
         x: u32,
         y: u32,
         width: u32,
@@ -705,6 +710,7 @@ impl Mtl {
             color
         };
 
+        // self.clear_rect_pipeline_state.
         encoder.set_render_pipeline_state(&self.clear_rect_pipeline_state.as_ref().unwrap());
         encoder.set_vertex_value(0, &clear_rect);
         encoder.set_scissor_rect(metal::MTLScissorRect {
@@ -724,74 +730,44 @@ impl Mtl {
             width: size.w as _,
             height: size.h as _,
         });
-
-        // let color_texture = match self.render_target {
-        //     RenderTarget::Screen => {
-        //         self.layer.next_drawable().unwrap().texture()
-        //     }
-        //     RenderTarget::Image(id) => {
-        //         &images.get(id).unwrap().tex
-        //     }
-        // };
-        // // self.clear_color = color;
-        // // func replace(region: MTLRegion,
-        // //     mipmapLevel level: Int,
-        // //       withBytes pixelBytes: UnsafeRawPointer,
-        // //     bytesPerRow: Int)
-
-        // [RGBA::new()]
-        // let bytes = vec![color; (width * height) as usize];
-
-        // color_texture.replace_region(
-        //     metal::MTLRegion::new_2d(x as _, y as _, width as _, height as _),
-        //     0,
-        //     bytes.as_ptr() as _,
-        //     4
-        // );
-
-        // encoder.set_scissor_rect(metal::MTLScissorRect {
-        //     x: x as _,
-        //     y: y as _,
-        //     width: width as _,
-        //     height: height as _,
-        // });
-
-        // let clear_rect = ClearRect {
-        //     rect: Rect { x: -1.0, y: -1.0, w: 2.0, h: 2.0 },
-        //     color
-        // };
-
-        // encoder.set_vertex_value(0, &clear_rect);
-
-        // // reset scissor rect
-        // let size = *self.view_size_buffer;
-        // encoder.set_scissor_rect(metal::MTLScissorRect {
-        //     x: 0,
-        //     y: 0,
-        //     width: size.w as _,
-        //     height: size.h as _,
-        // });
-        // encoder.set_scissor_rect(metal::MTLScissorRect {
-        //     x: x as _,
-        //     y: y as _,
-        //     width: width as _,
-        //     height: height as _,
-        // });
-
-        // encoder.set_scissor()
-        // self.clear_color = metal::MTLClearColor::new(color.r, color.g, color.b, color.a);
-        // self.clear_buffer_on_flush = true;
-        // todo!()
-        // let scissor_rect: metal::MTLScissorRect = todo!();
-        // encoder.set_viewport(viewport);
-        //         unsafe {
-        //             gl::Enable(gl::SCISSOR_TEST);
-        //             gl::Scissor(x as i32, self.view[1] as i32 - (height as i32 + y as i32), width as i32, height as i32);
-        //             gl::ClearColor(color.r, color.g, color.b, color.a);
-        //             gl::Clear(gl::COLOR_BUFFER_BIT | gl::STENCIL_BUFFER_BIT);
-        //             gl::Disable(gl::SCISSOR_TEST);
-        //         }
     }
+
+    // pub fn clear_rect2(
+    //     &mut self,
+    //     // encoder: &metal::RenderCommandEncoderRef,
+    //     images: &ImageStore<MtlTexture>,
+    //     x: u32,
+    //     y: u32,
+    //     width: u32,
+    //     height: u32,
+    //     color: Color,
+    // ) {
+        
+    //     let color_texture = match self.render_target {
+    //         RenderTarget::Screen => {
+    //             self.layer.next_drawable().unwrap().texture()
+    //         }
+    //         RenderTarget::Image(id) => {
+    //             &images.get(id).unwrap().tex
+    //         }
+    //     };
+    //     // // self.clear_color = color;
+    //     // // func replace(region: MTLRegion,
+    //     // //     mipmapLevel level: Int,
+    //     // //       withBytes pixelBytes: UnsafeRawPointer,
+    //     // //     bytesPerRow: Int)
+
+    //     // [RGBA::new()]
+    //     let bytes = vec![color; (width * height) as usize];
+
+    //     color_texture.replace_region(
+    //         metal::MTLRegion::new_2d(x as _, y as _, width as _, height as _),
+    //         0,
+    //         bytes.as_ptr() as _,
+    //         4
+    //     );
+    // }
+
     pub fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
         self.render_target = target;
     }
@@ -840,9 +816,9 @@ fn new_render_command_encoder<'a>(
 ) -> &'a metal::RenderCommandEncoderRef {
     let load_action =
     // if clear_buffer_on_flush {
-        // metal::MTLLoadAction::Clear
+        metal::MTLLoadAction::Clear;
     // } else {
-        metal::MTLLoadAction::Load;
+        // metal::MTLLoadAction::Load;
     // };
     let desc = metal::RenderPassDescriptor::new();
 
@@ -934,7 +910,7 @@ impl Renderer for Mtl {
                 drawable = Some(d); //;.to_owned();
                 tex
             }
-            RenderTarget::Image(id) => images.get(id).unwrap().tex.to_owned(),
+            RenderTarget::Image(id) => images.get(id).unwrap().tex().to_owned(),
         };
 
         let size = Size::new(color_texture.width() as _, color_texture.height() as _);
@@ -984,6 +960,7 @@ impl Renderer for Mtl {
                     color,
                 } => {
                     self.clear_rect(&encoder, x, y, width, height, color);
+                    // self.clear_rect2(images, x, y, width, height, color);
                 }
                 CommandType::SetRenderTarget(target) => {
                     self.set_target(images, target);

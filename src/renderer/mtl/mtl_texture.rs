@@ -7,7 +7,7 @@ impl From<PixelFormat> for metal::MTLPixelFormat {
         match a {
             // PixelFormat::Rgba8 | PixelFormat::Rgb8
             //  => metal::MTLPixelFormat::RGBA8Unorm,
-            PixelFormat::Rgba8 => metal::MTLPixelFormat::RGBA8Unorm,
+            PixelFormat::Rgba8 => metal::MTLPixelFormat::BGRA8Unorm,
             PixelFormat::Rgb8 => todo!(),
             PixelFormat::Gray8 => metal::MTLPixelFormat::R8Unorm,
         }
@@ -16,7 +16,7 @@ impl From<PixelFormat> for metal::MTLPixelFormat {
 
 pub struct MtlTexture {
     pub info: ImageInfo,
-    pub tex: metal::Texture,
+    tex: metal::Texture,
     pub sampler: metal::SamplerState,
     // todo: texture has a device reference, use that
     pub device: metal::Device,
@@ -41,6 +41,10 @@ impl MtlTexture {
     ) -> Result<Self, ErrorKind> {
         // println!("format: {:?}", info.format());
         assert!(info.format() != PixelFormat::Rgb8);
+
+        if info.format() == PixelFormat::Gray8 {
+            println!("creating grey texture of size: {}, {}", info.width(), info.height());
+        }
 
         let generate_mipmaps = info.flags().contains(ImageFlags::GENERATE_MIPMAPS);
         let nearest = info.flags().contains(ImageFlags::NEAREST);
@@ -119,6 +123,10 @@ impl MtlTexture {
             device: device.to_owned(),
             command_queue: command_queue.to_owned(),
         })
+    }
+
+    pub fn tex(&self) -> &metal::TextureRef {
+        &self.tex
     }
 
     // pub fn id(&self) -> u32 {

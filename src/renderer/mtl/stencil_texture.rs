@@ -49,7 +49,7 @@ impl StencilTexture {
         self.tex = self.device.new_texture(&desc);
     }
 
-    pub fn clear(&mut self) {
-        self.size = Size::default();
-    }
+    // pub fn clear(&mut self) {
+    //     self.size = Size::default();
+    // }
 }
