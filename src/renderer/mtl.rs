@@ -448,13 +448,13 @@ impl Mtl {
         blend_func: CompositeOperationState,
         pixel_format: metal::MTLPixelFormat,
     ) {
+        // println!("set_composite operation {:?}", pixel_format);
         let blend_func: Blend = blend_func.into();
 
         if self.pipeline_state.is_some()
             && self.stencil_only_pipeline_state.is_some()
             && self.pipeline_pixel_format == pixel_format
-            && self.blend_func == blend_func
-        {
+            && self.blend_func == blend_func {
             return;
         }
 
@@ -482,14 +482,17 @@ impl Mtl {
         let stencil_only_pipeline_state = self.device.new_render_pipeline_state(&desc).unwrap();
         self.stencil_only_pipeline_state = Some(stencil_only_pipeline_state);
 
+        self.pipeline_pixel_format = pixel_format;
+
+        // the rest of this function is not in metalnvg
         let clear_rect_pipeline_state = {
-            let desc = metal::RenderPipelineDescriptor::new();
-            let color_attachment_desc2 = desc.color_attachments().object_at(0).unwrap();
+            let desc2 = metal::RenderPipelineDescriptor::new();
+            let color_attachment_desc2 = desc2.color_attachments().object_at(0).unwrap();
             color_attachment_desc2.set_pixel_format(pixel_format);
             // color_attachent_desc.set_pixel_format(metal::MTLPixelFormat::BGRA8Unorm);;
-
-            desc.set_fragment_function(Some(&self.clear_rect_frag_func));
-            desc.set_vertex_function(Some(&self.clear_rect_vert_func));
+            desc2.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
+            desc2.set_fragment_function(Some(&self.clear_rect_frag_func));
+            desc2.set_vertex_function(Some(&self.clear_rect_vert_func));
 
             color_attachment_desc2.set_blending_enabled(true);
             color_attachment_desc2.set_source_rgb_blend_factor(blend_func.src_rgb);
@@ -497,7 +500,7 @@ impl Mtl {
             color_attachment_desc2.set_destination_rgb_blend_factor(blend_func.dst_rgb);
             color_attachment_desc2.set_destination_alpha_blend_factor(blend_func.dst_alpha);
 
-            self.device.new_render_pipeline_state(&desc).unwrap()
+            self.device.new_render_pipeline_state(&desc2).unwrap()
         };
         self.clear_rect_pipeline_state = Some(clear_rect_pipeline_state);
     }
@@ -816,9 +819,9 @@ fn new_render_command_encoder<'a>(
 ) -> &'a metal::RenderCommandEncoderRef {
     let load_action =
     // if clear_buffer_on_flush {
-        metal::MTLLoadAction::Clear;
+        // metal::MTLLoadAction::Clear;
     // } else {
-        // metal::MTLLoadAction::Load;
+        metal::MTLLoadAction::Load;
     // };
     let desc = metal::RenderPassDescriptor::new();
 
