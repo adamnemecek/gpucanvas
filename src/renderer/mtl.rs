@@ -220,6 +220,7 @@ pub struct Mtl {
     // clear_rect
     clear_rect_vert_func: metal::Function,
     clear_rect_frag_func: metal::Function,
+    clear_rect_pipeline_state: Option<metal::RenderPipelineState>,
 }
 
 impl From<CGSize> for Size {
@@ -420,7 +421,8 @@ impl Mtl {
             device: device.to_owned(),
 
             clear_rect_vert_func,
-            clear_rect_frag_func
+            clear_rect_frag_func,
+            clear_rect_pipeline_state: None
         }
     }
 
