@@ -418,7 +418,7 @@ impl Mtl {
             pipeline_pixel_format: metal::MTLPixelFormat::Invalid,
             render_target: RenderTarget::Screen,
             pseudo_texture,
-            clear_color: Color::black(),
+            clear_color: Color::blue(),
             device: device.to_owned(),
 
             clear_rect_vert_func,
@@ -445,7 +445,7 @@ impl Mtl {
     //     }
     // }
 
-    
+
 
     /// updaterenderpipelinstateforblend
     pub fn set_composite_operation(
@@ -714,7 +714,8 @@ impl Mtl {
         color: Color,
     ) {
         let clear_rect = ClearRect {
-            rect: Rect { x: -1.0, y: -1.0, w: 2.0, h: 2.0 },
+            // rect: Rect { x: -1.0, y: -1.0, w: 2.0, h: 2.0 },
+            rect: Rect { x: -0.5, y: -0.5, w: 1.0, h: 1.0 },
             color
         };
 
@@ -750,7 +751,7 @@ impl Mtl {
     //     height: u32,
     //     color: Color,
     // ) {
-        
+
     //     let color_texture = match self.render_target {
     //         RenderTarget::Screen => {
     //             self.layer.next_drawable().unwrap().texture()
@@ -824,9 +825,9 @@ fn new_render_command_encoder<'a>(
 ) -> &'a metal::RenderCommandEncoderRef {
     let load_action =
     // if clear_buffer_on_flush {
-        // metal::MTLLoadAction::Clear;
+        metal::MTLLoadAction::Clear;
     // } else {
-        metal::MTLLoadAction::Load;
+        // metal::MTLLoadAction::Load;
     // };
     let desc = metal::RenderPassDescriptor::new();
 
@@ -902,6 +903,7 @@ impl Renderer for Mtl {
         let ptr_hash = self.index_buffer.ptr_hash();
 
         let clear_color: Color = self.clear_color;
+        // println!("clear_color: {:?}", clear_color);
 
         let command_buffer = self.command_queue.new_command_buffer().to_owned();
         command_buffer.enqueue();
@@ -911,8 +913,10 @@ impl Renderer for Mtl {
         // }).copy();
         // command_buffer.add_completed_handler(&block);
         let mut drawable: Option<metal::CoreAnimationDrawable> = None;
+
         let color_texture = match self.render_target {
             RenderTarget::Screen => {
+
                 let d = self.layer.next_drawable().unwrap().to_owned();
                 let tex = d.texture().to_owned();
                 drawable = Some(d); //;.to_owned();
