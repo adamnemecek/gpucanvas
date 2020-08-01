@@ -4,15 +4,13 @@ use rgb::RGBA8;
 
 use metalgear::{GPUVar, GPUVec};
 
+use super::mtl::mtl_ext::RenderCommandEncoderExt;
+use super::{Command, CommandType, Params, RenderTarget, Renderer};
 use crate::{
     image::ImageFlags,
     renderer::{ImageId, Vertex},
-    Rect,
-    BlendFactor, Color, CompositeOperationState, ErrorKind, FillRule, ImageInfo, ImageSource, ImageStore, Size,
-
+    BlendFactor, Color, CompositeOperationState, ErrorKind, FillRule, ImageInfo, ImageSource, ImageStore, Rect, Size,
 };
-use super::mtl::mtl_ext::RenderCommandEncoderExt;
-use super::{Command, CommandType, Params, RenderTarget, Renderer};
 
 mod mtl_texture;
 use mtl_texture::MtlTexture;
@@ -22,8 +20,6 @@ use stencil_texture::StencilTexture;
 
 mod mtl_ext;
 pub use mtl_ext::generate_mipmaps;
-
-
 
 // pub trait VecExt<T> {
 //     fn push_ext(&mut self, value: T) -> usize;
@@ -186,7 +182,6 @@ pub struct Mtl {
 
     blend_func: Blend,
     // clear_buffer_on_flush: bool,
-
     ///
     /// fill and stroke have a stencil, anti_alias_stencil and shape_stencil
     ///
@@ -422,7 +417,7 @@ impl Mtl {
 
             clear_rect_vert_func,
             clear_rect_frag_func,
-            clear_rect_pipeline_state: None
+            clear_rect_pipeline_state: None,
         }
     }
 
@@ -484,16 +479,23 @@ impl Mtl {
         let stencil_only_pipeline_state = self.device.new_render_pipeline_state(&desc).unwrap();
         self.stencil_only_pipeline_state = Some(stencil_only_pipeline_state);
 
-        // self.pipeline_pixel_format = pixel_format;
-        //         unsafe {
-        //             gl::BlendFuncSeparate(
-        //                 Self::gl_factor(blend_state.src_rgb),
-        //                 Self::gl_factor(blend_state.dst_rgb),
-        //                 Self::gl_factor(blend_state.src_alpha),
-        //                 Self::gl_factor(blend_state.dst_alpha)
-        //             );
-        //         }
-        // self.pipeline
+        let clear_rect_pipeline_state = {
+            let desc = metal::RenderPipelineDescriptor::new();
+            let color_attachment_desc = desc.color_attachments().object_at(0).unwrap();
+            color_attachment_desc.set_pixel_format(pixel_format);
+
+            desc.set_fragment_function(Some(&self.clear_rect_frag_func));
+            desc.set_vertex_function(Some(&self.clear_rect_vert_func));
+
+            color_attachment_desc.set_blending_enabled(true);
+            color_attachment_desc.set_source_rgb_blend_factor(blend_func.src_rgb);
+            color_attachment_desc.set_source_alpha_blend_factor(blend_func.src_alpha);
+            color_attachment_desc.set_destination_rgb_blend_factor(blend_func.dst_rgb);
+            color_attachment_desc.set_destination_alpha_blend_factor(blend_func.dst_alpha);
+
+            self.device.new_render_pipeline_state(&desc).unwrap()
+        };
+        self.clear_rect_pipeline_state = Some(clear_rect_pipeline_state);
     }
 
     /// done
@@ -691,13 +693,61 @@ impl Mtl {
     pub fn clear_rect(
         &mut self,
         encoder: &metal::RenderCommandEncoderRef,
+        images: &ImageStore<MtlTexture>,
         x: u32,
         y: u32,
         width: u32,
         height: u32,
         color: Color,
     ) {
-        // self.clear_color = color;
+        // let clear_rect = ClearRect {
+        //     rect: Rect { x: -1.0, y: -1.0, w: 2.0, h: 2.0 },
+        //     color
+        // };
+
+        // encoder.set_render_pipeline_state(&self.clear_rect_pipeline_state.as_ref().unwrap());
+        // encoder.set_vertex_value(0, &clear_rect);
+        // encoder.set_scissor_rect(metal::MTLScissorRect {
+        //     x: x as _,
+        //     y: y as _,
+        //     width: width as _,
+        //     height: height as _,
+        // });
+
+        // encoder.draw_primitives_instanced(metal::MTLPrimitiveType::TriangleStrip, 0, 4, 1);
+
+        // // reset scissor rect
+        // let size = *self.view_size_buffer;
+        // encoder.set_scissor_rect(metal::MTLScissorRect {
+        //     x: 0,
+        //     y: 0,
+        //     width: size.w as _,
+        //     height: size.h as _,
+        // });
+
+        // let color_texture = match self.render_target {
+        //     RenderTarget::Screen => {
+        //         self.layer.next_drawable().unwrap().texture()
+        //     }
+        //     RenderTarget::Image(id) => {
+        //         &images.get(id).unwrap().tex
+        //     }
+        // };
+        // // self.clear_color = color;
+        // // func replace(region: MTLRegion,
+        // //     mipmapLevel level: Int,
+        // //       withBytes pixelBytes: UnsafeRawPointer,
+        // //     bytesPerRow: Int)
+
+        // [RGBA::new()]
+        // let bytes = vec![color; (width * height) as usize];
+
+        // color_texture.replace_region(
+        //     metal::MTLRegion::new_2d(x as _, y as _, width as _, height as _),
+        //     0,
+        //     bytes.as_ptr() as _,
+        //     4
+        // );
 
         // encoder.set_scissor_rect(metal::MTLScissorRect {
         //     x: x as _,
@@ -867,7 +917,6 @@ impl Renderer for Mtl {
 
         let ptr_hash = self.index_buffer.ptr_hash();
 
-
         let clear_color: Color = self.clear_color;
 
         let command_buffer = self.command_queue.new_command_buffer().to_owned();
@@ -882,16 +931,13 @@ impl Renderer for Mtl {
             RenderTarget::Screen => {
                 let d = self.layer.next_drawable().unwrap().to_owned();
                 let tex = d.texture().to_owned();
-                drawable = Some(d);//;.to_owned();
+                drawable = Some(d); //;.to_owned();
                 tex
             }
-            RenderTarget::Image(id) => {
-                images.get(id).unwrap().tex.to_owned()
-            }
+            RenderTarget::Image(id) => images.get(id).unwrap().tex.to_owned(),
         };
 
-        let size = Size::new(color_texture.width() as _,
-                                color_texture.height() as _);
+        let size = Size::new(color_texture.width() as _, color_texture.height() as _);
         self.stencil_texture.resize(size);
 
         // todo: this should be calling get_target
@@ -922,18 +968,14 @@ impl Renderer for Mtl {
                     fill_params,
                 } => {
                     // self.concave_fill(&encoder, images, cmd, stencil_params, fill_params)
-
-                },
+                }
                 CommandType::Stroke { params } => {
                     // self.stroke(&encoder, images, cmd, params)
-
-                },
+                }
                 CommandType::StencilStroke { params1, params2 } => {
                     // self.stencil_stroke(&encoder, images, cmd, params1, params2)
                 }
-                CommandType::Triangles { params } => {
-                    self.triangles(&encoder, images, cmd, params)
-                },
+                CommandType::Triangles { params } => self.triangles(&encoder, images, cmd, params),
                 CommandType::ClearRect {
                     x,
                     y,
@@ -941,7 +983,7 @@ impl Renderer for Mtl {
                     height,
                     color,
                 } => {
-                    self.clear_rect(&encoder, x, y, width, height, color);
+                    self.clear_rect(&encoder, images, x, y, width, height, color);
                 }
                 CommandType::SetRenderTarget(target) => {
                     self.set_target(images, target);
@@ -955,8 +997,9 @@ impl Renderer for Mtl {
             command_buffer.present_drawable(&drawable);
         }
 
-        #[cfg(target_os = "macos")] {
-            if self.render_target ==  RenderTarget::Screen {
+        #[cfg(target_os = "macos")]
+        {
+            if self.render_target == RenderTarget::Screen {
                 let blit = command_buffer.new_blit_command_encoder();
                 blit.synchronize_resource(&color_texture);
                 blit.end_encoding();
@@ -1065,3 +1108,29 @@ mod tests {
         assert!(expected == result);
     }
 }
+
+// pub struct SolidTexture {
+//     w: usize,
+//     h: usize,
+//     color: Color,
+//     inner: Vec<Color>
+// }
+
+// impl SolidTexture {
+//     pub fn new(w: usize, h: usize, color: Color) -> Self {
+//         Self {
+//             w,
+//             h,
+//             color,
+//             inner: vec![color; w * h]
+//         }
+//     }
+
+//     pub fn update(&mut self, w: usize, h: usize, color: Color) {
+//         if self.w * self.h < w * h {
+//             self.inner = vec![color; w * h]
+//         }
+//         self.w = w;
+//         self.h = h;
+//     }
+// }

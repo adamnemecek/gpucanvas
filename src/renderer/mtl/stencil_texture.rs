@@ -9,7 +9,8 @@ pub fn create_stencil_texture_descriptor(size: Size) -> metal::TextureDescriptor
     desc.set_height(size.h as u64);
     desc.set_mipmap_level_count(1);
 
-    #[cfg(target_os = "macos")] {
+    #[cfg(target_os = "macos")]
+    {
         desc.set_resource_options(metal::MTLResourceOptions::StorageModePrivate);
     }
     desc.set_usage(metal::MTLTextureUsage::RenderTarget);
@@ -51,5 +52,4 @@ impl StencilTexture {
     pub fn clear(&mut self) {
         self.size = Size::default();
     }
-
 }
