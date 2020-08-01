@@ -669,24 +669,7 @@ impl Mtl {
         image_tex: Option<ImageId>,
         _alpha_tex: Option<ImageId>,
     ) {
-        //
-        // https://developer.apple.com/documentation/metal/mtlrendercommandencoder/1515917-setfragmentbufferoffset?language=objc
-        //
-        // let len = self.uniform_buffer.len();
-        // self.uniform_buffer.push(paint);
-        // let offset = len * std::mem::size_of::<Params>();
-        // encoder.set_fragment_buffer_offset(0, offset as u64);
-        // todo!();
-        // let arr = UniformArray::from(paint);
-        // encoder.set_fragment_buffer(index, buffer, offset)
-        // self.uniform_buffer[0] = paint;
-        // let ptr = &paint as *const Params;
-        // encoder.set_vertex_bytes(
-        //     0,
-        //     std::mem::size_of::<Params>() as u64,
-        //     ptr as *const _
-        // );
-        encoder.set_vertex_value(0, &paint);
+        encoder.set_fragment_value(0, &paint);
 
         let tex = if let Some(id) = image_tex {
             images.get(id).unwrap()
@@ -859,12 +842,30 @@ impl Renderer for Mtl {
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
         // let lens = PathsLength::new(commands);
+        // #[derive(Copy, Clone, Default, Debug)]
+        // struct Counters {
+        //     convex_fill: usize,
+        //     concave_fill: usize,
+        //     stroke: usize,
+        //     stencil_stroke: usize,
+        //     triangles: usize,
+        //     clear_rect: usize,
+        //     set_render_target: usize,
+        // }
+
+        // let mut counters: Counters = Default::default();
 
         self.vertex_buffer.clear();
         self.vertex_buffer.extend_from_slice(verts);
 
         /// build indices
         self.index_buffer.clear();
+        self.index_buffer.reserve(verts.len());
+        // temporary to ensure that the index_buffer is does not
+        // change the inner allocation
+        // the reserve should allocate enough
+
+        let ptr_hash = self.index_buffer.ptr_hash();
 
 
         let clear_color: Color = self.clear_color;
@@ -963,6 +964,7 @@ impl Renderer for Mtl {
         }
 
         command_buffer.commit();
+        assert!(ptr_hash == self.index_buffer.ptr_hash());
         // if !self.layer.presents_with_transaction() {
         //     command_buffer.present_drawable(&drawable);
         // }
