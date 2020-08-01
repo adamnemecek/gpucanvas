@@ -289,7 +289,7 @@ fn main() {
                     perf.render(canvas, 5.0, 5.0);
                 });
 
-                //canvas.restore();
+                canvas.restore();
 
                 canvas.flush();
                 windowed_context.swap_buffers().unwrap();

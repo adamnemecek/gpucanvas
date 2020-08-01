@@ -186,11 +186,11 @@ fn main() {
                 let width = size.width;
                 let height = size.height;
 
-                // let dpi_factor: f32 = 1.0; //todo
+                let dpi_factor: f32 = 1.0; //todo
 
                 // let t = start.elapsed().as_secs_f32();
 
-                // canvas.set_size(width as u32, height as u32, dpi_factor as f32);
+                canvas.set_size(width as u32, height as u32, dpi_factor as f32);
                 canvas.clear_rect(0, 0, width as u32, height as u32, Color::rgbf(0.3, 0.3, 0.32));
 
                 // let height = height as f32;
@@ -313,10 +313,10 @@ fn main() {
 
                 // canvas.save_with(|canvas| {
                 //     canvas.reset();
-                //     perf.render(canvas, 5.0, 5.0);
+                // //     perf.render(canvas, 5.0, 5.0);
                 // });
 
-                //canvas.restore();
+                // canvas.restore();
 
                 canvas.flush();
                 // windowed_context.swap_buffers().unwrap();
