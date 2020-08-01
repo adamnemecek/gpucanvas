@@ -333,15 +333,15 @@ fn main() {
     });
 }
 
-fn draw_clear_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
-    canvas.save();
+// fn draw_clear_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
+//     canvas.save();
 
-    let mut path = Path::new();
-    path.rect(x, y, w, h);
-    canvas.fill_path(&mut path, Paint::color(Color::rgba(255, 192, 0, 255)));
+//     let mut path = Path::new();
+//     path.rect(x, y, w, h);
+//     canvas.fill_path(&mut path, Paint::color(Color::rgba(255, 192, 0, 255)));
 
-    canvas.restore();
-}
+//     canvas.restore();
+// }
 
 
 fn draw_clear_rect2<T: Renderer>(canvas: &mut Canvas<T>, x: u32, y: u32, w: u32, h: u32) {
