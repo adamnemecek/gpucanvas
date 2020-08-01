@@ -303,7 +303,9 @@ fn main() {
                 //     canvas.stroke_path(&mut path, Paint::color(Color::hex("454545")));
                 // }
 
-                draw_clear_rect(&mut canvas, 20.0, 10.0, 50.0, 50.0);
+                draw_clear_rect2(&mut canvas, 20, 10, 50, 50);
+                // render_clear_rect(&mut );
+
                 // if true {
                 //     let paint = Paint::image(image_id, size.width as f32, 15.0, 1920.0, 1080.0, 0.0, 1.0);
                 //     let mut path = Path::new();
@@ -341,6 +343,15 @@ fn draw_clear_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, 
     canvas.restore();
 }
 
+
+fn draw_clear_rect2<T: Renderer>(canvas: &mut Canvas<T>, x: u32, y: u32, w: u32, h: u32) {
+    canvas.save();
+
+    canvas.clear_rect(x, y, w, h, Color::rgba(255, 192, 0, 255));
+    // canvas.fill_path(&mut path, Paint::color(Color::rgba(255, 192, 0, 255)));
+
+    canvas.restore();
+}
 // fn draw_paragraph<T: Renderer>(
 //     canvas: &mut Canvas<T>,
 //     font: FontId,
