@@ -502,9 +502,9 @@ impl Mtl {
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         cmd: &Command,
-        gpu_paint: Params,
+        paint: Params,
     ) {
-        self.set_uniforms(encoder, images, gpu_paint, cmd.image, cmd.alpha_mask);
+        self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
 
         for drawable in &cmd.drawables {
@@ -716,28 +716,28 @@ impl Mtl {
     ) {
         // self.clear_color = color;
 
-        encoder.set_scissor_rect(metal::MTLScissorRect {
-            x: x as _,
-            y: y as _,
-            width: width as _,
-            height: height as _,
-        });
+        // encoder.set_scissor_rect(metal::MTLScissorRect {
+        //     x: x as _,
+        //     y: y as _,
+        //     width: width as _,
+        //     height: height as _,
+        // });
 
-        let clear_rect = ClearRect {
-            rect: Rect { x: -1.0, y: -1.0, w: 2.0, h: 2.0 },
-            color
-        };
+        // let clear_rect = ClearRect {
+        //     rect: Rect { x: -1.0, y: -1.0, w: 2.0, h: 2.0 },
+        //     color
+        // };
 
-        encoder.set_vertex_value(0, &clear_rect);
+        // encoder.set_vertex_value(0, &clear_rect);
 
-        // reset scissor rect
-        let size = *self.view_size_buffer;
-        encoder.set_scissor_rect(metal::MTLScissorRect {
-            x: 0,
-            y: 0,
-            width: size.w as _,
-            height: size.h as _,
-        });
+        // // reset scissor rect
+        // let size = *self.view_size_buffer;
+        // encoder.set_scissor_rect(metal::MTLScissorRect {
+        //     x: 0,
+        //     y: 0,
+        //     width: size.w as _,
+        //     height: size.h as _,
+        // });
         // encoder.set_scissor_rect(metal::MTLScissorRect {
         //     x: x as _,
         //     y: y as _,
