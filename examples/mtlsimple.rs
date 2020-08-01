@@ -71,19 +71,21 @@ fn main() {
     let renderer = Mtl::new(&device, &layer);
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
+    let root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let fonts = Fonts {
         regular: canvas
-            .add_font("examples/assets/Roboto-Regular.ttf")
+            .add_font(root.join("examples/assets/Roboto-Regular.ttf"))
             .expect("Cannot add font"),
         bold: canvas
-            .add_font("examples/assets/Roboto-Light.ttf")
+            .add_font(root.join("examples/assets/Roboto-Light.ttf"))
             .expect("Cannot add font"),
-        icons: canvas.add_font("examples/assets/entypo.ttf").expect("Cannot add font"),
+        icons: canvas.add_font(root.join("examples/assets/entypo.ttf")).expect("Cannot add font"),
     };
 
     let images: Vec<ImageId> = (1..=12)
         .map(|i| {
-            let name = format!("examples/assets/images/image{}.jpg", i);
+            // let name = format!("{:?}/examples/assets/images/image{}.jpg", root, i);
+            let name = format!("{}/examples/assets/images/image{}.jpg", root.to_str().unwrap().to_string(), i);
             canvas
                 .load_image_file(name, ImageFlags::empty())
                 .expect("cannot load image")
@@ -303,7 +305,7 @@ fn main() {
                 //     canvas.stroke_path(&mut path, Paint::color(Color::hex("454545")));
                 // }
 
-                draw_clear_rect2(&mut canvas, 20, 10, 50, 50);
+                // draw_clear_rect2(&mut canvas, 20, 10, 50, 50);
                 // render_clear_rect(&mut );
 
                 // if true {
@@ -352,6 +354,7 @@ fn draw_clear_rect2<T: Renderer>(canvas: &mut Canvas<T>, x: u32, y: u32, w: u32,
 
     canvas.restore();
 }
+
 // fn draw_paragraph<T: Renderer>(
 //     canvas: &mut Canvas<T>,
 //     font: FontId,

@@ -1,0 +1,287 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in library 'gpucanvas'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--lib",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "gpucanvas",
+                    "kind": "lib"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'breakout'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=breakout",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "breakout",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'breakout'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=breakout",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "breakout",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'mtlrect'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=mtlrect",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "mtlrect",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'mtlrect'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=mtlrect",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "mtlrect",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'demo'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=demo",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "demo",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'demo'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=demo",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "demo",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'text'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=text",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "text",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'text'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=text",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "text",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'svg'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=svg",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "svg",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'svg'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=svg",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "svg",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'mtldemo'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=mtldemo",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "mtldemo",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'mtlsimple'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=mtlsimple",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "mtlsimple",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug unit tests in example 'mtldemo'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--example=mtldemo",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "mtldemo",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug integration test 'integration'",
+            "cargo": {
+                "args": [
+                    "test",
+                    "--no-run",
+                    "--test=integration",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "integration",
+                    "kind": "test"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        }
+    ]
+}

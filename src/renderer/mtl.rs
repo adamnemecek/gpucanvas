@@ -997,14 +997,14 @@ impl Renderer for Mtl {
             command_buffer.present_drawable(&drawable);
         }
 
-        #[cfg(target_os = "macos")]
-        {
-            if self.render_target == RenderTarget::Screen {
-                let blit = command_buffer.new_blit_command_encoder();
-                blit.synchronize_resource(&color_texture);
-                blit.end_encoding();
-            }
-        }
+        // #[cfg(target_os = "macos")]
+        // {
+        //     if self.render_target == RenderTarget::Screen {
+        //         let blit = command_buffer.new_blit_command_encoder();
+        //         blit.synchronize_resource(&color_texture);
+        //         blit.end_encoding();
+        //     }
+        // }
 
         command_buffer.commit();
         assert!(ptr_hash == self.index_buffer.ptr_hash());

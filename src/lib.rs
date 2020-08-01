@@ -245,6 +245,10 @@ where
         Ok(canvas)
     }
 
+    pub fn renderer_mut(&mut self) -> &mut T {
+        &mut self.renderer
+    }
+
     pub fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
         self.width = width;
         self.height = height;
