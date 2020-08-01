@@ -693,37 +693,37 @@ impl Mtl {
     pub fn clear_rect(
         &mut self,
         encoder: &metal::RenderCommandEncoderRef,
-        images: &ImageStore<MtlTexture>,
+        _images: &ImageStore<MtlTexture>, // todo remove this argument
         x: u32,
         y: u32,
         width: u32,
         height: u32,
         color: Color,
     ) {
-        // let clear_rect = ClearRect {
-        //     rect: Rect { x: -1.0, y: -1.0, w: 2.0, h: 2.0 },
-        //     color
-        // };
+        let clear_rect = ClearRect {
+            rect: Rect { x: -1.0, y: -1.0, w: 2.0, h: 2.0 },
+            color
+        };
 
-        // encoder.set_render_pipeline_state(&self.clear_rect_pipeline_state.as_ref().unwrap());
-        // encoder.set_vertex_value(0, &clear_rect);
-        // encoder.set_scissor_rect(metal::MTLScissorRect {
-        //     x: x as _,
-        //     y: y as _,
-        //     width: width as _,
-        //     height: height as _,
-        // });
+        encoder.set_render_pipeline_state(&self.clear_rect_pipeline_state.as_ref().unwrap());
+        encoder.set_vertex_value(0, &clear_rect);
+        encoder.set_scissor_rect(metal::MTLScissorRect {
+            x: x as _,
+            y: y as _,
+            width: width as _,
+            height: height as _,
+        });
 
-        // encoder.draw_primitives_instanced(metal::MTLPrimitiveType::TriangleStrip, 0, 4, 1);
+        encoder.draw_primitives_instanced(metal::MTLPrimitiveType::TriangleStrip, 0, 4, 1);
 
-        // // reset scissor rect
-        // let size = *self.view_size_buffer;
-        // encoder.set_scissor_rect(metal::MTLScissorRect {
-        //     x: 0,
-        //     y: 0,
-        //     width: size.w as _,
-        //     height: size.h as _,
-        // });
+        // reset scissor rect
+        let size = *self.view_size_buffer;
+        encoder.set_scissor_rect(metal::MTLScissorRect {
+            x: 0,
+            y: 0,
+            width: size.w as _,
+            height: size.h as _,
+        });
 
         // let color_texture = match self.render_target {
         //     RenderTarget::Screen => {

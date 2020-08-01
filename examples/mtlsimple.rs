@@ -181,17 +181,17 @@ fn main() {
                 // // let size = windowed_context.window().inner_size();
                 // // let size = renderer.size();
 
-                // let size = layer.drawable_size();
+                let size = layer.drawable_size();
                 // // let size = Size::new(size.width, size.height);
-                // let width = size.width;
-                // let height = size.height;
+                let width = size.width;
+                let height = size.height;
 
                 // let dpi_factor: f32 = 1.0; //todo
 
                 // let t = start.elapsed().as_secs_f32();
 
                 // canvas.set_size(width as u32, height as u32, dpi_factor as f32);
-                // canvas.clear_rect(0, 0, width as u32, height as u32, Color::rgbf(0.3, 0.3, 0.32));
+                canvas.clear_rect(0, 0, width as u32, height as u32, Color::rgbf(0.3, 0.3, 0.32));
 
                 // let height = height as f32;
                 // let width = width as f32;
@@ -303,6 +303,7 @@ fn main() {
                 //     canvas.stroke_path(&mut path, Paint::color(Color::hex("454545")));
                 // }
 
+                draw_clear_rect(&mut canvas, 20.0, 10.0, 50.0, 50.0);
                 // if true {
                 //     let paint = Paint::image(image_id, size.width as f32, 15.0, 1920.0, 1080.0, 0.0, 1.0);
                 //     let mut path = Path::new();
