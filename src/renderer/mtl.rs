@@ -98,14 +98,31 @@ pub use mtl_ext::generate_mipmaps;
 /// Based on pathfinder.
 /// https://www.gamedev.net/forums/topic/643945-how-to-generate-a-triangle-fan-index-list-for-a-circle-shape/
 
-fn triangle_fan_indices(quad_len: usize) -> Vec<u32> {
+fn triangle_fan_indices(len: usize) -> Vec<u32> {
     let mut indices: Vec<u32> = vec![];
-    for index in 1..(quad_len as u32 - 1) {
+    for index in 1..(len as u32 - 1) {
         indices.extend_from_slice(&[0, index as u32, index + 1]);
     }
 
     indices
 }
+
+/// expects buffer to be able to allocate vertices
+fn triangle_fan_indices_ext(
+    start: u32,
+    len: usize,
+    buf: &mut GPUVec<u32>
+) {
+    // let mut indices: Vec<u32> = vec![];
+    let invariant = buf.capacity();
+    for index in start..(start + len as u32 - 1) {
+        buf.extend_from_slice(&[start, index as u32, index + 1]);
+    }
+
+    assert!(invariant == buf.capacity());
+}
+
+
 
 // fn prepare_pipeline_state<'a>(
 //     device: &DeviceRef,
@@ -558,18 +575,18 @@ impl Mtl {
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
-                /// offset is in bytes
-                let index_buffer_offset = start * self.index_size;
+                // offset is in bytes
+                let byte_index_buffer_offset = start * self.index_size;
 
+                triangle_fan_indices_ext(start as u32, count, &mut self.index_buffer);
                 // original uses fans
-                // encoder.draw_indexed_primitives(
-                //     metal::MTLPrimitiveType::Triangle,
-                //     count as u64,
-                //     metal::MTLIndexType::UInt32,
-                //     self.index_buffer.as_ref(),
-                //     index_buffer_offset as u64,
-                // );
-                // todo!()
+                encoder.draw_indexed_primitives(
+                    metal::MTLPrimitiveType::Triangle,
+                    count as u64,
+                    metal::MTLIndexType::UInt32,
+                    self.index_buffer.as_ref(),
+                    byte_index_buffer_offset as u64,
+                );
             }
 
             // Draw fringes
@@ -592,23 +609,22 @@ impl Mtl {
         encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
         encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state.as_ref().unwrap());
 
-        // todo metal nanovg doesn't have this
-        // self.set_uniforms(encoder, images, stencil_paint, None, None);
+        // todo metal nanovg doesn't have this but gpucanvas does
+        self.set_uniforms(encoder, images, stencil_paint, None, None);
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
-                /// offset is in bytes
-                let index_buffer_offset = start * self.index_size;
+                let byte_index_buffer_offset = start * self.index_size;
 
-                // draw fans
-
-                // encoder.draw_indexed_primitives(
-                //     metal::MTLPrimitiveType::Triangle,
-                //     count as u64,
-                //     metal::MTLIndexType::UInt32,
-                //     self.index_buffer.as_ref(),
-                //     index_buffer_offset as u64,
-                // );
+                triangle_fan_indices_ext(start as u32, count, &mut self.index_buffer);
+                // original uses fans
+                encoder.draw_indexed_primitives(
+                    metal::MTLPrimitiveType::Triangle,
+                    count as u64,
+                    metal::MTLIndexType::UInt32,
+                    self.index_buffer.as_ref(),
+                    byte_index_buffer_offset as u64,
+                );
             }
         }
         // Restores states.
@@ -622,7 +638,6 @@ impl Mtl {
 
             for drawable in &cmd.drawables {
                 if let Some((start, count)) = drawable.stroke_verts {
-                    /// draw fans
                     encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64);
                 }
             }
@@ -742,6 +757,7 @@ impl Mtl {
     pub fn clear_rect(
         &mut self,
         encoder: &metal::RenderCommandEncoderRef,
+        images: &ImageStore<MtlTexture>,
         x: u32,
         y: u32,
         width: u32,
@@ -750,11 +766,9 @@ impl Mtl {
     ) {
         let clear_rect = ClearRect {
             rect: Rect { x: -1.0, y: -1.0, w: 2.0, h: 2.0 },
-            // rect: Rect { x: -0.5, y: -0.5, w: 1.0, h: 1.0 },
             color
         };
 
-        // self.clear_rect_pipeline_state.
         encoder.set_render_pipeline_state(&self.clear_rect_pipeline_state.as_ref().unwrap());
         encoder.set_vertex_value(0, &clear_rect);
         encoder.set_scissor_rect(metal::MTLScissorRect {
@@ -766,7 +780,7 @@ impl Mtl {
 
         encoder.draw_primitives_instanced(metal::MTLPrimitiveType::TriangleStrip, 0, 4, 1);
 
-        // reset scissor rect
+        // reset state
         let size = *self.view_size_buffer;
         encoder.set_scissor_rect(metal::MTLScissorRect {
             x: 0,
@@ -774,6 +788,11 @@ impl Mtl {
             width: size.w as _,
             height: size.h as _,
         });
+
+        // reset buffers for the other commands
+        encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
+        encoder.set_vertex_buffer(0, Some(self.vertex_buffer.as_ref()), 0);
+        encoder.set_vertex_buffer(1, Some(self.view_size_buffer.as_ref()), 0);
     }
 
     pub fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
@@ -859,14 +878,15 @@ fn new_render_command_encoder<'a>(
         encoder
     }
     else {
-        let desc = metal::RenderPassDescriptor::new();
-        let color_attachment = desc.color_attachments().object_at(0).unwrap();
+        todo!()
+    //     let desc = metal::RenderPassDescriptor::new();
+    //     let color_attachment = desc.color_attachments().object_at(0).unwrap();
 
-        color_attachment.set_texture(Some(color_texture));
-        color_attachment.set_load_action(metal::MTLLoadAction::Clear);
-        color_attachment.set_clear_color(clear_color.into());
-        color_attachment.set_store_action(metal::MTLStoreAction::Store);
-        command_buffer.new_render_command_encoder(&desc)
+    //     color_attachment.set_texture(Some(color_texture));
+    //     color_attachment.set_load_action(metal::MTLLoadAction::Clear);
+    //     color_attachment.set_clear_color(clear_color.into());
+    //     color_attachment.set_store_action(metal::MTLStoreAction::Store);
+    //     command_buffer.new_render_command_encoder(&desc)
     }
 }
 
@@ -897,9 +917,9 @@ impl Renderer for Mtl {
         self.vertex_buffer.clear();
         self.vertex_buffer.extend_from_slice(verts);
 
-        /// build indices
+        // build indices
         self.index_buffer.clear();
-        self.index_buffer.reserve(verts.len());
+        self.index_buffer.reserve(3 * verts.len());
         // temporary to ensure that the index_buffer is does not
         // change the inner allocation
         // the reserve should allocate enough
@@ -954,20 +974,29 @@ impl Renderer for Mtl {
             self.set_composite_operation(cmd.composite_operation, pixel_format);
 
             match cmd.cmd_type {
-                CommandType::ConvexFill { params } => self.convex_fill(&encoder, images, cmd, params),
+                CommandType::ConvexFill { params } => {
+                    //counters.convex_fill += 1;
+                    self.convex_fill(&encoder, images, cmd, params)
+                }
                 CommandType::ConcaveFill {
                     stencil_params,
                     fill_params,
                 } => {
-                    // self.concave_fill(&encoder, images, cmd, stencil_params, fill_params)
-                }
+                    //counters.concave_fill += 1;
+                    self.concave_fill(&encoder, images, cmd, stencil_params, fill_params)
+                },
                 CommandType::Stroke { params } => {
-                    // self.stroke(&encoder, images, cmd, params)
-                }
+                    //counters.stroke += 1;
+                    self.stroke(&encoder, images, cmd, params)
+                },
                 CommandType::StencilStroke { params1, params2 } => {
-                    // self.stencil_stroke(&encoder, images, cmd, params1, params2)
-                }
-                CommandType::Triangles { params } => self.triangles(&encoder, images, cmd, params),
+                    //counters.stencil_stroke += 1;
+                    self.stencil_stroke(&encoder, images, cmd, params1, params2)
+                },
+                CommandType::Triangles { params } => {
+                    //counters.triangles += 1;
+                    self.triangles(&encoder, images, cmd, params)
+                },
                 CommandType::ClearRect {
                     x,
                     y,
@@ -975,10 +1004,11 @@ impl Renderer for Mtl {
                     height,
                     color,
                 } => {
-                    self.clear_rect(&encoder, x, y, width, height, color);
-                    // self.clear_rect2(images, x, y, width, height, color);
+                    //counters.clear_rect += 1;
+                    self.clear_rect(&encoder, images, x, y, width, height, color);
                 }
                 CommandType::SetRenderTarget(target) => {
+                    //counters.set_render_target += 1;
                     self.set_target(images, target);
                 }
             }
@@ -990,18 +1020,21 @@ impl Renderer for Mtl {
             command_buffer.present_drawable(&drawable);
         }
 
-        #[cfg(target_os = "macos")]
-        {
-            if self.render_target == RenderTarget::Screen {
-                let blit = command_buffer.new_blit_command_encoder();
-                blit.synchronize_resource(&color_texture);
-                blit.end_encoding();
-            }
-        }
+        // todo
+        // #[cfg(target_os = "macos")]
+        // {
+        //     if self.render_target == RenderTarget::Screen {
+        //         let blit = command_buffer.new_blit_command_encoder();
+        //         blit.synchronize_resource(&color_texture);
+        //         blit.end_encoding();
+        //     }
+        // }
 
         command_buffer.commit();
         assert!(vertex_buffer_hash == self.vertex_buffer.ptr_hash());
         assert!(index_buffer_hash == self.index_buffer.ptr_hash());
+
+        // println!("counters {:?}", counters);
 
         // if !self.layer.presents_with_transaction() {
         //     command_buffer.present_drawable(&drawable);
