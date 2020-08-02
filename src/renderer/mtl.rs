@@ -128,7 +128,7 @@ fn triangle_fan_indices2(
 ) -> GPUVec<u32> {
     let triangle_len = len - 2;
     let index_len = 3 * triangle_len;
-    let mut vec = GPUVec::<u32>::with_capacity(device, index_len as);
+    let mut vec = GPUVec::<u32>::with_capacity(device, index_len as usize);
 
     // let mut indices: Vec<u32> = vec![];
     for index in 2..(len) {
@@ -138,21 +138,21 @@ fn triangle_fan_indices2(
     vec
 }
 
-fn triangle_fan_indices3(
-    start: u32, 
-    len: u32
-) -> Vec<u32> {
-    let triangle_len = len - 2;
-    let index_len = 3 * triangle_len;
-    let mut vec = Vec::<u32>::with_capacity(index_len as);
+// fn triangle_fan_indices3(
+//     start: u32, 
+//     len: u32
+// ) -> Vec<u32> {
+//     let triangle_len = len - 2;
+//     let index_len = 3 * triangle_len;
+//     let mut vec = Vec::<u32>::with_capacity(index_len as);
 
-    // let mut indices: Vec<u32> = vec![];
-    for index in 2..(len) {
-        vec.extend_from_slice(&[start, start + index - 1, start + index]);
-    }
+//     // let mut indices: Vec<u32> = vec![];
+//     for index in 2..(len) {
+//         vec.extend_from_slice(&[start, start + index - 1, start + index]);
+//     }
 
-    vec
-}
+//     vec
+// }
 /// expects buffer to be able to allocate vertices
 fn triangle_fan_indices_ext(
     start: u32,
@@ -876,6 +876,27 @@ impl From<Color> for metal::MTLClearColor {
     }
 }
 
+
+static mut SHOULD_RENDER: bool = true;
+
+fn lock() {
+    unsafe {
+        SHOULD_RENDER = false;
+    }
+}
+
+fn unlock() {
+    unsafe {
+        SHOULD_RENDER = true;
+    }
+}
+
+fn should_render() -> bool {
+    unsafe {
+        SHOULD_RENDER
+    }
+}
+
 fn new_render_command_encoder<'a>(
     color_texture: &metal::TextureRef,
     command_buffer: &'a metal::CommandBufferRef,
@@ -954,7 +975,10 @@ impl Renderer for Mtl {
 
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
-
+        // if !should_render() {
+        //     return;
+        // }
+        // lock();
         // let lens = PathsLength::new(commands);
         #[derive(Copy, Clone, Default, Debug)]
         struct Counters {
@@ -991,6 +1015,7 @@ impl Renderer for Mtl {
         // let block = block::ConcreteBlock::new(move |buffer: &metal::CommandBufferRef| {
         //     // println!("{}", buffer.label());
         //     // self.vertex_buffer.clear();
+        //     unlock();
         // }).copy();
         // command_buffer.add_completed_handler(&block);
         let mut drawable: Option<metal::CoreAnimationDrawable> = None;
@@ -1089,7 +1114,7 @@ impl Renderer for Mtl {
 
         command_buffer.commit();
         // command_buffer.wait_until_scheduled();
-        println!("counters {:?}", counters);
+        // println!("counters {:?}", counters);
 
         // if !self.layer.presents_with_transaction() {
         //     command_buffer.present_drawable(&drawable);

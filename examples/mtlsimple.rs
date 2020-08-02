@@ -305,7 +305,7 @@ fn main() {
                 //     canvas.stroke_path(&mut path, Paint::color(Color::hex("454545")));
                 // }
 
-                // draw_clear_rect2(&mut canvas, 20, 10, 50, 50);
+                draw_clear_rect2(&mut canvas, 20, 10, 50, 50);
                 // draw_rounded_rect increases convex_fill by 1
                 draw_rounded_rect(&mut canvas, 100.0, 100.0, 40.0, 40.0, 5.0, 1.0);
                 // draw_rounded_rect(&mut canvas,300.0, 100.0, 40.0, 40.0, 5.0, 1.0);
