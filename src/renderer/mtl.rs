@@ -883,7 +883,7 @@ fn new_render_command_encoder<'a>(
 
         let encoder = command_buffer.new_render_command_encoder(&desc);
 
-        // encoder.set_cull_mode(metal::MTLCullMode::Back);
+        encoder.set_cull_mode(metal::MTLCullMode::Back);
         encoder.set_front_facing_winding(metal::MTLWinding::Clockwise);
         encoder.set_stencil_reference_value(0);
         encoder.set_viewport(metal::MTLViewport {

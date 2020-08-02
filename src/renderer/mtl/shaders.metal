@@ -215,7 +215,10 @@ struct ClearRect {
     Color color;
 };
 
-float2 rect_vert(
+
+/// gets the vertices in counter clockwise order
+/// so that this plays nicely with the cull mode set
+float2 rect_vert_ccw(
     Rect rect,
     uint vid
 ) {
@@ -231,10 +234,10 @@ float2 rect_vert(
         pos = float2(right, top);
         break;
     case 1:
-        pos = float2(left, top);
+        pos = float2(right, bottom);
         break;
     case 2:
-        pos = float2(right, bottom);
+        pos = float2(left, top);
         break;
     case 3:
         pos = float2(left, bottom);
@@ -248,7 +251,7 @@ vertex ColorInOut clear_rect_vertex(
     unsigned int vid [[ vertex_id ]]
 ) {
     ColorInOut out;
-    float4 pos = float4(rect_vert(clear_rect->rect, vid), 0, 1);
+    float4 pos = float4(rect_vert_ccw(clear_rect->rect, vid), 0, 1);
     auto col = clear_rect->color;
 
     out.position = pos;
@@ -261,27 +264,27 @@ fragment float4 clear_rect_fragment(ColorInOut in [[stage_in]]) {
 };
 
 
-typedef struct {
-	packed_float2 position;
-	packed_float3 color;
-} vertex_t;
+// typedef struct {
+// 	packed_float2 position;
+// 	packed_float3 color;
+// } vertex_t;
 
-// vertex shader function
-vertex ColorInOut triangle_vertex(const device vertex_t* vertex_array [[ buffer(0) ]],
-                                   unsigned int vid [[ vertex_id ]])
-{
-    ColorInOut out;
+// // vertex shader function
+// vertex ColorInOut triangle_vertex(const device vertex_t* vertex_array [[ buffer(0) ]],
+//                                    unsigned int vid [[ vertex_id ]])
+// {
+//     ColorInOut out;
 
-    auto device const &v = vertex_array[vid];
-    out.position = float4(v.position.x, v.position.y, 0.0, 1.0);
-    out.color = float4(v.color.x, v.color.y, v.color.z, 0.2);
+//     auto device const &v = vertex_array[vid];
+//     out.position = float4(v.position.x, v.position.y, 0.0, 1.0);
+//     out.color = float4(v.color.x, v.color.y, v.color.z, 0.2);
 
-    return out;
-}
+//     return out;
+// }
 
-// fragment shader function
-fragment float4 triangle_fragment(ColorInOut in [[stage_in]])
-{
-    return in.color;
-};
+// // fragment shader function
+// fragment float4 triangle_fragment(ColorInOut in [[stage_in]])
+// {
+//     return in.color;
+// };
 
