@@ -107,6 +107,37 @@ fn triangle_fan_indices(quad_len: usize) -> Vec<u32> {
     indices
 }
 
+// fn prepare_pipeline_state<'a>(
+//     device: &DeviceRef,
+//     library: &LibraryRef,
+//     vertex_shader: &str,
+//     fragment_shader: &str,
+// ) -> RenderPipelineState {
+//     let vert = library.get_function(vertex_shader, None).unwrap();
+//     let frag = library.get_function(fragment_shader, None).unwrap();
+
+//     let pipeline_state_descriptor = RenderPipelineDescriptor::new();
+//     pipeline_state_descriptor.set_vertex_function(Some(&vert));
+//     pipeline_state_descriptor.set_fragment_function(Some(&frag));
+//     let attachment = pipeline_state_descriptor
+//         .color_attachments()
+//         .object_at(0)
+//         .unwrap();
+//     attachment.set_pixel_format(MTLPixelFormat::BGRA8Unorm);
+
+//     attachment.set_blending_enabled(true);
+//     attachment.set_rgb_blend_operation(metal::MTLBlendOperation::Add);
+//     attachment.set_alpha_blend_operation(metal::MTLBlendOperation::Add);
+//     attachment.set_source_rgb_blend_factor(metal::MTLBlendFactor::SourceAlpha);
+//     attachment.set_source_alpha_blend_factor(metal::MTLBlendFactor::SourceAlpha);
+//     attachment.set_destination_rgb_blend_factor(metal::MTLBlendFactor::OneMinusSourceAlpha);
+//     attachment.set_destination_alpha_blend_factor(metal::MTLBlendFactor::OneMinusSourceAlpha);
+
+//     device
+//         .new_render_pipeline_state(&pipeline_state_descriptor)
+//         .unwrap()
+// }
+
 // fn main() {
 // 	let indices = triangle_fan_indices(10);
 // 	println!("{:?}", indices);
@@ -480,11 +511,13 @@ impl Mtl {
 
         self.blend_func = blend_func;
         let pipeline_state = self.device.new_render_pipeline_state(&desc).unwrap();
+        // pipeline_state.set_label("pipeline_state");
         self.pipeline_state = Some(pipeline_state);
 
         desc.set_fragment_function(None);
         color_attachment_desc.set_write_mask(metal::MTLColorWriteMask::empty());
         let stencil_only_pipeline_state = self.device.new_render_pipeline_state(&desc).unwrap();
+        // stencil_only_pipeline_state.set_label("stencil_only_pipeline_state");
         self.stencil_only_pipeline_state = Some(stencil_only_pipeline_state);
 
         self.pipeline_pixel_format = pixel_format;
@@ -507,6 +540,8 @@ impl Mtl {
 
             self.device.new_render_pipeline_state(&desc2).unwrap()
         };
+
+        // clear_rect_pipeline_state.set_label("clear_rect_pipeline_state");
         self.clear_rect_pipeline_state = Some(clear_rect_pipeline_state);
     }
 
@@ -899,7 +934,6 @@ impl Renderer for Mtl {
         // temporary to ensure that the index_buffer is does not
         // change the inner allocation
         // the reserve should allocate enough
-
         let ptr_hash = self.index_buffer.ptr_hash();
 
         let clear_color: Color = self.clear_color;
@@ -986,14 +1020,14 @@ impl Renderer for Mtl {
             command_buffer.present_drawable(&drawable);
         }
 
-        // #[cfg(target_os = "macos")]
-        // {
-        //     if self.render_target == RenderTarget::Screen {
-        //         let blit = command_buffer.new_blit_command_encoder();
-        //         blit.synchronize_resource(&color_texture);
-        //         blit.end_encoding();
-        //     }
-        // }
+        #[cfg(target_os = "macos")]
+        {
+            if self.render_target == RenderTarget::Screen {
+                let blit = command_buffer.new_blit_command_encoder();
+                blit.synchronize_resource(&color_texture);
+                blit.end_encoding();
+            }
+        }
 
         command_buffer.commit();
         assert!(ptr_hash == self.index_buffer.ptr_hash());
