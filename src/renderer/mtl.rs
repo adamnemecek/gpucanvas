@@ -1064,7 +1064,7 @@ impl Renderer for Mtl {
     //     todo!();
     // }
 
-    fn screenshot(&mut self) -> Result<ImgVec<RGBA8>, ErrorKind> {
+    fn screenshot(&mut self, images: &ImageStore<Self::Image>) -> Result<ImgVec<RGBA8>, ErrorKind> {
         // todo!()
         // look at headless renderer in metal-rs
         let size = *self.view_size_buffer;

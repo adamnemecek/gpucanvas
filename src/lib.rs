@@ -295,7 +295,7 @@ where
 
     pub fn screenshot(&mut self) -> Result<ImgVec<RGBA8>, ErrorKind> {
         self.flush();
-        self.renderer.screenshot()
+        self.renderer.screenshot(&self.images)
     }
 
     // State Handling

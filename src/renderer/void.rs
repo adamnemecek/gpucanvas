@@ -43,7 +43,7 @@ impl Renderer for Void {
 
     fn delete_image(&mut self, image: Self::Image) {}
 
-    fn screenshot(&mut self) -> Result<ImgVec<RGBA8>, ErrorKind> {
+    fn screenshot(&mut self, _images: &ImageStore<Self::Image>) -> Result<ImgVec<RGBA8>, ErrorKind> {
         Ok(ImgVec::new(Vec::new(), 0, 0))
     }
 }
