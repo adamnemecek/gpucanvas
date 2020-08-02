@@ -307,7 +307,8 @@ fn main() {
 
                 draw_clear_rect2(&mut canvas, 20, 10, 50, 50);
                 // draw_rounded_rect increases convex_fill by 1
-                draw_rounded_rect(&mut canvas, 100.0, 100.0, 40.0, 40.0, 5.0, 1.0);
+                // draw_rounded_rect(&mut canvas, 100.0, 100.0, 40.0, 40.0, 5.0, 1.0);
+                draw_rect(&mut canvas, 100.0, 100.0, 40.0, 40.0);
                 // draw_rounded_rect(&mut canvas,300.0, 100.0, 40.0, 40.0, 5.0, 1.0);
                 // render_clear_rect(&mut );
 
@@ -369,7 +370,34 @@ fn draw_clear_rect2<T: Renderer>(canvas: &mut Canvas<T>, x: u32, y: u32, w: u32,
 //     canvas.restore();
 // }
 
-fn draw_rounded_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, r: f32, t: f32) {
+
+fn draw_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
+    let mut path = Path::new();
+    // path.rounded_rect(
+    //     x,y,w,h,5.0
+    // );
+    path.rect(
+        x,y, w, h
+    );
+    let ax = 10.0;
+    let ay = 20.0;
+    let bx = 10.0;
+    let by = 20.0;
+
+    let paint = Paint::linear_gradient(
+        ax,
+        ay,
+        bx,
+        by,
+        Color::hsla(0.6 / (PI * 2.0), 1.0, 0.55, 1.0),
+        Color::hsla(0.6 / (PI * 2.0), 1.0, 0.55, 1.0),
+    );
+
+    canvas.fill_path(&mut path, paint);
+}
+
+
+fn draw_roundrect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, r: f32, t: f32) {
     let mut path = Path::new();
     path.rounded_rect(
         x,y,w,h,5.0
