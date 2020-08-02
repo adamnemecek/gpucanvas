@@ -749,8 +749,8 @@ impl Mtl {
         color: Color,
     ) {
         let clear_rect = ClearRect {
-            // rect: Rect { x: -1.0, y: -1.0, w: 2.0, h: 2.0 },
-            rect: Rect { x: -0.5, y: -0.5, w: 1.0, h: 1.0 },
+            rect: Rect { x: -1.0, y: -1.0, w: 2.0, h: 2.0 },
+            // rect: Rect { x: -0.5, y: -0.5, w: 1.0, h: 1.0 },
             color
         };
 
@@ -858,47 +858,59 @@ fn new_render_command_encoder<'a>(
     // uniform_buffer: &GPUVec<Params>,
     // clear_buffer_on_flush: bool,
 ) -> &'a metal::RenderCommandEncoderRef {
-    let load_action =
-    // if clear_buffer_on_flush {
-        metal::MTLLoadAction::Clear;
-    // } else {
-        // metal::MTLLoadAction::Load;
-    // };
-    let desc = metal::RenderPassDescriptor::new();
+    if true {
+        let load_action =
+        // if clear_buffer_on_flush {
+            metal::MTLLoadAction::Clear;
+        // } else {
+            // metal::MTLLoadAction::Load;
+        // };
+        let desc = metal::RenderPassDescriptor::new();
 
-    let view_size = &*view_size_buffer;
+        let view_size = &*view_size_buffer;
 
-    let color_attachment = desc.color_attachments().object_at(0).unwrap();
-    color_attachment.set_clear_color(clear_color.into());
-    color_attachment.set_load_action(load_action);
-    color_attachment.set_store_action(metal::MTLStoreAction::Store);
-    color_attachment.set_texture(Some(&color_texture));
+        let color_attachment = desc.color_attachments().object_at(0).unwrap();
+        color_attachment.set_clear_color(clear_color.into());
+        color_attachment.set_load_action(load_action);
+        color_attachment.set_store_action(metal::MTLStoreAction::Store);
+        color_attachment.set_texture(Some(&color_texture));
 
-    let stencil_attachment = desc.stencil_attachment().unwrap();
-    stencil_attachment.set_clear_stencil(0);
-    stencil_attachment.set_load_action(metal::MTLLoadAction::Clear);
-    stencil_attachment.set_store_action(metal::MTLStoreAction::DontCare);
-    stencil_attachment.set_texture(Some(&stencil_texture.tex()));
+        let stencil_attachment = desc.stencil_attachment().unwrap();
+        stencil_attachment.set_clear_stencil(0);
+        stencil_attachment.set_load_action(metal::MTLLoadAction::Clear);
+        stencil_attachment.set_store_action(metal::MTLStoreAction::DontCare);
+        stencil_attachment.set_texture(Some(&stencil_texture.tex()));
 
-    let encoder = command_buffer.new_render_command_encoder(&desc);
+        let encoder = command_buffer.new_render_command_encoder(&desc);
 
-    encoder.set_cull_mode(metal::MTLCullMode::Back);
-    encoder.set_front_facing_winding(metal::MTLWinding::Clockwise);
-    encoder.set_stencil_reference_value(0);
-    encoder.set_viewport(metal::MTLViewport {
-        originX: 0.0,
-        originY: 0.0,
-        width: view_size.w as f64,
-        height: view_size.h as f64,
-        znear: 0.0,
-        zfar: 1.0,
-    });
+        // encoder.set_cull_mode(metal::MTLCullMode::Back);
+        encoder.set_front_facing_winding(metal::MTLWinding::Clockwise);
+        encoder.set_stencil_reference_value(0);
+        encoder.set_viewport(metal::MTLViewport {
+            originX: 0.0,
+            originY: 0.0,
+            width: view_size.w as f64,
+            height: view_size.h as f64,
+            znear: 0.0,
+            zfar: 1.0,
+        });
 
-    encoder.set_vertex_buffer(0, Some(vertex_buffer.as_ref()), 0);
-    encoder.set_vertex_buffer(1, Some(view_size_buffer.as_ref()), 0);
-    // encoder.set_fragment_buffer(0, Some(uniform_buffer.as_ref()), 0);
+        // encoder.set_vertex_buffer(0, Some(vertex_buffer.as_ref()), 0);
+        // encoder.set_vertex_buffer(1, Some(view_size_buffer.as_ref()), 0);
+        // encoder.set_fragment_buffer(0, Some(uniform_buffer.as_ref()), 0);
 
-    encoder
+        encoder
+    }
+    else {
+        let desc = metal::RenderPassDescriptor::new();
+        let color_attachment = desc.color_attachments().object_at(0).unwrap();
+
+        color_attachment.set_texture(Some(color_texture));
+        color_attachment.set_load_action(metal::MTLLoadAction::Clear);
+        color_attachment.set_clear_color(clear_color.into());
+        color_attachment.set_store_action(metal::MTLStoreAction::Store);
+        command_buffer.new_render_command_encoder(&desc)
+    }
 }
 
 impl Renderer for Mtl {
