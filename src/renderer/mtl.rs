@@ -963,9 +963,6 @@ impl Renderer for Mtl {
         let size = Size::new(color_texture.width() as _, color_texture.height() as _);
         self.stencil_texture.resize(size);
 
-        // todo: this should be calling get_target
-        // let drawable = self.layer.next_drawable().unwrap().to_owned();
-        // let color_texture = drawable.texture();
         let pixel_format = color_texture.pixel_format();
 
         let encoder = new_render_command_encoder(
@@ -994,7 +991,7 @@ impl Renderer for Mtl {
                     fill_params,
                 } => {
                     //counters.concave_fill += 1;
-                    self.concave_fill(&encoder, images, cmd, stencil_params, fill_params)
+                    // self.concave_fill(&encoder, images, cmd, stencil_params, fill_params)
                 },
                 CommandType::Stroke { params } => {
                     //counters.stroke += 1;
@@ -1041,10 +1038,11 @@ impl Renderer for Mtl {
         //     }
         // }
 
-        command_buffer.commit();
         assert!(vertex_buffer_hash == self.vertex_buffer.ptr_hash());
         assert!(index_buffer_hash == self.index_buffer.ptr_hash());
 
+        command_buffer.commit();
+        // command_buffer.wait_until_scheduled();
         // println!("counters {:?}", counters);
 
         // if !self.layer.presents_with_transaction() {

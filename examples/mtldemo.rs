@@ -289,7 +289,7 @@ fn main() {
 
                 draw_thumbnails(&mut canvas, 365.0, popy - 30.0, 160.0, 300.0, &images, t);
 
-                draw_clear_rect2(&mut canvas, 20, 60, 50, 50);
+                draw_clear_rect2(&mut canvas, t, 20, 60, 50, 50);
                 /*
                 draw_spinner(&mut canvas, 15.0, 285.0, 10.0, t);
                 */
@@ -333,10 +333,12 @@ fn main() {
     });
 }
 
-fn draw_clear_rect2<T: Renderer>(canvas: &mut Canvas<T>, x: u32, y: u32, w: u32, h: u32) {
+fn draw_clear_rect2<T: Renderer>(canvas: &mut Canvas<T>, t: f32, x: u32, y: u32, w: u32, h: u32) {
     canvas.save();
 
-    canvas.clear_rect(x, y, w, h, Color::rgba(255, 192, 0, 255));
+    let sin = t.sin();
+    let cos = t.cos();
+    canvas.clear_rect(x, y, w, h, Color::rgbaf(sin * 1.0, cos * 192.0/255.0, 0.0, 1.0));
     // canvas.fill_path(&mut path, Paint::color(Color::rgba(255, 192, 0, 255)));
 
     canvas.restore();
