@@ -98,10 +98,10 @@ pub use mtl_ext::generate_mipmaps;
 /// Based on pathfinder.
 /// https://www.gamedev.net/forums/topic/643945-how-to-generate-a-triangle-fan-index-list-for-a-circle-shape/
 
-fn triangle_fan_indices(len: usize) -> Vec<u32> {
+fn triangle_fan_indices(start: u32, len: u32) -> Vec<u32> {
     let mut indices: Vec<u32> = vec![];
-    for index in 1..(len as u32 - 1) {
-        indices.extend_from_slice(&[0, index as u32, index + 1]);
+    for index in 1..(len - 1) {
+        indices.extend_from_slice(&[start, start + index, start + index + 1]);
     }
 
     indices
@@ -115,8 +115,12 @@ fn triangle_fan_indices_ext(
 ) {
     // let mut indices: Vec<u32> = vec![];
     let invariant = buf.capacity();
+    // for index in start..(start + len as u32 - 1) {
+    //     buf.extend_from_slice(&[start, index, index + 1]);
+    // }
+
     for index in start..(start + len as u32 - 1) {
-        buf.extend_from_slice(&[start, index as u32, index + 1]);
+        buf.extend_from_slice(&[start, index, index + 1]);
     }
 
     assert!(invariant == buf.capacity());
@@ -265,6 +269,7 @@ pub struct Mtl {
     clear_rect_vert_func: metal::Function,
     clear_rect_frag_func: metal::Function,
     clear_rect_pipeline_state: Option<metal::RenderPipelineState>,
+
 }
 
 impl From<CGSize> for Size {
@@ -578,7 +583,9 @@ impl Mtl {
                 // offset is in bytes
                 let byte_index_buffer_offset = start * self.index_size;
 
-                triangle_fan_indices_ext(start as u32, count, &mut self.index_buffer);
+                // triangle_fan_indices_ext(start as u32, count, &mut self.index_buffer);
+                let indices = triangle_fan_indices(start as u32, count as u32);
+                self.index_buffer.extend_from_slice(&indices);
                 // original uses fans
                 encoder.draw_indexed_primitives(
                     metal::MTLPrimitiveType::Triangle,
@@ -616,7 +623,8 @@ impl Mtl {
             if let Some((start, count)) = drawable.fill_verts {
                 let byte_index_buffer_offset = start * self.index_size;
 
-                triangle_fan_indices_ext(start as u32, count, &mut self.index_buffer);
+                let indices = triangle_fan_indices(start as u32, count as u32);
+                self.index_buffer.extend_from_slice(&indices);
                 // original uses fans
                 encoder.draw_indexed_primitives(
                     metal::MTLPrimitiveType::Triangle,
@@ -900,6 +908,7 @@ impl Renderer for Mtl {
 
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+
         // let lens = PathsLength::new(commands);
         // #[derive(Copy, Clone, Default, Debug)]
         // struct Counters {
@@ -914,10 +923,12 @@ impl Renderer for Mtl {
 
         // let mut counters: Counters = Default::default();
 
+
         self.vertex_buffer.clear();
         self.vertex_buffer.extend_from_slice(verts);
 
         // build indices
+
         self.index_buffer.clear();
         self.index_buffer.reserve(3 * verts.len());
         // temporary to ensure that the index_buffer is does not
@@ -1132,7 +1143,11 @@ mod tests {
     #[test]
     fn test_triangle_fan_indices() {
         let expected: Vec<u32> = vec![0, 1, 2, 0, 2, 3, 0, 3, 4];
-        let result = triangle_fan_indices(5);
+        let result = triangle_fan_indices(0, 5);
+        assert!(expected == result);
+
+        let expected: Vec<u32> = vec![2, 3, 4, 2, 4, 5, 2, 5, 6];
+        let result = triangle_fan_indices(2, 5);
         assert!(expected == result);
     }
 }
