@@ -107,6 +107,36 @@ fn triangle_fan_indices(start: u32, len: u32) -> Vec<u32> {
     indices
 }
 
+// from https://github.com/OpenSmalltalk/opensmalltalk-vm/blob/4ee8bb6e7960e5776558f0baca10daee7ec5d653/platforms/iOS/plugins/B3DAcceleratorPlugin/sqMetalRenderer.m#L718
+// unsigned int triangleCount = vertexCount - 2;
+// unsigned int renderIndexCount = triangleCount*3;    
+// id<MTLBuffer> indexBuffer = [device newBufferWithLength: renderIndexCount*4 options: MTLResourceStorageModeManaged];
+
+// // Set the triangle fan indices.
+// unsigned int *destIndices = (unsigned int *)indexBuffer.contents;
+// for(unsigned int i = 2; i < vertexCount; ++i) {
+//     destIndices[0] = 0;
+//     destIndices[1] = i - 1;
+//     destIndices[2] = i;
+//     destIndices += 3;
+// }
+
+fn triangle_fan_indices2(
+    device: &metal::DeviceRef,
+    start: u32, 
+    len: u32
+) -> GPUVec<u32> {
+    let triangle_len = len - 2;
+    let index_len = 3 * triangle_len;
+    let mut vec = GPUVec::<u32>::with_capacity(device, index_len as);
+
+    // let mut indices: Vec<u32> = vec![];
+    for index in 2..(len) {
+        vec.extend_from_slice(&[start, start + index - 1, start + index]);
+    }
+
+    vec
+}
 /// expects buffer to be able to allocate vertices
 fn triangle_fan_indices_ext(
     start: u32,
