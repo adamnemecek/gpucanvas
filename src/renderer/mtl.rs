@@ -137,6 +137,22 @@ fn triangle_fan_indices2(
 
     vec
 }
+
+fn triangle_fan_indices3(
+    start: u32, 
+    len: u32
+) -> Vec<u32> {
+    let triangle_len = len - 2;
+    let index_len = 3 * triangle_len;
+    let mut vec = Vec::<u32>::with_capacity(index_len as);
+
+    // let mut indices: Vec<u32> = vec![];
+    for index in 2..(len) {
+        vec.extend_from_slice(&[start, start + index - 1, start + index]);
+    }
+
+    vec
+}
 /// expects buffer to be able to allocate vertices
 fn triangle_fan_indices_ext(
     start: u32,
