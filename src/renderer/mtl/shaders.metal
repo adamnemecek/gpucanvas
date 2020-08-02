@@ -216,8 +216,9 @@ struct ClearRect {
 };
 
 
-/// gets the vertices in counter clockwise order
+/// gets the vertices in counterclockwise order
 /// so that this plays nicely with the cull mode set
+/// to flip to clockwise the flip 1 and 2
 float2 rect_vert_ccw(
     Rect rect,
     uint vid

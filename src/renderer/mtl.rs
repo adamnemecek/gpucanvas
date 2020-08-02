@@ -592,8 +592,8 @@ impl Mtl {
         encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
         encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state.as_ref().unwrap());
 
-        /// todo metal nanovg doesn't have this
-        self.set_uniforms(encoder, images, stencil_paint, None, None);
+        // todo metal nanovg doesn't have this
+        // self.set_uniforms(encoder, images, stencil_paint, None, None);
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
@@ -710,7 +710,7 @@ impl Mtl {
         }
     }
 
-    pub fn set_uniforms(
+    fn set_uniforms(
         &mut self,
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
@@ -776,42 +776,6 @@ impl Mtl {
         });
     }
 
-    // pub fn clear_rect2(
-    //     &mut self,
-    //     // encoder: &metal::RenderCommandEncoderRef,
-    //     images: &ImageStore<MtlTexture>,
-    //     x: u32,
-    //     y: u32,
-    //     width: u32,
-    //     height: u32,
-    //     color: Color,
-    // ) {
-
-    //     let color_texture = match self.render_target {
-    //         RenderTarget::Screen => {
-    //             self.layer.next_drawable().unwrap().texture()
-    //         }
-    //         RenderTarget::Image(id) => {
-    //             &images.get(id).unwrap().tex
-    //         }
-    //     };
-    //     // // self.clear_color = color;
-    //     // // func replace(region: MTLRegion,
-    //     // //     mipmapLevel level: Int,
-    //     // //       withBytes pixelBytes: UnsafeRawPointer,
-    //     // //     bytesPerRow: Int)
-
-    //     // [RGBA::new()]
-    //     let bytes = vec![color; (width * height) as usize];
-
-    //     color_texture.replace_region(
-    //         metal::MTLRegion::new_2d(x as _, y as _, width as _, height as _),
-    //         0,
-    //         bytes.as_ptr() as _,
-    //         4
-    //     );
-    // }
-
     pub fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
         self.render_target = target;
     }
@@ -831,13 +795,6 @@ impl Mtl {
 
     // }
 
-    // pub fn new_command_buffer(&self) -> metal::CommandBuffer {
-    //     self.command_queue.new_command_buffer().to_owned()
-    // }
-
-    // pub fn clear_color(&self) -> Color {
-    //     self.clear_color
-    // }
 }
 
 impl From<Color> for metal::MTLClearColor {
@@ -895,8 +852,8 @@ fn new_render_command_encoder<'a>(
             zfar: 1.0,
         });
 
-        // encoder.set_vertex_buffer(0, Some(vertex_buffer.as_ref()), 0);
-        // encoder.set_vertex_buffer(1, Some(view_size_buffer.as_ref()), 0);
+        encoder.set_vertex_buffer(0, Some(vertex_buffer.as_ref()), 0);
+        encoder.set_vertex_buffer(1, Some(view_size_buffer.as_ref()), 0);
         // encoder.set_fragment_buffer(0, Some(uniform_buffer.as_ref()), 0);
 
         encoder
@@ -946,7 +903,8 @@ impl Renderer for Mtl {
         // temporary to ensure that the index_buffer is does not
         // change the inner allocation
         // the reserve should allocate enough
-        let ptr_hash = self.index_buffer.ptr_hash();
+        let vertex_buffer_hash = self.vertex_buffer.ptr_hash();
+        let index_buffer_hash = self.index_buffer.ptr_hash();
 
         let clear_color: Color = self.clear_color;
         // println!("clear_color: {:?}", clear_color);
@@ -1042,7 +1000,9 @@ impl Renderer for Mtl {
         }
 
         command_buffer.commit();
-        assert!(ptr_hash == self.index_buffer.ptr_hash());
+        assert!(vertex_buffer_hash == self.vertex_buffer.ptr_hash());
+        assert!(index_buffer_hash == self.index_buffer.ptr_hash());
+
         // if !self.layer.presents_with_transaction() {
         //     command_buffer.present_drawable(&drawable);
         // }

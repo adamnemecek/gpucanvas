@@ -9,19 +9,19 @@ pub fn generate_mipmaps(command_queue: &metal::CommandQueueRef, tex: &metal::Tex
 }
 
 
-pub trait TextureExt {
-    fn size(&self) -> metal::MTLSize;
-}
+// pub trait TextureExt {
+//     fn size(&self) -> metal::MTLSize;
+// }
 
-impl TextureExt for metal::TextureRef {
-    fn size(&self) -> metal::MTLSize {
-        metal::MTLSize {
-            width: self.width(),
-            height: self.height(),
-            depth: self.depth()
-        }
-    }
-}
+// impl TextureExt for metal::TextureRef {
+//     fn size(&self) -> metal::MTLSize {
+//         metal::MTLSize {
+//             width: self.width(),
+//             height: self.height(),
+//             depth: self.depth()
+//         }
+//     }
+// }
 
 pub trait RenderCommandEncoderExt {
     fn set_vertex_value<T>(&self, index: u64, value: &T);
