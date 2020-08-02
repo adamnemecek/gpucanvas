@@ -910,18 +910,18 @@ impl Renderer for Mtl {
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
 
         // let lens = PathsLength::new(commands);
-        // #[derive(Copy, Clone, Default, Debug)]
-        // struct Counters {
-        //     convex_fill: usize,
-        //     concave_fill: usize,
-        //     stroke: usize,
-        //     stencil_stroke: usize,
-        //     triangles: usize,
-        //     clear_rect: usize,
-        //     set_render_target: usize,
-        // }
+        #[derive(Copy, Clone, Default, Debug)]
+        struct Counters {
+            convex_fill: usize,
+            concave_fill: usize,
+            stroke: usize,
+            stencil_stroke: usize,
+            triangles: usize,
+            clear_rect: usize,
+            set_render_target: usize,
+        }
 
-        // let mut counters: Counters = Default::default();
+        let mut counters: Counters = Default::default();
 
 
         self.vertex_buffer.clear();
@@ -983,26 +983,26 @@ impl Renderer for Mtl {
 
             match cmd.cmd_type {
                 CommandType::ConvexFill { params } => {
-                    //counters.convex_fill += 1;
+                    counters.convex_fill += 1;
                     self.convex_fill(&encoder, images, cmd, params)
                 }
                 CommandType::ConcaveFill {
                     stencil_params,
                     fill_params,
                 } => {
-                    //counters.concave_fill += 1;
-                    // self.concave_fill(&encoder, images, cmd, stencil_params, fill_params)
+                    counters.concave_fill += 1;
+                    self.concave_fill(&encoder, images, cmd, stencil_params, fill_params)
                 },
                 CommandType::Stroke { params } => {
-                    //counters.stroke += 1;
+                    counters.stroke += 1;
                     self.stroke(&encoder, images, cmd, params)
                 },
                 CommandType::StencilStroke { params1, params2 } => {
-                    //counters.stencil_stroke += 1;
+                    counters.stencil_stroke += 1;
                     self.stencil_stroke(&encoder, images, cmd, params1, params2)
                 },
                 CommandType::Triangles { params } => {
-                    //counters.triangles += 1;
+                    counters.triangles += 1;
                     self.triangles(&encoder, images, cmd, params)
                 },
                 CommandType::ClearRect {
@@ -1012,11 +1012,11 @@ impl Renderer for Mtl {
                     height,
                     color,
                 } => {
-                    //counters.clear_rect += 1;
+                    counters.clear_rect += 1;
                     self.clear_rect(&encoder, images, x, y, width, height, color);
                 }
                 CommandType::SetRenderTarget(target) => {
-                    //counters.set_render_target += 1;
+                    counters.set_render_target += 1;
                     self.set_target(images, target);
                 }
             }
@@ -1043,7 +1043,7 @@ impl Renderer for Mtl {
 
         command_buffer.commit();
         // command_buffer.wait_until_scheduled();
-        // println!("counters {:?}", counters);
+        println!("counters {:?}", counters);
 
         // if !self.layer.presents_with_transaction() {
         //     command_buffer.present_drawable(&drawable);
