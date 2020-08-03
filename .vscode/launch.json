@@ -5,6 +5,7 @@
     "version": "0.2.0",
     "configurations": [
 
+
         {
             "type": "lldb",
             "request": "launch",
@@ -239,6 +240,24 @@
                 ],
                 "filter": {
                     "name": "mtlsimple",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'glsimple'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=glsimple",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "glsimple",
                     "kind": "example"
                 }
             },

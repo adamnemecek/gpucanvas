@@ -109,7 +109,7 @@ fn triangle_fan_indices(start: u32, len: u32) -> Vec<u32> {
 
 // from https://github.com/OpenSmalltalk/opensmalltalk-vm/blob/4ee8bb6e7960e5776558f0baca10daee7ec5d653/platforms/iOS/plugins/B3DAcceleratorPlugin/sqMetalRenderer.m#L718
 // unsigned int triangleCount = vertexCount - 2;
-// unsigned int renderIndexCount = triangleCount*3;    
+// unsigned int renderIndexCount = triangleCount*3;
 // id<MTLBuffer> indexBuffer = [device newBufferWithLength: renderIndexCount*4 options: MTLResourceStorageModeManaged];
 
 // // Set the triangle fan indices.
@@ -123,7 +123,7 @@ fn triangle_fan_indices(start: u32, len: u32) -> Vec<u32> {
 
 fn triangle_fan_indices2(
     device: &metal::DeviceRef,
-    start: u32, 
+    start: u32,
     len: u32
 ) -> GPUVec<u32> {
     let triangle_len = len - 2;
@@ -139,7 +139,7 @@ fn triangle_fan_indices2(
 }
 
 // fn triangle_fan_indices3(
-//     start: u32, 
+//     start: u32,
 //     len: u32
 // ) -> Vec<u32> {
 //     let triangle_len = len - 2;
@@ -621,14 +621,18 @@ impl Mtl {
         cmd: &Command,
         paint: Params,
     ) {
-        self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
+        encoder.push_debug_group("convex_fill");
+
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
+        self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
+
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
+                // println!("fill verts #{}: start: {}, count {}", 0, start, count);
                 // offset is in bytes
                 let byte_index_buffer_offset = start * self.index_size;
-
+                assert!(self.index_buffer.len() == start);
                 // triangle_fan_indices_ext(start as u32, count, &mut self.index_buffer);
                 let indices = triangle_fan_indices(start as u32, count as u32);
                 self.index_buffer.extend_from_slice(&indices);
@@ -644,9 +648,12 @@ impl Mtl {
 
             // Draw fringes
             if let Some((start, count)) = drawable.stroke_verts {
+//                 println!("stroke verts #{}: start: {}, count {}", 0, start, count);
                 encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
             }
         }
+
+        encoder.pop_debug_group();
     }
 
     /// done
@@ -658,6 +665,8 @@ impl Mtl {
         stencil_paint: Params,
         fill_paint: Params,
     ) {
+        encoder.push_debug_group("concave_fill");
+
         encoder.set_cull_mode(metal::MTLCullMode::None);
         encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
         encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state.as_ref().unwrap());
@@ -667,8 +676,9 @@ impl Mtl {
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
+                // println!("fill verts #{}: start: {}, count {}", 0, start, count);
                 let byte_index_buffer_offset = start * self.index_size;
-
+                assert!(self.index_buffer.len() == start);
                 let indices = triangle_fan_indices(start as u32, count as u32);
                 self.index_buffer.extend_from_slice(&indices);
                 // original uses fans
@@ -692,6 +702,7 @@ impl Mtl {
 
             for drawable in &cmd.drawables {
                 if let Some((start, count)) = drawable.stroke_verts {
+                    // println!("stroke verts #{}: start: {}, count {}", 0, start, count);
                     encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64);
                 }
             }
@@ -703,6 +714,8 @@ impl Mtl {
             encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64);
         }
         encoder.set_depth_stencil_state(&self.default_stencil_state);
+
+        encoder.pop_debug_group();
     }
 
     /// done
@@ -713,12 +726,16 @@ impl Mtl {
         cmd: &Command,
         paint: Params,
     ) {
+        encoder.push_debug_group("stroke");
+
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
                 encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
             }
         }
+
+        encoder.pop_debug_group();
     }
 
     /// done
@@ -730,6 +747,8 @@ impl Mtl {
         paint1: Params,
         paint2: Params,
     ) {
+        encoder.push_debug_group("stencil_stroke");
+
         /// Fills the stroke base without overlap.
         self.set_uniforms(encoder, images, paint2, cmd.image, cmd.alpha_mask);
         encoder.set_depth_stencil_state(&self.stroke_shape_stencil_state);
@@ -762,6 +781,8 @@ impl Mtl {
             }
         }
         encoder.set_depth_stencil_state(&self.default_stencil_state);
+
+        encoder.pop_debug_group();
     }
 
     /// done
@@ -772,11 +793,15 @@ impl Mtl {
         cmd: &Command,
         paint: Params,
     ) {
+        encoder.push_debug_group("triangles");
+
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
         if let Some((start, count)) = cmd.triangles_verts {
             encoder.draw_primitives(metal::MTLPrimitiveType::Triangle, start as u64, count as u64);
         }
+
+        encoder.pop_debug_group();
     }
 
     fn set_uniforms(
@@ -818,6 +843,8 @@ impl Mtl {
         height: u32,
         color: Color,
     ) {
+        encoder.push_debug_group("clear_rect");
+
         let clear_rect = ClearRect {
             rect: Rect { x: -1.0, y: -1.0, w: 2.0, h: 2.0 },
             color
@@ -847,6 +874,8 @@ impl Mtl {
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
         encoder.set_vertex_buffer(0, Some(self.vertex_buffer.as_ref()), 0);
         encoder.set_vertex_buffer(1, Some(self.view_size_buffer.as_ref()), 0);
+
+        encoder.pop_debug_group();
     }
 
     pub fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {

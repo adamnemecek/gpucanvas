@@ -100,8 +100,8 @@ pub trait Renderer {
 }
 
 /// Vertex struct for specifying triangle geometry
-#[derive(Copy, Clone, Debug, PartialEq, PartialOrd, Default)]
 #[repr(C)]
+#[derive(Copy, Clone, Debug, PartialEq, PartialOrd, Default)]
 pub struct Vertex {
     pub x: f32,
     pub y: f32,
