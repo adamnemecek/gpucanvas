@@ -59,7 +59,7 @@ pub struct PathsLength {
     pub vertex_count: usize,
     pub index_count: usize,
     pub stroke_count: usize,
-    // pub triangle_count: usize,
+    pub triangle_count: usize,
 }
 
 impl PathsLength {
@@ -67,18 +67,18 @@ impl PathsLength {
         let mut vertex_count = 0;
         let mut index_count = 0;
         let mut stroke_count = 0;
-        // let mut triangle_count = 0;
+        let mut triangle_count = 0;
 
         for cmd in cmds {
             for drawable in &cmd.drawables {
-                if let Some((start, count)) = drawable.fill_verts {
+                if let Some((_start, count)) = drawable.fill_verts {
                     if count > 2 {
                         vertex_count += count;
                         index_count += (count - 2) * 3;
                     }
                 }
 
-                if let Some((start, count)) = drawable.stroke_verts {
+                if let Some((_start, count)) = drawable.stroke_verts {
                     if count > 0 {
                         vertex_count += count + 2;
                         stroke_count += count;
@@ -86,16 +86,16 @@ impl PathsLength {
                 }
             }
 
-            // if let Some((start, count)) = cmd.triangles_verts {
-            //     triangle_count += count;
-            // }
+            if let Some((start, count)) = cmd.triangles_verts {
+                triangle_count += count;
+            }
         }
 
         Self {
             vertex_count,
             index_count,
             stroke_count,
-            // triangle_count,
+            triangle_count,
         }
     }
 }
@@ -1032,7 +1032,7 @@ impl Renderer for Mtl {
         //     return;
         // }
         // lock();
-        let lens = PathsLength::new(commands);
+
         #[derive(Copy, Clone, Default, Debug)]
         struct Counters {
             convex_fill: usize,
@@ -1046,18 +1046,49 @@ impl Renderer for Mtl {
 
         let mut counters: Counters = Default::default();
 
+        let lens = PathsLength::new(commands);
+        let max_verts = lens.vertex_count + lens.triangle_count;
+
         self.vertex_buffer.clear();
-        self.vertex_buffer.extend_from_slice(verts);
+        self.index_buffer.resize(max_verts);
+        // self.vertex_buffer.extend_from_slice(verts);
 
         // build indices
         self.index_buffer.clear();
-        self.index_buffer.resize(3 * verts.len());
+        self.index_buffer.resize(lens.index_count);
         // println!("reserving {}", 3 * verts.len());
         // temporary to ensure that the index_buffer is does not
         // change the inner allocation
         // the reserve should allocate enough
         let vertex_buffer_hash = self.vertex_buffer.ptr_hash();
         let index_buffer_hash = self.index_buffer.ptr_hash();
+
+        for cmd in commands {
+            for drawable in &cmd.drawables {
+                if let Some((start, count)) = drawable.fill_verts {
+                    if count > 2 {
+                        let hub_offset = self.vertex_buffer.len() + 1;
+                        // self.vertex_buffer.splice_slow(..2, verts[start..start+count].iter().cloned());
+                        self.vertex_buffer.extend_from_slice(&verts[start..start+count]);
+
+                        // vertex_count += count;
+                        // index_count += (count - 2) * 3;
+
+                    }
+                }
+
+                if let Some((_start, count)) = drawable.stroke_verts {
+                    if count > 0 {
+                        // vertex_count += count + 2;
+                        // stroke_count += count;
+                    }
+                }
+            }
+
+            if let Some((start, count)) = cmd.triangles_verts {
+                // triangle_count += count;
+            }
+        }
 
         let clear_color: Color = self.clear_color;
         // println!("clear_color: {:?}", clear_color);
