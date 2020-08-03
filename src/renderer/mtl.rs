@@ -21,6 +21,20 @@ use stencil_texture::StencilTexture;
 mod mtl_ext;
 pub use mtl_ext::generate_mipmaps;
 
+
+// pub trait GPUVecExt {
+//     fn extend_with_triange_fan_indices(&mut self, start: u32, count: u32);
+// }
+
+
+// impl GPUVecExt for GPUVec<u32> {
+//     fn extend_with_triange_fan_indices(&mut self, start: u32, count: u32) {
+//         for index in 1..(count - 1) {
+//             self.extend_from_slice(&[start, start + index, start + index + 1]);
+//         }
+//     }
+// }
+
 // pub trait VecExt<T> {
 //     fn push_ext(&mut self, value: T) -> usize;
 // }
@@ -98,10 +112,18 @@ pub use mtl_ext::generate_mipmaps;
 /// Based on pathfinder.
 /// https://www.gamedev.net/forums/topic/643945-how-to-generate-a-triangle-fan-index-list-for-a-circle-shape/
 
-fn triangle_fan_indices(start: u32, len: u32) -> Vec<u32> {
+fn triangle_fan_indices_cw(start: u32, len: u32) -> Vec<u32> {
     let mut indices: Vec<u32> = vec![];
     for index in 1..(len - 1) {
-        indices.extend_from_slice(&[start, start + index, start + index + 1]);
+        indices.extend_from_slice(&[start, start + index, start + index + 1,]);
+    }
+
+    indices
+}
+fn triangle_fan_indices_ccw(start: u32, len: u32) -> Vec<u32> {
+    let mut indices: Vec<u32> = vec![];
+    for index in 1..(len - 1) {
+        indices.extend_from_slice(&[start, start + index + 1, start + index]);
     }
 
     indices
@@ -632,9 +654,9 @@ impl Mtl {
                 // println!("fill verts #{}: start: {}, count {}", 0, start, count);
                 // offset is in bytes
                 let byte_index_buffer_offset = start * self.index_size;
-                assert!(self.index_buffer.len() == start);
+                // assert!(self.index_buffer.len() == start);
                 // triangle_fan_indices_ext(start as u32, count, &mut self.index_buffer);
-                let indices = triangle_fan_indices(start as u32, count as u32);
+                let indices = triangle_fan_indices_ccw(start as u32, count as u32);
                 self.index_buffer.extend_from_slice(&indices);
                 // original uses fans
                 encoder.draw_indexed_primitives(
@@ -678,8 +700,8 @@ impl Mtl {
             if let Some((start, count)) = drawable.fill_verts {
                 // println!("fill verts #{}: start: {}, count {}", 0, start, count);
                 let byte_index_buffer_offset = start * self.index_size;
-                assert!(self.index_buffer.len() == start);
-                let indices = triangle_fan_indices(start as u32, count as u32);
+                // assert!(self.index_buffer.len() == start);
+                let indices = triangle_fan_indices_ccw(start as u32, count as u32);
                 self.index_buffer.extend_from_slice(&indices);
                 // original uses fans
                 encoder.draw_indexed_primitives(
@@ -749,7 +771,7 @@ impl Mtl {
     ) {
         encoder.push_debug_group("stencil_stroke");
 
-        /// Fills the stroke base without overlap.
+        // Fills the stroke base without overlap.
         self.set_uniforms(encoder, images, paint2, cmd.image, cmd.alpha_mask);
         encoder.set_depth_stencil_state(&self.stroke_shape_stencil_state);
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
@@ -760,7 +782,7 @@ impl Mtl {
             }
         }
 
-        /// Draw anti-aliased pixels.
+        // Draw anti-aliased pixels.
         self.set_uniforms(encoder, images, paint1, cmd.image, cmd.alpha_mask);
         encoder.set_depth_stencil_state(&self.stroke_anti_alias_stencil_state);
 
@@ -1004,6 +1026,8 @@ impl Renderer for Mtl {
 
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+        // println!("index_buffer.byte_len {}", self.index_buffer.byte_len());
+        // println!("index_buffer.byte_capacity {}", self.index_buffer.byte_capacity());
         // if !should_render() {
         //     return;
         // }
@@ -1022,14 +1046,13 @@ impl Renderer for Mtl {
 
         let mut counters: Counters = Default::default();
 
-
         self.vertex_buffer.clear();
         self.vertex_buffer.extend_from_slice(verts);
 
         // build indices
-
         self.index_buffer.clear();
-        self.index_buffer.reserve(3 * verts.len());
+        self.index_buffer.resize(3 * verts.len());
+        // println!("reserving {}", 3 * verts.len());
         // temporary to ensure that the index_buffer is does not
         // change the inner allocation
         // the reserve should allocate enough
@@ -1236,16 +1259,16 @@ impl Renderer for Mtl {
 }
 
 mod tests {
-    use super::triangle_fan_indices;
+    use super::triangle_fan_indices_cw;
 
     #[test]
-    fn test_triangle_fan_indices() {
+    fn test_triangle_fan_indices_cw() {
         let expected: Vec<u32> = vec![0, 1, 2, 0, 2, 3, 0, 3, 4];
-        let result = triangle_fan_indices(0, 5);
+        let result = triangle_fan_indices_cw(0, 5);
         assert!(expected == result);
 
         let expected: Vec<u32> = vec![2, 3, 4, 2, 4, 5, 2, 5, 6];
-        let result = triangle_fan_indices(2, 5);
+        let result = triangle_fan_indices_cw(2, 5);
         assert!(expected == result);
     }
 }
