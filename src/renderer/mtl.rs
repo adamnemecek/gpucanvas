@@ -1051,7 +1051,7 @@ impl Renderer for Mtl {
 
         self.vertex_buffer.clear();
         // self.index_buffer.resize(max_verts);
-        self.vertex_buffer.resize(verts.len());
+        // self.vertex_buffer.resize(verts.len())
         // self.vertex_buffer.extend_from_slice(verts);
 
         // build indices
@@ -1071,7 +1071,7 @@ impl Renderer for Mtl {
                 if let Some((start, count)) = drawable.fill_verts {
                     if count > 2 {
                         let mut hub_offset = self.vertex_buffer.len() as u32;
-                        // hub_offset += 1;
+                        hub_offset += 1;
                         // self.vertex_buffer.splice_slow(..2, verts[start..start+count].iter().cloned());
                         self.vertex_buffer.extend_from_slice(&verts[start..start+count]);
                         for index in 2..count {
