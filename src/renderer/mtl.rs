@@ -303,9 +303,9 @@ pub struct Mtl {
 
     blend_func: Blend,
     // clear_buffer_on_flush: bool,
-    ///
-    /// fill and stroke have a stencil, anti_alias_stencil and shape_stencil
-    ///
+    //
+    // fill and stroke have a stencil, anti_alias_stencil and shape_stencil
+    //
     default_stencil_state: metal::DepthStencilState,
     fill_shape_stencil_state: metal::DepthStencilState,
     fill_anti_alias_stencil_state: metal::DepthStencilState,
@@ -656,8 +656,8 @@ impl Mtl {
                 let byte_index_buffer_offset = start * self.index_size;
                 // assert!(self.index_buffer.len() == start);
                 // triangle_fan_indices_ext(start as u32, count, &mut self.index_buffer);
-                let indices = triangle_fan_indices_ccw(start as u32, count as u32);
-                self.index_buffer.extend_from_slice(&indices);
+                // let indices = triangle_fan_indices_ccw(start as u32, count as u32);
+                // self.index_buffer.extend_from_slice(&indices);
                 // original uses fans
                 encoder.draw_indexed_primitives(
                     metal::MTLPrimitiveType::Triangle,
@@ -701,8 +701,8 @@ impl Mtl {
                 // println!("fill verts #{}: start: {}, count {}", 0, start, count);
                 let byte_index_buffer_offset = start * self.index_size;
                 // assert!(self.index_buffer.len() == start);
-                let indices = triangle_fan_indices_ccw(start as u32, count as u32);
-                self.index_buffer.extend_from_slice(&indices);
+                // let indices = triangle_fan_indices_ccw(start as u32, count as u32);
+                // self.index_buffer.extend_from_slice(&indices);
                 // original uses fans
                 encoder.draw_indexed_primitives(
                     metal::MTLPrimitiveType::Triangle,
@@ -793,7 +793,7 @@ impl Mtl {
             }
         }
 
-        /// Clears stencil buffer.
+        // Clears stencil buffer.
         encoder.set_depth_stencil_state(&self.stroke_clear_stencil_state);
         encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state.as_ref().unwrap());
 
@@ -1063,32 +1063,54 @@ impl Renderer for Mtl {
         let vertex_buffer_hash = self.vertex_buffer.ptr_hash();
         let index_buffer_hash = self.index_buffer.ptr_hash();
 
+        // let mut stroke_vert_offset = max_verts - lens.stroke_count;
+
         for cmd in commands {
             for drawable in &cmd.drawables {
                 if let Some((start, count)) = drawable.fill_verts {
                     if count > 2 {
-                        let hub_offset = self.vertex_buffer.len() + 1;
+                        let mut hub_offset = self.vertex_buffer.len() as u32;
+                        hub_offset += 1;
                         // self.vertex_buffer.splice_slow(..2, verts[start..start+count].iter().cloned());
                         self.vertex_buffer.extend_from_slice(&verts[start..start+count]);
-
-                        // vertex_count += count;
-                        // index_count += (count - 2) * 3;
-
+                        for index in 2..count {
+                            self.index_buffer.extend_from_slice(&[hub_offset,
+                                                        (start + index) as u32,
+                                                        (start + index + 1) as u32]);
+                        }
                     }
                 }
 
-                if let Some((_start, count)) = drawable.stroke_verts {
+                if let Some((start, count)) = drawable.stroke_verts {
                     if count > 0 {
+                        self.vertex_buffer.extend_from_slice(&verts[start..start+count]);
+                        // self.vertex_buffer.splice_slow(stroke_vert_offset..stroke_vert_offset+count,
+                        //     verts[start..start+count].iter().cloned());
+                        //     stroke_vert_offset += count;
+                        // unsafe {
+                            // std::ptr::copy(
+                            //     &verts[start..start+count],
+                            //     self.vertex_buffer.as_mut_ptr() as _,
+                            //     0
+                            // );
+
+                        // }
+
+                        // ;
                         // vertex_count += count + 2;
                         // stroke_count += count;
                     }
                 }
             }
 
-            if let Some((start, count)) = cmd.triangles_verts {
-                // triangle_count += count;
-            }
+            // if let Some((start, count)) = cmd.triangles_verts {
+            //     // triangle_count += count;
+            // }
         }
+
+
+        // assert!(vertex_buffer_hash == self.vertex_buffer.ptr_hash());
+        // assert!(index_buffer_hash == self.index_buffer.ptr_hash());
 
         let clear_color: Color = self.clear_color;
         // println!("clear_color: {:?}", clear_color);
@@ -1192,8 +1214,6 @@ impl Renderer for Mtl {
         //     }
         // }
 
-        assert!(vertex_buffer_hash == self.vertex_buffer.ptr_hash());
-        assert!(index_buffer_hash == self.index_buffer.ptr_hash());
 
         command_buffer.commit();
         // command_buffer.wait_until_scheduled();
