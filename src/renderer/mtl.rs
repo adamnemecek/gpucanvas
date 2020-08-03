@@ -55,50 +55,50 @@ pub use mtl_ext::generate_mipmaps;
 //     }
 // }
 
-// pub struct PathsLength {
-//     pub vertex_count: usize,
-//     pub index_count: usize,
-//     pub stroke_count: usize,
-//     pub triangle_count: usize,
-// }
+pub struct PathsLength {
+    pub vertex_count: usize,
+    pub index_count: usize,
+    pub stroke_count: usize,
+    // pub triangle_count: usize,
+}
 
-// impl PathsLength {
-//     pub fn new(cmds: &[Command]) -> Self {
-//         let mut vertex_count = 0;
-//         let mut index_count = 0;
-//         let mut stroke_count = 0;
-//         let mut triangle_count = 0;
+impl PathsLength {
+    pub fn new(cmds: &[Command]) -> Self {
+        let mut vertex_count = 0;
+        let mut index_count = 0;
+        let mut stroke_count = 0;
+        // let mut triangle_count = 0;
 
-//         for cmd in cmds {
-//             for drawable in &cmd.drawables {
-//                 if let Some((start, count)) = drawable.fill_verts {
-//                     if count > 2 {
-//                         vertex_count += count;
-//                         index_count += (count - 2) * 3;
-//                     }
-//                 }
+        for cmd in cmds {
+            for drawable in &cmd.drawables {
+                if let Some((start, count)) = drawable.fill_verts {
+                    if count > 2 {
+                        vertex_count += count;
+                        index_count += (count - 2) * 3;
+                    }
+                }
 
-//                 if let Some((start, count)) = drawable.stroke_verts {
-//                     if count > 0 {
-//                         vertex_count += count + 2;
-//                         stroke_count += count;
-//                     }
-//                 }
-//             }
+                if let Some((start, count)) = drawable.stroke_verts {
+                    if count > 0 {
+                        vertex_count += count + 2;
+                        stroke_count += count;
+                    }
+                }
+            }
 
-//             if let Some((start, count)) = cmd.triangles_verts {
-//                 triangle_count += count;
-//             }
-//         }
+            // if let Some((start, count)) = cmd.triangles_verts {
+            //     triangle_count += count;
+            // }
+        }
 
-//         Self {
-//             vertex_count,
-//             index_count,
-//             stroke_count,
-//             triangle_count,
-//         }
-//     }
-// }
+        Self {
+            vertex_count,
+            index_count,
+            stroke_count,
+            // triangle_count,
+        }
+    }
+}
 
 // mod uniform_array;
 // use uniform_array::UniformArray;
@@ -1032,7 +1032,7 @@ impl Renderer for Mtl {
         //     return;
         // }
         // lock();
-        // let lens = PathsLength::new(commands);
+        let lens = PathsLength::new(commands);
         #[derive(Copy, Clone, Default, Debug)]
         struct Counters {
             convex_fill: usize,
