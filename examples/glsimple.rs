@@ -67,14 +67,14 @@ fn main() {
 
     // //let image_id = canvas.load_image_file("examples/assets/RoomRender.jpg", ImageFlags::FLIP_Y).expect("Cannot create image");
 
-    // let images: Vec<ImageId> = (1..=12)
-    //     .map(|i| {
-    //         let name = format!("examples/assets/images/image{}.jpg", i);
-    //         canvas
-    //             .load_image_file(name, ImageFlags::empty())
-    //             .expect("cannot load image")
-    //     })
-    //     .collect();
+    let images: Vec<ImageId> = (1..=12)
+        .map(|i| {
+            let name = format!("examples/assets/images/image{}.jpg", i);
+            canvas
+                .load_image_file(name, ImageFlags::empty())
+                .expect("cannot load image")
+        })
+        .collect();
 
     let mut screenshot_image_id = None;
 
@@ -281,6 +281,7 @@ fn main() {
                 draw_rect(&mut canvas, 100.0, 100.0, 40.0, 40.0);
 
                 draw_colorwheel(&mut canvas, 200.0, 200.0, 200.0, 200.0, 5.0);
+                draw_image(&mut canvas, images[0], 300.0, 300.0);
                 // if true {
                 //     let paint = Paint::image(image_id, size.width as f32, 15.0, 1920.0, 1080.0, 0.0, 1.0);
                 //     let mut path = Path::new();
@@ -307,6 +308,17 @@ fn main() {
     });
 }
 
+
+fn draw_image<T: Renderer>(canvas: &mut Canvas<T>, image: ImageId, x: f32, y: f32) {
+    canvas.save();
+    let (w,h) = canvas.image_size(image).unwrap();
+    let img_paint = Paint::image(image, x, y, w as _, h as _, 0.0, 1.0);
+
+    let mut path = Path::new();
+    path.rounded_rect(x, y, w as _, h as _, 5.0);
+    canvas.fill_path(&mut path, img_paint);
+    canvas.restore();
+}
 
 fn draw_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
     let mut path = Path::new();
@@ -379,6 +391,7 @@ fn draw_rounded_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32
 }
 
 
+/// original
 
 fn draw_paragraph<T: Renderer>(
     canvas: &mut Canvas<T>,
@@ -1134,6 +1147,7 @@ fn draw_slider<T: Renderer>(canvas: &mut Canvas<T>, pos: f32, x: f32, y: f32, w:
 
     canvas.restore();
 }
+
 
 fn draw_thumbnails<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, images: &[ImageId], t: f32) {
     let corner_radius = 3.0;

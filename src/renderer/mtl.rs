@@ -231,7 +231,7 @@ fn triangle_fan_indices_ext(
 
 // fn main() {
 // 	let indices = triangle_fan_indices(10);
-// 	println!("{:?}", indices);
+//// 	println!("{:?}", indices);
 // }
 
 
@@ -576,7 +576,7 @@ impl Mtl {
         blend_func: CompositeOperationState,
         pixel_format: metal::MTLPixelFormat,
     ) {
-        // println!("set_composite operation {:?}", pixel_format);
+        //// println!("set_composite operation {:?}", pixel_format);
         let blend_func: Blend = blend_func.into();
 
         if self.pipeline_state.is_some()
@@ -651,14 +651,14 @@ impl Mtl {
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
 
-        println!("convex_fill start");
+        //println!("convex_fill start");
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
 
                 #[cfg(debug_assertions)]
                 self.vertex_buffer.add_debug_marker("convex_fill/fill", start as u64..(start+count) as u64);
 
-                println!("\tconvex_fill/fill: verts #{}: start: {}, count {}", 0, start, count);
+                //println!("\tconvex_fill/fill: verts #{}: start: {}, count {}", 0, start, count);
 
                 // offset is in bytes
                 let offset = self.index_buffer.len();
@@ -671,7 +671,7 @@ impl Mtl {
 
                 // original uses fans so we fake it with indices
                 let indices = triangle_fan_indices_cw(start as u32, count as u32);
-                println!("\tindex_buffer.extend_from_slice {:?}", indices);
+                //println!("\tindex_buffer.extend_from_slice {:?}", indices);
                 self.index_buffer.extend_from_slice(&indices);
 
                 encoder.draw_indexed_primitives(
@@ -688,17 +688,17 @@ impl Mtl {
                 #[cfg(debug_assertions)]
                 self.vertex_buffer.add_debug_marker("convex_fill/stroke", start as u64..(start+count) as u64);
 
-                println!("\tconvex_fill/stroke: verts #{}: start: {}, count {}", 0, start, count);
+                //println!("\tconvex_fill/stroke: verts #{}: start: {}, count {}", 0, start, count);
                 encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
             }
         }
 
-        println!("\tconvex_fill/indices {:?}", self.index_buffer);
+        //println!("\tconvex_fill/indices {:?}", self.index_buffer);
 
         #[cfg(debug_assertions)]
         encoder.pop_debug_group();
 
-        println!("convex_fill end\n");
+        //println!("convex_fill end\n");
     }
 
     /// done
@@ -722,13 +722,13 @@ impl Mtl {
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
-                println!("concave_fill/fill verts #{}: start: {}, count {}", 0, start, count);
+                //println!("concave_fill/fill verts #{}: start: {}, count {}", 0, start, count);
                 let offset = self.index_buffer.len();
                 let byte_index_buffer_offset = offset * self.index_size;
                 // let byte_index_buffer_offset = start * self.index_size;
                 // assert!(self.index_buffer.len() == start);
                 let indices = triangle_fan_indices_cw(start as u32, count as u32);
-                println!("\tindex_buffer.extend_from_slice {:?}", indices);
+                //println!("\tindex_buffer.extend_from_slice {:?}", indices);
                 self.index_buffer.extend_from_slice(&indices);
                 // original uses fans
                 encoder.draw_indexed_primitives(
@@ -751,7 +751,7 @@ impl Mtl {
 
             for drawable in &cmd.drawables {
                 if let Some((start, count)) = drawable.stroke_verts {
-                    println!("concave_fill/stroke verts #{}: start: {}, count {}", 0, start, count);
+                    //println!("concave_fill/stroke verts #{}: start: {}, count {}", 0, start, count);
                     encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64);
                 }
             }
@@ -760,7 +760,7 @@ impl Mtl {
         // Draws fill.
         encoder.set_depth_stencil_state(&self.fill_stencil_state);
         if let Some((start, count)) = cmd.triangles_verts {
-            println!("concave_fill/triangles verts #{}: start: {}, count {}", 0, start, count);
+            //println!("concave_fill/triangles verts #{}: start: {}, count {}", 0, start, count);
             encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64);
         }
         encoder.set_depth_stencil_state(&self.default_stencil_state);
@@ -872,10 +872,10 @@ impl Mtl {
         encoder.set_fragment_value(0, &paint);
 
         let tex = if let Some(id) = image_tex {
-            // println!("found texture");
+            //// println!("found texture");
             images.get(id).unwrap()
         } else {
-            // println!("pseudo texture");
+            //// println!("pseudo texture");
             &self.pseudo_texture
         };
 
@@ -965,25 +965,25 @@ impl From<Color> for metal::MTLClearColor {
 }
 
 
-// static mut SHOULD_RENDER: bool = true;
+static mut SHOULD_RENDER: bool = true;
 
-// fn lock() {
-//     unsafe {
-//         SHOULD_RENDER = false;
-//     }
-// }
+fn lock() {
+    unsafe {
+        SHOULD_RENDER = false;
+    }
+}
 
-// fn unlock() {
-//     unsafe {
-//         SHOULD_RENDER = true;
-//     }
-// }
+fn unlock() {
+    unsafe {
+        SHOULD_RENDER = true;
+    }
+}
 
-// fn should_render() -> bool {
-//     unsafe {
-//         SHOULD_RENDER
-//     }
-// }
+fn should_render() -> bool {
+    unsafe {
+        SHOULD_RENDER
+    }
+}
 
 fn new_render_command_encoder<'a>(
     color_texture: &metal::TextureRef,
@@ -1063,13 +1063,13 @@ impl Renderer for Mtl {
 
     // called flush in ollix and nvg
     fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
-        println!("verts len {:?}", verts.len());
-        // println!("index_buffer.byte_len {}", self.index_buffer.byte_len());
-        // println!("index_buffer.byte_capacity {}", self.index_buffer.byte_capacity());
-        // if !should_render() {
-        //     return;
-        // }
-        // lock();
+        //println!("verts len {:?}", verts.len());
+        //// println!("index_buffer.byte_len {}", self.index_buffer.byte_len());
+        //// println!("index_buffer.byte_capacity {}", self.index_buffer.byte_capacity());
+        if !should_render() {
+            return;
+        }
+        lock();
 
         // #[derive(Copy, Clone, Default, Debug)]
         // struct Counters {
@@ -1098,7 +1098,7 @@ impl Renderer for Mtl {
         // build indices
         self.index_buffer.clear();
         self.index_buffer.resize(3 * verts.len());
-        // println!("reserving {}", 3 * verts.len());
+        //// println!("reserving {}", 3 * verts.len());
         // temporary to ensure that the index_buffer is does not
         // change the inner allocation
         // the reserve should allocate enough
@@ -1153,16 +1153,16 @@ impl Renderer for Mtl {
 
 
         let clear_color: Color = self.clear_color;
-        // println!("clear_color: {:?}", clear_color);
+        //// println!("clear_color: {:?}", clear_color);
 
         let command_buffer = self.command_queue.new_command_buffer().to_owned();
         command_buffer.enqueue();
-        // let block = block::ConcreteBlock::new(move |buffer: &metal::CommandBufferRef| {
+        let block = block::ConcreteBlock::new(move |buffer: &metal::CommandBufferRef| {
         //     // println!("{}", buffer.label());
-        //     // self.vertex_buffer.clear();
-        //     unlock();
-        // }).copy();
-        // command_buffer.add_completed_handler(&block);
+            // self.vertex_buffer.clear();
+            unlock();
+        }).copy();
+        command_buffer.add_completed_handler(&block);
         let mut drawable: Option<metal::CoreAnimationDrawable> = None;
 
         let color_texture = match self.render_target {
@@ -1260,7 +1260,7 @@ impl Renderer for Mtl {
         assert!(index_buffer_hash == self.index_buffer.ptr_hash());
 
         // command_buffer.wait_until_scheduled();
-        // println!("counters {:?}", counters);
+        //// println!("counters {:?}", counters);
 
         // if !self.layer.presents_with_transaction() {
         //     command_buffer.present_drawable(&drawable);
