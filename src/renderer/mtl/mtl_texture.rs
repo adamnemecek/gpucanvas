@@ -17,7 +17,7 @@ impl From<PixelFormat> for metal::MTLPixelFormat {
 pub struct MtlTexture {
     pub info: ImageInfo,
     tex: metal::Texture,
-    pub sampler: metal::SamplerState,
+    sampler: metal::SamplerState,
     // todo: texture has a device reference, use that
     pub device: metal::Device,
     pub command_queue: metal::CommandQueue,
@@ -129,6 +129,9 @@ impl MtlTexture {
         &self.tex
     }
 
+    pub fn sampler(&self) -> &metal::SamplerStateRef {
+        &self.sampler
+    }
     // pub fn id(&self) -> u32 {
     //     self.id
     // }

@@ -220,7 +220,15 @@ fragment float4 fragmentShaderAA(
         result = color * uniforms.innerCol;
     }
 
+    if (uniforms.hasMask == 1.0) {
+        // float4 smpl = alpha_texture.sample(alpha_samplr, pt);
+        // float4 mask = float4(smpl.x) * scissor;
+        // result *= mask;
+        return float4(1.0);
+    }
+    // else if (uniforms.type != 2.0) {
 
+    // }
 
     return result;
 }

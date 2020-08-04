@@ -4,7 +4,8 @@ use std::path::PathBuf;
 
 use gl_generator::{Api, Fallbacks, GlobalGenerator, Profile, Registry};
 
-fn main() {
+
+fn gl_main() {
     let dest = PathBuf::from(&env::var("OUT_DIR").unwrap());
 
     println!("cargo:rerun-if-changed=build.rs");
@@ -14,4 +15,12 @@ fn main() {
     Registry::new(Api::Gles2, (3, 0), Profile::Core, Fallbacks::All, [])
         .write_bindings(GlobalGenerator, &mut file)
         .unwrap();
+}
+
+fn mtl_main() {
+
+}
+
+fn main() {
+    gl_main();
 }

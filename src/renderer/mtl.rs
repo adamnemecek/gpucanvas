@@ -363,8 +363,9 @@ impl Mtl {
         //     layer.set_opaque(false);
         // }
 
+        let root_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         let library_path =
-            std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src/renderer/mtl/shaders.metallib");
+            root_path.join("src/renderer/mtl/shaders.metallib");
         let library = device.new_library_with_file(library_path).expect("library not found");
         let command_queue = device.new_command_queue();
 
@@ -384,11 +385,11 @@ impl Mtl {
 
         let clear_rect_vert_func = library
             .get_function("clear_rect_vertex", None)
-            .expect("vert shader not found");
+            .expect("clear_rect_vertex shader not found");
 
         let clear_rect_frag_func = library
             .get_function("clear_rect_fragment", None)
-            .expect("vert shader not found");
+            .expect("clear_rect_fragment shader not found");
 
         // let clear_buffer_on_flush = false;
 
@@ -875,7 +876,7 @@ impl Mtl {
         };
 
         encoder.set_fragment_texture(1, Some(&alpha_tex.tex()));
-        encoder.set_fragment_sampler_state(1, Some(&alpha_tex.sampler));
+        encoder.set_fragment_sampler_state(1, Some(&alpha_tex.sampler()));
     }
 
     // from warrenmoore

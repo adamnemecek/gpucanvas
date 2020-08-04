@@ -137,17 +137,17 @@ impl OpenGl {
     fn convex_fill(&self, images: &ImageStore<GlTexture>, cmd: &Command, gpu_paint: &Params) {
         self.set_uniforms(images, gpu_paint, cmd.image, cmd.alpha_mask);
 
-        let mut i = 0;
+        // let mut i = 0;
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
-                println!("fill verts #{}: start: {}, count {}", i, start, count);
+                // println!("fill verts #{}: start: {}, count {}", i, start, count);
                 unsafe {
                     gl::DrawArrays(gl::TRIANGLE_FAN, start as i32, count as i32);
                 }
             }
 
             if let Some((start, count)) = drawable.stroke_verts {
-                println!("stroke verts #{}: start: {}, count {}", i, start, count);
+                // println!("stroke verts #{}: start: {}, count {}", i, start, count);
                 unsafe {
                     gl::DrawArrays(gl::TRIANGLE_STRIP, start as i32, count as i32);
                 }
