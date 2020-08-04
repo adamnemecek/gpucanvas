@@ -279,6 +279,8 @@ fn main() {
                 draw_clear_rect2(&mut canvas, 60, 10, 50, 50);
                 // draw_rounded_rect(&mut canvas, 100.0, 100.0, 40.0, 40.0, 5.0, t);
                 draw_rect(&mut canvas, 100.0, 100.0, 40.0, 40.0);
+
+                draw_colorwheel(&mut canvas, 200.0, 200.0, 200.0, 200.0, 5.0);
                 // if true {
                 //     let paint = Paint::image(image_id, size.width as f32, 15.0, 1920.0, 1080.0, 0.0, 1.0);
                 //     let mut path = Path::new();
