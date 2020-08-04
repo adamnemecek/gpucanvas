@@ -195,6 +195,7 @@ fn main() {
                 canvas.set_size(width as u32, height as u32, dpi_factor as f32);
                 canvas.clear_rect(0, 0, width as u32, height as u32, Color::rgbf(0.3, 0.3, 0.32));
 
+                draw_image(&mut canvas, images[0], 300.0, 300.0);
                 // let height = height as f32;
                 // let width = width as f32;
 
@@ -339,6 +340,19 @@ fn main() {
             _ => (),
         }
     });
+}
+
+
+
+fn draw_image<T: Renderer>(canvas: &mut Canvas<T>, image: ImageId, x: f32, y: f32) {
+    canvas.save();
+    let (w,h) = canvas.image_size(image).unwrap();
+    let img_paint = Paint::image(image, x, y, w as _, h as _, 0.0, 1.0);
+
+    let mut path = Path::new();
+    path.rounded_rect(x, y, w as _, h as _, 5.0);
+    canvas.fill_path(&mut path, img_paint);
+    canvas.restore();
 }
 
 // fn draw_clear_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
