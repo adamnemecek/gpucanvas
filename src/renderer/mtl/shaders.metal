@@ -220,6 +220,8 @@ fragment float4 fragmentShaderAA(
         result = color * uniforms.innerCol;
     }
 
+
+
     return result;
 }
 

@@ -374,11 +374,11 @@ impl Mtl {
 
         let frag_func: metal::Function = if antialias {
             library
-                .get_function("fragmentShader", None)
+                .get_function("fragmentShaderAA", None)
                 .expect("frag shader not found")
         } else {
             library
-                .get_function("fragmentShaderAA", None)
+                .get_function("fragmentShader", None)
                 .expect("frag shader not found")
         };
 
