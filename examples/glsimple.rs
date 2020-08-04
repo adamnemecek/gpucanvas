@@ -50,15 +50,15 @@ fn main() {
     let renderer = OpenGl::new(|s| windowed_context.get_proc_address(s) as *const _).expect("Cannot create renderer");
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
-    // let fonts = Fonts {
-    //     regular: canvas
-    //         .add_font("examples/assets/Roboto-Regular.ttf")
-    //         .expect("Cannot add font"),
-    //     bold: canvas
-    //         .add_font("examples/assets/Roboto-Light.ttf")
-    //         .expect("Cannot add font"),
-    //     icons: canvas.add_font("examples/assets/entypo.ttf").expect("Cannot add font"),
-    // };
+    let fonts = Fonts {
+        regular: canvas
+            .add_font("examples/assets/Roboto-Regular.ttf")
+            .expect("Cannot add font"),
+        bold: canvas
+            .add_font("examples/assets/Roboto-Light.ttf")
+            .expect("Cannot add font"),
+        icons: canvas.add_font("examples/assets/entypo.ttf").expect("Cannot add font"),
+    };
 
     // //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
 
@@ -282,6 +282,7 @@ fn main() {
 
                 draw_colorwheel(&mut canvas, 200.0, 200.0, 200.0, 200.0, 5.0);
                 draw_image(&mut canvas, images[0], 300.0, 300.0);
+                draw_text(&mut canvas, &fonts, "title", 400.0, 200.0, 100.0, 100.0);
                 // if true {
                 //     let paint = Paint::image(image_id, size.width as f32, 15.0, 1920.0, 1080.0, 0.0, 1.0);
                 //     let mut path = Path::new();
@@ -318,6 +319,15 @@ fn draw_image<T: Renderer>(canvas: &mut Canvas<T>, image: ImageId, x: f32, y: f3
     path.rounded_rect(x, y, w as _, h as _, 5.0);
     canvas.fill_path(&mut path, img_paint);
     canvas.restore();
+}
+
+fn draw_text<T: Renderer>(canvas: &mut Canvas<T>, fonts: &Fonts, title: &str, x: f32, y: f32, w: f32, h: f32) {
+    let mut text_paint = Paint::color(Color::rgba(255, 255, 255, 32));
+    text_paint.set_font_size(16.0);
+    text_paint.set_font(&[fonts.regular]);
+    text_paint.set_text_align(Align::Left);
+    text_paint.set_text_baseline(Baseline::Middle);
+    let _ = canvas.fill_text(x + h, y + h * 0.5, title, text_paint);
 }
 
 fn draw_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
