@@ -21,17 +21,21 @@ use stencil_texture::StencilTexture;
 mod mtl_ext;
 pub use mtl_ext::generate_mipmaps;
 
-// pub trait GPUVecExt {
-//     fn extend_with_triange_fan_indices(&mut self, start: u32, count: u32);
-// }
+pub trait GPUVecExt {
+    fn extend_with_triange_fan_indices_cw(&mut self, start: u32, count: u32) -> usize;
+}
 
-// impl GPUVecExt for GPUVec<u32> {
-//     fn extend_with_triange_fan_indices(&mut self, start: u32, count: u32) {
-//         for index in 1..(count - 1) {
-//             self.extend_from_slice(&[start, start + index, start + index + 1]);
-//         }
-//     }
-// }
+impl GPUVecExt for GPUVec<u32> {
+    fn extend_with_triange_fan_indices_cw(&mut self, start: u32, count: u32) -> usize {
+        let mut added = 0;
+        for index in 1..(count - 1) {
+            self.extend_from_slice(&[start, start + index, start + index + 1]);
+            added += 3;
+        }
+
+        added
+    }
+}
 
 // pub trait VecExt<T> {
 //     fn push_ext(&mut self, value: T) -> usize;
@@ -655,13 +659,14 @@ impl Mtl {
                 // triangle_fan_indices_ext(start as u32, count, &mut self.index_buffer);
 
                 // original uses fans so we fake it with indices
-                let indices = triangle_fan_indices_cw(start as u32, count as u32);
+                // let indices = triangle_fan_indices_cw(start as u32, count as u32);
+                let triangle_fan_index_count = self.index_buffer.extend_with_triange_fan_indices_cw(start as u32, count as u32);
                 //println!("\tindex_buffer.extend_from_slice {:?}", indices);
-                self.index_buffer.extend_from_slice(&indices);
+                // self.index_buffer.extend_from_slice(&indices);
 
                 encoder.draw_indexed_primitives(
                     metal::MTLPrimitiveType::Triangle,
-                    indices.len() as u64,
+                    triangle_fan_index_count as u64, // indices.len() as u64,
                     metal::MTLIndexType::UInt32,
                     self.index_buffer.as_ref(),
                     byte_index_buffer_offset as u64,
@@ -713,13 +718,14 @@ impl Mtl {
                 let byte_index_buffer_offset = offset * self.index_size;
                 // let byte_index_buffer_offset = start * self.index_size;
                 // assert!(self.index_buffer.len() == start);
-                let indices = triangle_fan_indices_cw(start as u32, count as u32);
+                // let indices = triangle_fan_indices_cw(start as u32, count as u32);
                 //println!("\tindex_buffer.extend_from_slice {:?}", indices);
-                self.index_buffer.extend_from_slice(&indices);
+                // self.index_buffer.extend_from_slice(&indices);
+                let triangle_fan_index_count = self.index_buffer.extend_with_triange_fan_indices_cw(start as u32, count as u32);
                 // original uses fans
                 encoder.draw_indexed_primitives(
                     metal::MTLPrimitiveType::Triangle,
-                    indices.len() as u64,
+                    triangle_fan_index_count as u64, // indices.len() as u64,
                     metal::MTLIndexType::UInt32,
                     self.index_buffer.as_ref(),
                     byte_index_buffer_offset as u64,
@@ -866,7 +872,7 @@ impl Mtl {
         };
 
         encoder.set_fragment_texture(0, Some(&tex.tex()));
-        encoder.set_fragment_sampler_state(0, Some(&tex.sampler));
+        encoder.set_fragment_sampler_state(0, Some(&tex.sampler()));
 
         // todo alpha mask
         let alpha_tex = if let Some(id) = alpha_tex {
