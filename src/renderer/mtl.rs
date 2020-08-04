@@ -894,7 +894,6 @@ impl Mtl {
 
         encoder.set_fragment_texture(1, Some(&alpha_tex.tex()));
         encoder.set_fragment_sampler_state(1, Some(&alpha_tex.sampler));
-
     }
 
     // from warrenmoore

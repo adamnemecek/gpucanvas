@@ -27,14 +27,14 @@
 using namespace metal;
 
 struct Vertex {
-  float2 pos [[attribute(0)]];
-  float2 tcoord [[attribute(1)]];
+    float2 pos [[attribute(0)]];
+    float2 tcoord [[attribute(1)]];
 };
 
 struct RasterizerData {
-  float4 pos [[position]];
-  float2 fpos;
-  float2 ftcoord;
+    float4 pos [[position]];
+    float2 fpos;
+    float2 ftcoord;
 };
 
 // float scissorMat[12]; // matrices are actually 3 vec4s
@@ -57,21 +57,21 @@ struct RasterizerData {
 #define COMPILE_TIME_ASSERT(X)    COMPILE_TIME_ASSERT2(X,__LINE__)
 
 struct Uniforms {
-  float3x4 scissorMat;
-  float3x4 paintMat;
-  float4 innerCol;
-  float4 outerCol;
-  float2 scissorExt;
-  float2 scissorScale;
-  float2 extent;
-  float radius;
-  float feather;
-  float strokeMult;
-  float strokeThr;
-  int texType;
-  int type;
-  float hasMask;
-  float padding[19];
+    float3x4 scissorMat;
+    float3x4 paintMat;
+    float4 innerCol;
+    float4 outerCol;
+    float2 scissorExt;
+    float2 scissorScale;
+    float2 extent;
+    float radius;
+    float feather;
+    float strokeMult;
+    float strokeThr;
+    int texType;
+    int type;
+    float hasMask;
+    float padding[19];
 };
 
 COMPILE_TIME_ASSERT(sizeof(Uniforms) == 256);
