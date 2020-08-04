@@ -653,16 +653,25 @@ impl Mtl {
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
-                // self.vertex_buffer.add_debug_marker("convex_fill/fill", start as u64..(start+count) as u64);
+
+                #[cfg(debug_assertions)]
+                self.vertex_buffer.add_debug_marker("convex_fill/fill", start as u64..(start+count) as u64);
+
                 // println!("fill verts #{}: start: {}, count {}", 0, start, count);
+
                 // offset is in bytes
-                let byte_index_buffer_offset = start * self.index_size;
+                let offset = self.index_buffer.len();
+                let byte_index_buffer_offset = offset * self.index_size;
+                // let byte_index_buffer_offset = start * self.index_size;
+
                 // assert!(self.index_buffer.len() == start);
                 // triangle_fan_indices_ext(start as u32, count, &mut self.index_buffer);
+
+                // original uses fans so we fake it with indices
                 let indices = triangle_fan_indices_ccw(start as u32, count as u32);
                 // println!("{:?}", indices);
                 self.index_buffer.extend_from_slice(&indices);
-                // original uses fans
+
                 encoder.draw_indexed_primitives(
                     metal::MTLPrimitiveType::Triangle,
                     count as u64,
@@ -674,7 +683,9 @@ impl Mtl {
 
             // Draw fringes
             if let Some((start, count)) = drawable.stroke_verts {
-                // self.vertex_buffer.add_debug_marker("convex_fill/stroke", start as u64..(start+count) as u64);
+                #[cfg(debug_assertions)]
+                self.vertex_buffer.add_debug_marker("convex_fill/stroke", start as u64..(start+count) as u64);
+
 //                 println!("stroke verts #{}: start: {}, count {}", 0, start, count);
                 encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
             }
@@ -706,7 +717,9 @@ impl Mtl {
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
                 // println!("fill verts #{}: start: {}, count {}", 0, start, count);
-                let byte_index_buffer_offset = start * self.index_size;
+                let offset = self.index_buffer.len();
+                let byte_index_buffer_offset = offset * self.index_size;
+                // let byte_index_buffer_offset = start * self.index_size;
                 // assert!(self.index_buffer.len() == start);
                 let indices = triangle_fan_indices_ccw(start as u32, count as u32);
                 self.index_buffer.extend_from_slice(&indices);
@@ -1065,6 +1078,7 @@ impl Renderer for Mtl {
         // let lens = PathsLength::new(commands);
         // let max_verts = lens.vertex_count + lens.triangle_count;
 
+        self.vertex_buffer.remove_all_debug_markers();
         self.vertex_buffer.clear();
         // self.index_buffer.resize(max_verts);
         // self.vertex_buffer.resize(verts.len());
