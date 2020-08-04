@@ -112,10 +112,14 @@ vertex RasterizerData vertexShader(Vertex vert [[stage_in]],
 }
 
 // Fragment function (No AA)
-fragment float4 fragmentShader(RasterizerData in [[stage_in]],
-                               constant Uniforms& uniforms [[buffer(0)]],
-                               texture2d<float> texture [[texture(0)]],
-                               sampler sampler [[sampler(0)]]) {
+fragment float4 fragmentShader(
+  RasterizerData in [[stage_in]],
+  constant Uniforms& uniforms [[buffer(0)]],
+  texture2d<float> texture [[texture(0)]],
+  sampler samplr [[sampler(0)]]
+  // texture2d<float> alpha_texture [[texture(1)]],
+  // sampler alpha_samplr [[sampler(1)]]
+) {
   float scissor = scissorMask(uniforms, in.fpos);
   if (scissor == 0)
     return float4(0);
@@ -128,7 +132,7 @@ fragment float4 fragmentShader(RasterizerData in [[stage_in]],
     return color * scissor;
   } else if (uniforms.type == 1) {  // MNVG_SHADER_FILLIMG
     float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
-    float4 color = texture.sample(sampler, pt);
+    float4 color = texture.sample(samplr, pt);
     if (uniforms.texType == 1)
       color = float4(color.xyz * color.w, color.w);
     else if (uniforms.texType == 2)
@@ -136,7 +140,7 @@ fragment float4 fragmentShader(RasterizerData in [[stage_in]],
     color *= scissor;
     return color * uniforms.innerCol;
   } else {  // MNVG_SHADER_IMG
-    float4 color = texture.sample(sampler, in.ftcoord);
+    float4 color = texture.sample(samplr, in.ftcoord);
     if (uniforms.texType == 1)
       color = float4(color.xyz * color.w, color.w);
     else if (uniforms.texType == 2)
@@ -147,16 +151,20 @@ fragment float4 fragmentShader(RasterizerData in [[stage_in]],
 }
 
 // Fragment function (AA)
-fragment float4 fragmentShaderAA(RasterizerData in [[stage_in]],
-                                 constant Uniforms& uniforms [[buffer(0)]],
-                                 texture2d<float> texture [[texture(0)]],
-                                 sampler sampler [[sampler(0)]]) {
+fragment float4 fragmentShaderAA(
+    RasterizerData in [[stage_in]],
+    constant Uniforms& uniforms [[buffer(0)]],
+    texture2d<float> texture [[texture(0)]],
+    sampler samplr [[sampler(0)]]
+    // texture2d<float> alpha_texture [[texture(1)]],
+    // sampler alpha_samplr [[sampler(1)]]
+) {
   float scissor = scissorMask(uniforms, in.fpos);
   if (scissor == 0)
     return float4(0);
 
   if (uniforms.type == 2) {  // MNVG_SHADER_IMG
-    float4 color = texture.sample(sampler, in.ftcoord);
+    float4 color = texture.sample(samplr, in.ftcoord);
     if (uniforms.texType == 1)
       color = float4(color.xyz * color.w, color.w);
     else if (uniforms.texType == 2)
@@ -180,7 +188,7 @@ fragment float4 fragmentShaderAA(RasterizerData in [[stage_in]],
     return color;
   } else {  // MNVG_SHADER_FILLIMG
     float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
-    float4 color = texture.sample(sampler, pt);
+    float4 color = texture.sample(samplr, pt);
     if (uniforms.texType == 1)
       color = float4(color.xyz * color.w, color.w);
     else if (uniforms.texType == 2)

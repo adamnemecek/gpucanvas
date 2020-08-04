@@ -867,7 +867,7 @@ impl Mtl {
         images: &ImageStore<MtlTexture>,
         paint: Params,
         image_tex: Option<ImageId>,
-        _alpha_tex: Option<ImageId>,
+        alpha_tex: Option<ImageId>,
     ) {
         encoder.set_fragment_value(0, &paint);
 
@@ -883,6 +883,18 @@ impl Mtl {
         encoder.set_fragment_sampler_state(0, Some(&tex.sampler));
 
         // todo alpha mask
+        let alpha_tex = if let Some(id) = alpha_tex {
+            //// println!("found texture");
+            // println!("alpha_tex");
+            images.get(id).unwrap()
+        } else {
+            //// println!("pseudo texture");
+            &self.pseudo_texture
+        };
+
+        // encoder.set_fragment_texture(0, Some(&alpha_tex.tex()));
+        // encoder.set_fragment_sampler_state(0, Some(&alpha_tex.sampler));
+
     }
 
     // from warrenmoore
@@ -1013,6 +1025,7 @@ fn new_render_command_encoder<'a>(
         color_attachment.set_load_action(load_action);
         color_attachment.set_store_action(metal::MTLStoreAction::Store);
         color_attachment.set_texture(Some(&color_texture));
+        // added
 
         let stencil_attachment = desc.stencil_attachment().unwrap();
         stencil_attachment.set_clear_stencil(0);
