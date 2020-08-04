@@ -79,13 +79,19 @@ fn main() {
         bold: canvas
             .add_font(root.join("examples/assets/Roboto-Light.ttf"))
             .expect("Cannot add font"),
-        icons: canvas.add_font(root.join("examples/assets/entypo.ttf")).expect("Cannot add font"),
+        icons: canvas
+            .add_font(root.join("examples/assets/entypo.ttf"))
+            .expect("Cannot add font"),
     };
 
     let images: Vec<ImageId> = (1..=12)
         .map(|i| {
             // let name = format!("{:?}/examples/assets/images/image{}.jpg", root, i);
-            let name = format!("{}/examples/assets/images/image{}.jpg", root.to_str().unwrap().to_string(), i);
+            let name = format!(
+                "{}/examples/assets/images/image{}.jpg",
+                root.to_str().unwrap().to_string(),
+                i
+            );
             canvas
                 .load_image_file(name, ImageFlags::empty())
                 .expect("cannot load image")
@@ -334,13 +340,12 @@ fn main() {
     });
 }
 
-
 fn draw_clear_rect2<T: Renderer>(canvas: &mut Canvas<T>, t: f32, x: u32, y: u32, w: u32, h: u32) {
     canvas.save();
 
     let sin = t.sin();
     let cos = t.cos();
-    canvas.clear_rect(x, y, w, h, Color::rgbaf(sin * 1.0, cos * 192.0/255.0, 0.0, 1.0));
+    canvas.clear_rect(x, y, w, h, Color::rgbaf(sin * 1.0, cos * 192.0 / 255.0, 0.0, 1.0));
     // canvas.fill_path(&mut path, Paint::color(Color::rgba(255, 192, 0, 255)));
 
     canvas.restore();
@@ -348,9 +353,7 @@ fn draw_clear_rect2<T: Renderer>(canvas: &mut Canvas<T>, t: f32, x: u32, y: u32,
 
 fn draw_rounded_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, r: f32, t: f32) {
     let mut path = Path::new();
-    path.rounded_rect(
-        x,y,w,h,5.0
-    );
+    path.rounded_rect(x, y, w, h, 5.0);
     let ax = 10.0;
     let ay = 20.0;
     let bx = 10.0;
@@ -367,7 +370,6 @@ fn draw_rounded_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32
 
     canvas.fill_path(&mut path, paint);
 }
-
 
 fn draw_paragraph<T: Renderer>(
     canvas: &mut Canvas<T>,

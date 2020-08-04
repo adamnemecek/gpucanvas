@@ -305,15 +305,12 @@ fn main() {
     });
 }
 
-
 fn draw_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
     let mut path = Path::new();
     // path.rounded_rect(
     //     x,y,w,h,5.0
     // );
-    path.rect(
-        x,y, w, h
-    );
+    path.rect(x, y, w, h);
     let ax = 10.0;
     let ay = 20.0;
     let bx = 10.0;
@@ -328,11 +325,8 @@ fn draw_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32
         Color::hsla(0.6 / (PI * 2.0), 1.0, 0.55, 1.0),
     );
 
-    
-
     canvas.fill_path(&mut path, paint);
 }
-
 
 fn draw_clear_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
     canvas.save();
@@ -353,12 +347,9 @@ fn draw_clear_rect2<T: Renderer>(canvas: &mut Canvas<T>, x: u32, y: u32, w: u32,
     canvas.restore();
 }
 
-
 fn draw_rounded_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, r: f32, t: f32) {
     let mut path = Path::new();
-    path.rounded_rect(
-        x,y,w,h,5.0
-    );
+    path.rounded_rect(x, y, w, h, 5.0);
     let ax = 10.0;
     let ay = 20.0;
     let bx = 10.0;
@@ -375,8 +366,6 @@ fn draw_rounded_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32
 
     canvas.fill_path(&mut path, paint);
 }
-
-
 
 fn draw_paragraph<T: Renderer>(
     canvas: &mut Canvas<T>,
@@ -482,7 +471,6 @@ fn draw_paragraph<T: Renderer>(
 
     canvas.restore();
 }
-
 
 fn draw_eyes<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, mx: f32, my: f32, t: f32) {
     let ex = w * 0.23;

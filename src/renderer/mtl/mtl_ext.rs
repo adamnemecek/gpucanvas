@@ -8,7 +8,6 @@ pub fn generate_mipmaps(command_queue: &metal::CommandQueueRef, tex: &metal::Tex
     command_buffer.wait_until_completed();
 }
 
-
 // pub trait TextureExt {
 //     fn size(&self) -> metal::MTLSize;
 // }

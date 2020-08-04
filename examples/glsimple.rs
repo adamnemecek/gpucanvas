@@ -263,7 +263,6 @@ fn main() {
                 // /*
                 // draw_spinner(&mut canvas, 15.0, 285.0, 10.0, t);
                 // */
-
                 // if let Some(image_id) = screenshot_image_id {
                 //     let x = size.width as f32 - 512.0;
                 //     let y = size.height as f32 - 512.0;
@@ -309,10 +308,9 @@ fn main() {
     });
 }
 
-
 fn draw_image<T: Renderer>(canvas: &mut Canvas<T>, image: ImageId, x: f32, y: f32) {
     canvas.save();
-    let (w,h) = canvas.image_size(image).unwrap();
+    let (w, h) = canvas.image_size(image).unwrap();
     let img_paint = Paint::image(image, x, y, w as _, h as _, 0.0, 1.0);
 
     let mut path = Path::new();
@@ -337,9 +335,7 @@ fn draw_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32
     // path.rounded_rect(
     //     x,y,w,h,5.0
     // );
-    path.rect(
-        x,y, w, h
-    );
+    path.rect(x, y, w, h);
     let ax = 10.0;
     let ay = 20.0;
     let bx = 10.0;
@@ -354,11 +350,8 @@ fn draw_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32
         Color::hsla(0.6 / (PI * 2.0), 1.0, 0.55, 1.0),
     );
 
-    
-
     canvas.fill_path(&mut path, paint);
 }
-
 
 fn draw_clear_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
     canvas.save();
@@ -379,12 +372,9 @@ fn draw_clear_rect2<T: Renderer>(canvas: &mut Canvas<T>, x: u32, y: u32, w: u32,
     canvas.restore();
 }
 
-
 fn draw_rounded_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, r: f32, t: f32) {
     let mut path = Path::new();
-    path.rounded_rect(
-        x,y,w,h,5.0
-    );
+    path.rounded_rect(x, y, w, h, 5.0);
     let ax = 10.0;
     let ay = 20.0;
     let bx = 10.0;
@@ -401,7 +391,6 @@ fn draw_rounded_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32
 
     canvas.fill_path(&mut path, paint);
 }
-
 
 /// original
 
@@ -509,7 +498,6 @@ fn draw_paragraph<T: Renderer>(
 
     canvas.restore();
 }
-
 
 fn draw_eyes<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, mx: f32, my: f32, t: f32) {
     let ex = w * 0.23;
@@ -1159,7 +1147,6 @@ fn draw_slider<T: Renderer>(canvas: &mut Canvas<T>, pos: f32, x: f32, y: f32, w:
 
     canvas.restore();
 }
-
 
 fn draw_thumbnails<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, images: &[ImageId], t: f32) {
     let corner_radius = 3.0;

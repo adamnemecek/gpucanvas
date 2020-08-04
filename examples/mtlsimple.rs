@@ -79,13 +79,19 @@ fn main() {
         bold: canvas
             .add_font(root.join("examples/assets/Roboto-Light.ttf"))
             .expect("Cannot add font"),
-        icons: canvas.add_font(root.join("examples/assets/entypo.ttf")).expect("Cannot add font"),
+        icons: canvas
+            .add_font(root.join("examples/assets/entypo.ttf"))
+            .expect("Cannot add font"),
     };
 
     let images: Vec<ImageId> = (1..=12)
         .map(|i| {
             // let name = format!("{:?}/examples/assets/images/image{}.jpg", root, i);
-            let name = format!("{}/examples/assets/images/image{}.jpg", root.to_str().unwrap().to_string(), i);
+            let name = format!(
+                "{}/examples/assets/images/image{}.jpg",
+                root.to_str().unwrap().to_string(),
+                i
+            );
             canvas
                 .load_image_file(name, ImageFlags::empty())
                 .expect("cannot load image")
@@ -195,7 +201,6 @@ fn main() {
                 canvas.set_size(width as u32, height as u32, dpi_factor as f32);
                 canvas.clear_rect(0, 0, width as u32, height as u32, Color::rgbf(0.3, 0.3, 0.32));
 
-                draw_image(&mut canvas, images[0], 300.0, 300.0);
                 // let height = height as f32;
                 // let width = width as f32;
 
@@ -343,11 +348,9 @@ fn main() {
     });
 }
 
-
-
 fn draw_image<T: Renderer>(canvas: &mut Canvas<T>, image: ImageId, x: f32, y: f32) {
     canvas.save();
-    let (w,h) = canvas.image_size(image).unwrap();
+    let (w, h) = canvas.image_size(image).unwrap();
     let img_paint = Paint::image(image, x, y, w as _, h as _, 0.0, 1.0);
 
     let mut path = Path::new();
@@ -365,7 +368,6 @@ fn draw_image<T: Renderer>(canvas: &mut Canvas<T>, image: ImageId, x: f32, y: f3
 
 //     canvas.restore();
 // }
-
 
 fn draw_clear_rect2<T: Renderer>(canvas: &mut Canvas<T>, x: u32, y: u32, w: u32, h: u32) {
     canvas.save();
@@ -387,15 +389,12 @@ fn draw_clear_rect2<T: Renderer>(canvas: &mut Canvas<T>, x: u32, y: u32, w: u32,
 //     canvas.restore();
 // }
 
-
 fn draw_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
     let mut path = Path::new();
     // path.rounded_rect(
     //     x,y,w,h,5.0
     // );
-    path.rect(
-        x,y, w, h
-    );
+    path.rect(x, y, w, h);
     let ax = 10.0;
     let ay = 20.0;
     let bx = 10.0;
@@ -413,12 +412,9 @@ fn draw_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32
     canvas.fill_path(&mut path, paint);
 }
 
-
 fn draw_roundrect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, r: f32, t: f32) {
     let mut path = Path::new();
-    path.rounded_rect(
-        x,y,w,h,5.0
-    );
+    path.rounded_rect(x, y, w, h, 5.0);
     let ax = 10.0;
     let ay = 20.0;
     let bx = 10.0;

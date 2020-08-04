@@ -21,11 +21,9 @@ use stencil_texture::StencilTexture;
 mod mtl_ext;
 pub use mtl_ext::generate_mipmaps;
 
-
 // pub trait GPUVecExt {
 //     fn extend_with_triange_fan_indices(&mut self, start: u32, count: u32);
 // }
-
 
 // impl GPUVecExt for GPUVec<u32> {
 //     fn extend_with_triange_fan_indices(&mut self, start: u32, count: u32) {
@@ -117,7 +115,7 @@ impl PathsLength {
 fn triangle_fan_indices_cw(start: u32, len: u32) -> Vec<u32> {
     let mut indices: Vec<u32> = vec![];
     for index in 1..(len - 1) {
-        indices.extend_from_slice(&[start, start + index, start + index + 1,]);
+        indices.extend_from_slice(&[start, start + index, start + index + 1]);
     }
 
     indices
@@ -145,11 +143,7 @@ fn triangle_fan_indices_ccw(start: u32, len: u32) -> Vec<u32> {
 //     destIndices += 3;
 // }
 
-fn triangle_fan_indices2(
-    device: &metal::DeviceRef,
-    start: u32,
-    len: u32
-) -> GPUVec<u32> {
+fn triangle_fan_indices2(device: &metal::DeviceRef, start: u32, len: u32) -> GPUVec<u32> {
     let triangle_len = len - 2;
     let index_len = 3 * triangle_len;
     let mut vec = GPUVec::<u32>::with_capacity(device, index_len as usize);
@@ -178,11 +172,7 @@ fn triangle_fan_indices2(
 //     vec
 // }
 /// expects buffer to be able to allocate vertices
-fn triangle_fan_indices_ext(
-    start: u32,
-    len: usize,
-    buf: &mut GPUVec<u32>
-) {
+fn triangle_fan_indices_ext(start: u32, len: usize, buf: &mut GPUVec<u32>) {
     // let mut indices: Vec<u32> = vec![];
     let invariant = buf.capacity();
     // for index in start..(start + len as u32 - 1) {
@@ -195,8 +185,6 @@ fn triangle_fan_indices_ext(
 
     assert!(invariant == buf.capacity());
 }
-
-
 
 // fn prepare_pipeline_state<'a>(
 //     device: &DeviceRef,
@@ -233,7 +221,6 @@ fn triangle_fan_indices_ext(
 // 	let indices = triangle_fan_indices(10);
 //// 	println!("{:?}", indices);
 // }
-
 
 #[repr(C)]
 #[derive(Copy, Clone, Default, Debug, PartialEq, PartialOrd)]
@@ -339,7 +326,6 @@ pub struct Mtl {
     clear_rect_vert_func: metal::Function,
     clear_rect_frag_func: metal::Function,
     clear_rect_pipeline_state: Option<metal::RenderPipelineState>,
-
 }
 
 impl From<CGSize> for Size {
@@ -376,7 +362,6 @@ impl Mtl {
         // #[cfg(target_os = "macos")] {
         //     layer.set_opaque(false);
         // }
-
 
         let library_path =
             std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("src/renderer/mtl/shaders.metallib");
@@ -568,8 +553,6 @@ impl Mtl {
     //     }
     // }
 
-
-
     /// updaterenderpipelinstateforblend
     pub fn set_composite_operation(
         &mut self,
@@ -582,7 +565,8 @@ impl Mtl {
         if self.pipeline_state.is_some()
             && self.stencil_only_pipeline_state.is_some()
             && self.pipeline_pixel_format == pixel_format
-            && self.blend_func == blend_func {
+            && self.blend_func == blend_func
+        {
             return;
         }
 
@@ -654,9 +638,9 @@ impl Mtl {
         //println!("convex_fill start");
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
-
                 #[cfg(debug_assertions)]
-                self.vertex_buffer.add_debug_marker("convex_fill/fill", start as u64..(start+count) as u64);
+                self.vertex_buffer
+                    .add_debug_marker("convex_fill/fill", start as u64..(start + count) as u64);
 
                 //println!("\tconvex_fill/fill: verts #{}: start: {}, count {}", 0, start, count);
 
@@ -686,7 +670,8 @@ impl Mtl {
             // Draw fringes
             if let Some((start, count)) = drawable.stroke_verts {
                 #[cfg(debug_assertions)]
-                self.vertex_buffer.add_debug_marker("convex_fill/stroke", start as u64..(start+count) as u64);
+                self.vertex_buffer
+                    .add_debug_marker("convex_fill/stroke", start as u64..(start + count) as u64);
 
                 //println!("\tconvex_fill/stroke: verts #{}: start: {}, count {}", 0, start, count);
                 encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
@@ -884,11 +869,8 @@ impl Mtl {
 
         // todo alpha mask
         let alpha_tex = if let Some(id) = alpha_tex {
-            //// println!("found texture");
-            // println!("alpha_tex");
             images.get(id).unwrap()
         } else {
-            //// println!("pseudo texture");
             &self.pseudo_texture
         };
 
@@ -915,8 +897,13 @@ impl Mtl {
         encoder.push_debug_group("clear_rect");
 
         let clear_rect = ClearRect {
-            rect: Rect { x: -1.0, y: -1.0, w: 2.0, h: 2.0 },
-            color
+            rect: Rect {
+                x: -1.0,
+                y: -1.0,
+                w: 2.0,
+                h: 2.0,
+            },
+            color,
         };
 
         encoder.set_render_pipeline_state(&self.clear_rect_pipeline_state.as_ref().unwrap());
@@ -966,7 +953,6 @@ impl Mtl {
     // pub fn reset(&mut self) {
 
     // }
-
 }
 
 impl From<Color> for metal::MTLClearColor {
@@ -974,7 +960,6 @@ impl From<Color> for metal::MTLClearColor {
         Self::new(v.r.into(), v.g.into(), v.b.into(), v.a.into())
     }
 }
-
 
 static mut SHOULD_RENDER: bool = true;
 
@@ -991,9 +976,7 @@ fn unlock() {
 }
 
 fn should_render() -> bool {
-    unsafe {
-        SHOULD_RENDER
-    }
+    unsafe { SHOULD_RENDER }
 }
 
 fn new_render_command_encoder<'a>(
@@ -1051,17 +1034,16 @@ fn new_render_command_encoder<'a>(
         // encoder.set_fragment_buffer(0, Some(uniform_buffer.as_ref()), 0);
 
         encoder
-    }
-    else {
+    } else {
         todo!()
-    //     let desc = metal::RenderPassDescriptor::new();
-    //     let color_attachment = desc.color_attachments().object_at(0).unwrap();
+        //     let desc = metal::RenderPassDescriptor::new();
+        //     let color_attachment = desc.color_attachments().object_at(0).unwrap();
 
-    //     color_attachment.set_texture(Some(color_texture));
-    //     color_attachment.set_load_action(metal::MTLLoadAction::Clear);
-    //     color_attachment.set_clear_color(clear_color.into());
-    //     color_attachment.set_store_action(metal::MTLStoreAction::Store);
-    //     command_buffer.new_render_command_encoder(&desc)
+        //     color_attachment.set_texture(Some(color_texture));
+        //     color_attachment.set_load_action(metal::MTLLoadAction::Clear);
+        //     color_attachment.set_clear_color(clear_color.into());
+        //     color_attachment.set_store_action(metal::MTLStoreAction::Store);
+        //     command_buffer.new_render_command_encoder(&desc)
     }
 }
 
@@ -1162,18 +1144,17 @@ impl Renderer for Mtl {
         //     // }
         // }
 
-
-
         let clear_color: Color = self.clear_color;
         //// println!("clear_color: {:?}", clear_color);
 
         let command_buffer = self.command_queue.new_command_buffer().to_owned();
         command_buffer.enqueue();
         let block = block::ConcreteBlock::new(move |buffer: &metal::CommandBufferRef| {
-        //     // println!("{}", buffer.label());
+            //     // println!("{}", buffer.label());
             // self.vertex_buffer.clear();
             unlock();
-        }).copy();
+        })
+        .copy();
         command_buffer.add_completed_handler(&block);
         let mut drawable: Option<metal::CoreAnimationDrawable> = None;
 
@@ -1219,19 +1200,19 @@ impl Renderer for Mtl {
                 } => {
                     counters.concave_fill += 1;
                     self.concave_fill(&encoder, images, cmd, stencil_params, fill_params)
-                },
+                }
                 CommandType::Stroke { params } => {
                     counters.stroke += 1;
                     self.stroke(&encoder, images, cmd, params)
-                },
+                }
                 CommandType::StencilStroke { params1, params2 } => {
                     counters.stencil_stroke += 1;
                     self.stencil_stroke(&encoder, images, cmd, params1, params2)
-                },
+                }
                 CommandType::Triangles { params } => {
                     counters.triangles += 1;
                     self.triangles(&encoder, images, cmd, params)
-                },
+                }
                 CommandType::ClearRect {
                     x,
                     y,
@@ -1264,7 +1245,6 @@ impl Renderer for Mtl {
         //         blit.end_encoding();
         //     }
         // }
-
 
         command_buffer.commit();
 
