@@ -121,8 +121,9 @@ fragment float4 fragmentShader(
   sampler alpha_samplr [[sampler(1)]]
 ) {
     float scissor = scissorMask(uniforms, in.fpos);
-    if (scissor == 0)
+    if (scissor == 0) {
         return float4(0);
+    }
 
     if (uniforms.type == 0) {  // MNVG_SHADER_FILLGRAD
         float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy;
@@ -160,8 +161,9 @@ fragment float4 fragmentShaderAA(
     sampler alpha_samplr [[sampler(1)]]
 ) {
     float scissor = scissorMask(uniforms, in.fpos);
-    if (scissor == 0)
+    if (scissor == 0) {
         return float4(0);
+    }
 
     if (uniforms.type == 2) {  // MNVG_SHADER_IMG
         float4 color = texture.sample(samplr, in.ftcoord);
