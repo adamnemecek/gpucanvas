@@ -125,30 +125,41 @@ fragment float4 fragmentShader(
         return float4(0);
     }
 
-    if (uniforms.type == 0) {  // MNVG_SHADER_FILLGRAD
+    float4 result;
+
+    if (uniforms.type == 0) {
+        // MNVG_SHADER_FILLGRAD
         float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy;
         float d = saturate((uniforms.feather * 0.5 + sdroundrect(uniforms, pt))
                            / uniforms.feather);
         float4 color = mix(uniforms.innerCol, uniforms.outerCol, d);
-        return color * scissor;
-    } else if (uniforms.type == 1) {  // MNVG_SHADER_FILLIMG
+        result = color * scissor;
+    } else if (uniforms.type == 1) {
+        // MNVG_SHADER_FILLIMG
         float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
         float4 color = texture.sample(samplr, pt);
-        if (uniforms.texType == 1)
+        if (uniforms.texType == 1) {
             color = float4(color.xyz * color.w, color.w);
-        else if (uniforms.texType == 2)
+        }
+        else if (uniforms.texType == 2) {
             color = float4(color.x);
+        }
         color *= scissor;
-        return color * uniforms.innerCol;
-    } else {  // MNVG_SHADER_IMG
+        result = color * uniforms.innerCol;
+    } else {
+        // MNVG_SHADER_IMG
         float4 color = texture.sample(samplr, in.ftcoord);
-        if (uniforms.texType == 1)
+        if (uniforms.texType == 1) {
             color = float4(color.xyz * color.w, color.w);
-        else if (uniforms.texType == 2)
+        }
+        else if (uniforms.texType == 2) {
             color = float4(color.x);
+        }
         color *= scissor;
-        return color * uniforms.innerCol;
+        result = color * uniforms.innerCol;
     }
+
+    return result;
 }
 
 // Fragment function (AA)
@@ -165,40 +176,51 @@ fragment float4 fragmentShaderAA(
         return float4(0);
     }
 
-    if (uniforms.type == 2) {  // MNVG_SHADER_IMG
+    float4 result;
+
+    if (uniforms.type == 2) {
+        // MNVG_SHADER_IMG
         float4 color = texture.sample(samplr, in.ftcoord);
-        if (uniforms.texType == 1)
+        if (uniforms.texType == 1) {
             color = float4(color.xyz * color.w, color.w);
-        else if (uniforms.texType == 2)
+        }
+        else if (uniforms.texType == 2) {
             color = float4(color.x);
+        }
         color *= scissor;
-        return color * uniforms.innerCol;
+        result = color * uniforms.innerCol;
     }
 
     float strokeAlpha = strokeMask(uniforms, in.ftcoord);
     if (strokeAlpha < uniforms.strokeThr) {
-        return float4(0);
+        result = float4(0);
     }
 
-    if (uniforms.type == 0) {  // MNVG_SHADER_FILLGRAD
+    if (uniforms.type == 0) {
+        // MNVG_SHADER_FILLGRAD
         float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy;
         float d = saturate((uniforms.feather * 0.5 + sdroundrect(uniforms, pt))
                            / uniforms.feather);
         float4 color = mix(uniforms.innerCol, uniforms.outerCol, d);
         color *= scissor;
         color *= strokeAlpha;
-        return color;
-    } else {  // MNVG_SHADER_FILLIMG
+        result = color;
+    } else {
+        // MNVG_SHADER_FILLIMG
         float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
         float4 color = texture.sample(samplr, pt);
-        if (uniforms.texType == 1)
+        if (uniforms.texType == 1) {
             color = float4(color.xyz * color.w, color.w);
-        else if (uniforms.texType == 2)
+        }
+        else if (uniforms.texType == 2) {
             color = float4(color.x);
+        }
         color *= scissor;
         color *= strokeAlpha;
-        return color * uniforms.innerCol;
+        result = color * uniforms.innerCol;
     }
+
+    return result;
 }
 
 struct ColorInOut {
