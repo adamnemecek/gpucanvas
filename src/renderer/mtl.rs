@@ -670,7 +670,7 @@ impl Mtl {
                 // triangle_fan_indices_ext(start as u32, count, &mut self.index_buffer);
 
                 // original uses fans so we fake it with indices
-                let indices = triangle_fan_indices_ccw(start as u32, count as u32);
+                let indices = triangle_fan_indices_cw(start as u32, count as u32);
                 println!("\textend_slice {:?}", indices);
                 self.index_buffer.extend_from_slice(&indices);
 
@@ -726,7 +726,7 @@ impl Mtl {
                 let byte_index_buffer_offset = offset * self.index_size;
                 // let byte_index_buffer_offset = start * self.index_size;
                 // assert!(self.index_buffer.len() == start);
-                let indices = triangle_fan_indices_ccw(start as u32, count as u32);
+                let indices = triangle_fan_indices_cw(start as u32, count as u32);
                 self.index_buffer.extend_from_slice(&indices);
                 // original uses fans
                 encoder.draw_indexed_primitives(
@@ -1021,7 +1021,7 @@ fn new_render_command_encoder<'a>(
         let encoder = command_buffer.new_render_command_encoder(&desc);
 
         encoder.set_cull_mode(metal::MTLCullMode::Back);
-        encoder.set_front_facing_winding(metal::MTLWinding::Clockwise);
+        encoder.set_front_facing_winding(metal::MTLWinding::CounterClockwise);
         encoder.set_stencil_reference_value(0);
         encoder.set_viewport(metal::MTLViewport {
             originX: 0.0,
