@@ -215,6 +215,33 @@ struct ClearRect {
     Color color;
 };
 
+float2 rect_vert_cw(
+    Rect rect,
+    uint vid
+) {
+    float2 pos;
+
+    float left = rect.x;
+    float right = rect.x + rect.w;
+    float bottom = rect.y;
+    float top = rect.y + rect.h;
+
+    switch (vid) {
+    case 0:
+        pos = float2(right, top);
+        break;
+    case 1:
+        pos = float2(left, top);
+        break;
+    case 2:
+        pos = float2(right, bottom);
+        break;
+    case 3:
+        pos = float2(left, bottom);
+        break;
+    }
+    return pos;
+}
 
 /// gets the vertices in counterclockwise order
 /// so that this plays nicely with the cull mode set
@@ -252,7 +279,7 @@ vertex ColorInOut clear_rect_vertex(
     unsigned int vid [[ vertex_id ]]
 ) {
     ColorInOut out;
-    float4 pos = float4(rect_vert_ccw(clear_rect->rect, vid), 0, 1);
+    float4 pos = float4(rect_vert_cw(clear_rect->rect, vid), 0, 1);
     auto col = clear_rect->color;
 
     out.position = pos;

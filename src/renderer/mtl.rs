@@ -591,8 +591,8 @@ impl Mtl {
         color_attachment_desc.set_pixel_format(pixel_format);
 
         desc.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
-        desc.set_fragment_function(Some(&self.frag_func));
         desc.set_vertex_function(Some(&self.vert_func));
+        desc.set_fragment_function(Some(&self.frag_func));
         desc.set_vertex_descriptor(Some(&self.vertex_descriptor));
 
         color_attachment_desc.set_blending_enabled(true);
@@ -671,7 +671,7 @@ impl Mtl {
 
                 // original uses fans so we fake it with indices
                 let indices = triangle_fan_indices_cw(start as u32, count as u32);
-                println!("\textend_slice {:?}", indices);
+                println!("\tindex_buffer.extend_from_slice {:?}", indices);
                 self.index_buffer.extend_from_slice(&indices);
 
                 encoder.draw_indexed_primitives(
@@ -727,6 +727,7 @@ impl Mtl {
                 // let byte_index_buffer_offset = start * self.index_size;
                 // assert!(self.index_buffer.len() == start);
                 let indices = triangle_fan_indices_cw(start as u32, count as u32);
+                println!("\tindex_buffer.extend_from_slice {:?}", indices);
                 self.index_buffer.extend_from_slice(&indices);
                 // original uses fans
                 encoder.draw_indexed_primitives(
