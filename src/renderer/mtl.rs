@@ -645,6 +645,7 @@ impl Mtl {
         cmd: &Command,
         paint: Params,
     ) {
+        #[cfg(debug_assertions)]
         encoder.push_debug_group("convex_fill");
 
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
@@ -652,6 +653,7 @@ impl Mtl {
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
+                // self.vertex_buffer.add_debug_marker("convex_fill/fill", start as u64..(start+count) as u64);
                 // println!("fill verts #{}: start: {}, count {}", 0, start, count);
                 // offset is in bytes
                 let byte_index_buffer_offset = start * self.index_size;
@@ -672,11 +674,13 @@ impl Mtl {
 
             // Draw fringes
             if let Some((start, count)) = drawable.stroke_verts {
+                // self.vertex_buffer.add_debug_marker("convex_fill/stroke", start as u64..(start+count) as u64);
 //                 println!("stroke verts #{}: start: {}, count {}", 0, start, count);
                 encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
             }
         }
 
+        #[cfg(debug_assertions)]
         encoder.pop_debug_group();
     }
 
@@ -689,6 +693,7 @@ impl Mtl {
         stencil_paint: Params,
         fill_paint: Params,
     ) {
+        #[cfg(debug_assertions)]
         encoder.push_debug_group("concave_fill");
 
         encoder.set_cull_mode(metal::MTLCullMode::None);
@@ -739,6 +744,7 @@ impl Mtl {
         }
         encoder.set_depth_stencil_state(&self.default_stencil_state);
 
+        #[cfg(debug_assertions)]
         encoder.pop_debug_group();
     }
 
@@ -750,6 +756,7 @@ impl Mtl {
         cmd: &Command,
         paint: Params,
     ) {
+        #[cfg(debug_assertions)]
         encoder.push_debug_group("stroke");
 
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
@@ -759,6 +766,7 @@ impl Mtl {
             }
         }
 
+        #[cfg(debug_assertions)]
         encoder.pop_debug_group();
     }
 
@@ -771,6 +779,7 @@ impl Mtl {
         paint1: Params,
         paint2: Params,
     ) {
+        #[cfg(debug_assertions)]
         encoder.push_debug_group("stencil_stroke");
 
         // Fills the stroke base without overlap.
@@ -806,6 +815,7 @@ impl Mtl {
         }
         encoder.set_depth_stencil_state(&self.default_stencil_state);
 
+        #[cfg(debug_assertions)]
         encoder.pop_debug_group();
     }
 
@@ -817,6 +827,7 @@ impl Mtl {
         cmd: &Command,
         paint: Params,
     ) {
+        #[cfg(debug_assertions)]
         encoder.push_debug_group("triangles");
 
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
@@ -825,6 +836,7 @@ impl Mtl {
             encoder.draw_primitives(metal::MTLPrimitiveType::Triangle, start as u64, count as u64);
         }
 
+        #[cfg(debug_assertions)]
         encoder.pop_debug_group();
     }
 
@@ -867,6 +879,7 @@ impl Mtl {
         height: u32,
         color: Color,
     ) {
+        #[cfg(debug_assertions)]
         encoder.push_debug_group("clear_rect");
 
         let clear_rect = ClearRect {
@@ -899,6 +912,7 @@ impl Mtl {
         encoder.set_vertex_buffer(0, Some(self.vertex_buffer.as_ref()), 0);
         encoder.set_vertex_buffer(1, Some(self.view_size_buffer.as_ref()), 0);
 
+        #[cfg(debug_assertions)]
         encoder.pop_debug_group();
     }
 
