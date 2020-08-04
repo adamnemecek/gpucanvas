@@ -676,7 +676,7 @@ impl Mtl {
 
                 encoder.draw_indexed_primitives(
                     metal::MTLPrimitiveType::Triangle,
-                    count as u64,
+                    indices.len() as u64,
                     metal::MTLIndexType::UInt32,
                     self.index_buffer.as_ref(),
                     byte_index_buffer_offset as u64,
@@ -694,6 +694,7 @@ impl Mtl {
         }
 
         println!("\tconvex_fill/indices {:?}", self.index_buffer);
+
         #[cfg(debug_assertions)]
         encoder.pop_debug_group();
 
@@ -732,7 +733,7 @@ impl Mtl {
                 // original uses fans
                 encoder.draw_indexed_primitives(
                     metal::MTLPrimitiveType::Triangle,
-                    count as u64,
+                    indices.len() as u64,
                     metal::MTLIndexType::UInt32,
                     self.index_buffer.as_ref(),
                     byte_index_buffer_offset as u64,
@@ -1166,10 +1167,9 @@ impl Renderer for Mtl {
 
         let color_texture = match self.render_target {
             RenderTarget::Screen => {
-
                 let d = self.layer.next_drawable().unwrap().to_owned();
                 let tex = d.texture().to_owned();
-                drawable = Some(d); //;.to_owned();
+                drawable = Some(d);
                 tex
             }
             RenderTarget::Image(id) => images.get(id).unwrap().tex().to_owned(),
