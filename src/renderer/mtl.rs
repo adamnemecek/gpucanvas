@@ -892,8 +892,8 @@ impl Mtl {
             &self.pseudo_texture
         };
 
-        // encoder.set_fragment_texture(0, Some(&alpha_tex.tex()));
-        // encoder.set_fragment_sampler_state(0, Some(&alpha_tex.sampler));
+        encoder.set_fragment_texture(1, Some(&alpha_tex.tex()));
+        encoder.set_fragment_sampler_state(1, Some(&alpha_tex.sampler));
 
     }
 

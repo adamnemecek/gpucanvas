@@ -116,9 +116,9 @@ fragment float4 fragmentShader(
   RasterizerData in [[stage_in]],
   constant Uniforms& uniforms [[buffer(0)]],
   texture2d<float> texture [[texture(0)]],
-  sampler samplr [[sampler(0)]]
-  // texture2d<float> alpha_texture [[texture(1)]],
-  // sampler alpha_samplr [[sampler(1)]]
+  sampler samplr [[sampler(0)]],
+  texture2d<float> alpha_texture [[texture(1)]],
+  sampler alpha_samplr [[sampler(1)]]
 ) {
     float scissor = scissorMask(uniforms, in.fpos);
     if (scissor == 0)
@@ -155,9 +155,9 @@ fragment float4 fragmentShaderAA(
     RasterizerData in [[stage_in]],
     constant Uniforms& uniforms [[buffer(0)]],
     texture2d<float> texture [[texture(0)]],
-    sampler samplr [[sampler(0)]]
-    // texture2d<float> alpha_texture [[texture(1)]],
-    // sampler alpha_samplr [[sampler(1)]]
+    sampler samplr [[sampler(0)]],
+    texture2d<float> alpha_texture [[texture(1)]],
+    sampler alpha_samplr [[sampler(1)]]
 ) {
     float scissor = scissorMask(uniforms, in.fpos);
     if (scissor == 0)
