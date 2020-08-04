@@ -322,12 +322,14 @@ fn draw_image<T: Renderer>(canvas: &mut Canvas<T>, image: ImageId, x: f32, y: f3
 }
 
 fn draw_text<T: Renderer>(canvas: &mut Canvas<T>, fonts: &Fonts, title: &str, x: f32, y: f32, w: f32, h: f32) {
-    let mut text_paint = Paint::color(Color::rgba(255, 255, 255, 32));
+    canvas.save();
+    let mut text_paint = Paint::color(Color::rgba(200, 200, 200, 255));
     text_paint.set_font_size(16.0);
     text_paint.set_font(&[fonts.regular]);
     text_paint.set_text_align(Align::Left);
     text_paint.set_text_baseline(Baseline::Middle);
     let _ = canvas.fill_text(x + h, y + h * 0.5, title, text_paint);
+    canvas.restore();
 }
 
 fn draw_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
