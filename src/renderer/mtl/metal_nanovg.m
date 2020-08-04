@@ -1133,11 +1133,14 @@ static void mtlnvg__renderFill(void* uptr, NVGpaint* paint,
              sizeof(NVGvertex) * path->nfill);
 
       int hubVertOffset = vertOffset++;
+
       for (int j = 2; j < path->nfill; j++) {
         *index++ = hubVertOffset;
         *index++ = vertOffset++;
         *index++ = vertOffset;
       }
+
+
       vertOffset++;
     }
     if (path->nstroke > 0) {
@@ -1252,7 +1255,7 @@ static void mtlnvg__renderFlush(void* uptr) {
   // Makes mnvgReadPixels() work as expected on Mac.
   if (s_framebuffer != NULL) {
     id<MTLBlitCommandEncoder> blitCommandEncoder = [buffers.commandBuffer
-        blitCommandEncoder];    
+        blitCommandEncoder];
     [blitCommandEncoder synchronizeResource:colorTexture];
     [blitCommandEncoder endEncoding];
   }
@@ -1522,13 +1525,13 @@ void* mnvgCommandQueue(NVGcontext* ctx) {
 int mnvgCreateImageFromHandle(NVGcontext* ctx, void* textureId, int imageFlags) {
   MNVGcontext* mtl = (__bridge MNVGcontext*)nvgInternalParams(ctx)->userPtr;
   MNVGtexture* tex = mtlnvg__allocTexture(mtl);
-  
+
   if (tex == NULL) return 0;
-  
+
   tex.type = NVG_TEXTURE_RGBA;
   tex.tex = (__bridge id<MTLTexture>)textureId;
   tex.flags = imageFlags;
-  
+
   return tex.id;
 }
 

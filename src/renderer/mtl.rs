@@ -80,6 +80,8 @@ impl PathsLength {
 
                 if let Some((_start, count)) = drawable.stroke_verts {
                     if count > 0 {
+                        // todo we shouldn't actually be adding the two since
+                        // the vercies
                         vertex_count += count + 2;
                         stroke_count += count;
                     }
@@ -648,7 +650,6 @@ impl Mtl {
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
 
-
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
                 // println!("fill verts #{}: start: {}, count {}", 0, start, count);
@@ -656,8 +657,9 @@ impl Mtl {
                 let byte_index_buffer_offset = start * self.index_size;
                 // assert!(self.index_buffer.len() == start);
                 // triangle_fan_indices_ext(start as u32, count, &mut self.index_buffer);
-                // let indices = triangle_fan_indices_ccw(start as u32, count as u32);
-                // self.index_buffer.extend_from_slice(&indices);
+                let indices = triangle_fan_indices_ccw(start as u32, count as u32);
+                // println!("{:?}", indices);
+                self.index_buffer.extend_from_slice(&indices);
                 // original uses fans
                 encoder.draw_indexed_primitives(
                     metal::MTLPrimitiveType::Triangle,
@@ -701,8 +703,8 @@ impl Mtl {
                 // println!("fill verts #{}: start: {}, count {}", 0, start, count);
                 let byte_index_buffer_offset = start * self.index_size;
                 // assert!(self.index_buffer.len() == start);
-                // let indices = triangle_fan_indices_ccw(start as u32, count as u32);
-                // self.index_buffer.extend_from_slice(&indices);
+                let indices = triangle_fan_indices_ccw(start as u32, count as u32);
+                self.index_buffer.extend_from_slice(&indices);
                 // original uses fans
                 encoder.draw_indexed_primitives(
                     metal::MTLPrimitiveType::Triangle,
@@ -858,7 +860,7 @@ impl Mtl {
     pub fn clear_rect(
         &mut self,
         encoder: &metal::RenderCommandEncoderRef,
-        images: &ImageStore<MtlTexture>,
+        _images: &ImageStore<MtlTexture>,
         x: u32,
         y: u32,
         width: u32,
@@ -928,25 +930,25 @@ impl From<Color> for metal::MTLClearColor {
 }
 
 
-static mut SHOULD_RENDER: bool = true;
+// static mut SHOULD_RENDER: bool = true;
 
-fn lock() {
-    unsafe {
-        SHOULD_RENDER = false;
-    }
-}
+// fn lock() {
+//     unsafe {
+//         SHOULD_RENDER = false;
+//     }
+// }
 
-fn unlock() {
-    unsafe {
-        SHOULD_RENDER = true;
-    }
-}
+// fn unlock() {
+//     unsafe {
+//         SHOULD_RENDER = true;
+//     }
+// }
 
-fn should_render() -> bool {
-    unsafe {
-        SHOULD_RENDER
-    }
-}
+// fn should_render() -> bool {
+//     unsafe {
+//         SHOULD_RENDER
+//     }
+// }
 
 fn new_render_command_encoder<'a>(
     color_texture: &metal::TextureRef,
@@ -963,9 +965,9 @@ fn new_render_command_encoder<'a>(
     if true {
         let load_action =
         // if clear_buffer_on_flush {
-            metal::MTLLoadAction::Clear;
+            // metal::MTLLoadAction::Clear;
         // } else {
-            // metal::MTLLoadAction::Load;
+            metal::MTLLoadAction::Load;
         // };
         let desc = metal::RenderPassDescriptor::new();
 
@@ -1046,17 +1048,17 @@ impl Renderer for Mtl {
 
         // let mut counters: Counters = Default::default();
 
-        let lens = PathsLength::new(commands);
-        let max_verts = lens.vertex_count + lens.triangle_count;
+        // let lens = PathsLength::new(commands);
+        // let max_verts = lens.vertex_count + lens.triangle_count;
 
         self.vertex_buffer.clear();
         // self.index_buffer.resize(max_verts);
-        // self.vertex_buffer.resize(verts.len())
-        // self.vertex_buffer.extend_from_slice(verts);
+        // self.vertex_buffer.resize(verts.len());
+        self.vertex_buffer.extend_from_slice(verts);
 
         // build indices
         self.index_buffer.clear();
-        self.index_buffer.resize(lens.index_count);
+        self.index_buffer.resize(3 * verts.len());
         // println!("reserving {}", 3 * verts.len());
         // temporary to ensure that the index_buffer is does not
         // change the inner allocation
@@ -1066,48 +1068,48 @@ impl Renderer for Mtl {
 
         // let mut stroke_vert_offset = max_verts - lens.stroke_count;
 
-        for cmd in commands {
-            for drawable in &cmd.drawables {
-                if let Some((start, count)) = drawable.fill_verts {
-                    if count > 2 {
-                        let mut hub_offset = self.vertex_buffer.len() as u32;
-                        hub_offset += 1;
-                        // self.vertex_buffer.splice_slow(..2, verts[start..start+count].iter().cloned());
-                        self.vertex_buffer.extend_from_slice(&verts[start..start+count]);
-                        for index in 2..count {
-                            self.index_buffer.extend_from_slice(&[hub_offset,
-                                                        (start + index) as u32,
-                                                        (start + index + 1) as u32]);
-                        }
-                    }
-                }
+        // for cmd in commands {
+        //     for drawable in &cmd.drawables {
+        //         if let Some((start, count)) = drawable.fill_verts {
+        //             if count > 2 {
+        //                 let mut hub_offset = self.vertex_buffer.len() as u32;
+        //                 // hub_offset += 1;
+        //                 // self.vertex_buffer.splice_slow(..2, verts[start..start+count].iter().cloned());
+        //                 self.vertex_buffer.extend_from_slice(&verts[start..start+count]);
+        //                 for index in 2..count {
+        //                     self.index_buffer.extend_from_slice(&[hub_offset,
+        //                                                 (start + index) as u32,
+        //                                                 (start + index + 1) as u32]);
+        //                 }
+        //             }
+        //         }
 
-                if let Some((start, count)) = drawable.stroke_verts {
-                    if count > 0 {
-                        self.vertex_buffer.extend_from_slice(&verts[start..start+count]);
-                        // self.vertex_buffer.splice_slow(stroke_vert_offset..stroke_vert_offset+count,
-                        //     verts[start..start+count].iter().cloned());
-                        //     stroke_vert_offset += count;
-                        // unsafe {
-                            // std::ptr::copy(
-                            //     &verts[start..start+count],
-                            //     self.vertex_buffer.as_mut_ptr() as _,
-                            //     0
-                            // );
+        //         if let Some((start, count)) = drawable.stroke_verts {
+        //             if count > 0 {
+        //                 self.vertex_buffer.extend_from_slice(&verts[start..start+count]);
+        //                 // self.vertex_buffer.splice_slow(stroke_vert_offset..stroke_vert_offset+count,
+        //                 //     verts[start..start+count].iter().cloned());
+        //                 //     stroke_vert_offset += count;
+        //                 // unsafe {
+        //                     // std::ptr::copy(
+        //                     //     &verts[start..start+count],
+        //                     //     self.vertex_buffer.as_mut_ptr() as _,
+        //                     //     0
+        //                     // );
 
-                        // }
+        //                 // }
 
-                        // ;
-                        // vertex_count += count + 2;
-                        // stroke_count += count;
-                    }
-                }
-            }
+        //                 // ;
+        //                 // vertex_count += count + 2;
+        //                 // stroke_count += count;
+        //             }
+        //         }
+        //     }
 
-            // if let Some((start, count)) = cmd.triangles_verts {
-            //     // triangle_count += count;
-            // }
-        }
+        //     // if let Some((start, count)) = cmd.triangles_verts {
+        //     //     // triangle_count += count;
+        //     // }
+        // }
 
 
         // assert!(vertex_buffer_hash == self.vertex_buffer.ptr_hash());
