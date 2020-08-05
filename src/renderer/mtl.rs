@@ -37,6 +37,20 @@ impl GPUVecExt for GPUVec<u32> {
     }
 }
 
+struct MtlCompositeOperationState {
+    blend_func: Blend,
+    pixel_format: metal::MTLPixelFormat,
+    pipeline_state: Option<metal::RenderPipelineState>,
+    stencil_only_pipeline_state: Option<metal::RenderPipelineState>,
+    clear_rect_pipeline_state: Option<metal::RenderPipelineState>,
+}
+
+impl MtlCompositeOperationState {
+    pub fn new( ) -> Self {
+        todo!()
+    }
+}
+
 // pub trait VecExt<T> {
 //     fn push_ext(&mut self, value: T) -> usize;
 // }
@@ -1206,17 +1220,17 @@ impl Renderer for Mtl {
         // self.stencil_texture.resize();
         // self.clear_buffer_on_flush = false;
 
-        fn dump_command_type(cmd: &Command) -> &str {
-            match cmd.cmd_type {
-                CommandType::ConvexFill { .. } => "convex_fill",
-                CommandType::ConcaveFill { .. } => "concave_fill",
-                CommandType::Stroke { .. } => "stroke",
-                CommandType::StencilStroke { .. } => "stencil_stroke",
-                CommandType::Triangles { .. } => "triangles",
-                CommandType::ClearRect { .. } => "clear_rect",
-                CommandType::SetRenderTarget { .. } => "set_render_target",
-            }
-        }
+        // fn dump_command_type(cmd: &Command) -> &str {
+        //     match cmd.cmd_type {
+        //         CommandType::ConvexFill { .. } => "convex_fill",
+        //         CommandType::ConcaveFill { .. } => "concave_fill",
+        //         CommandType::Stroke { .. } => "stroke",
+        //         CommandType::StencilStroke { .. } => "stencil_stroke",
+        //         CommandType::Triangles { .. } => "triangles",
+        //         CommandType::ClearRect { .. } => "clear_rect",
+        //         CommandType::SetRenderTarget { .. } => "set_render_target",
+        //     }
+        // }
 
         for cmd in commands {
             // println!("command_type: {:?}", dump_command_type(cmd));
