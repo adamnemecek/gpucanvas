@@ -176,28 +176,18 @@ fragment float4 fragmentShaderAA(
         return float4(0);
     }
 
-    float4 result;
-
-    if (uniforms.shaderType == 2) {
-        // MNVG_SHADER_IMG
-        float4 color = texture.sample(samplr, in.ftcoord);
-        if (uniforms.texType == 1) {
-            color = float4(color.xyz * color.w, color.w);
-        }
-        else if (uniforms.texType == 2) {
-            color = float4(color.x);
-        }
-        color *= scissor;
-        result = color * uniforms.innerCol;
-    }
-
     float strokeAlpha = strokeMask(uniforms, in.ftcoord);
     if (strokeAlpha < uniforms.strokeThr) {
-        result = float4(0);
+        discard_fragment();
     }
+
+    float4 result;
+
+
 
     if (uniforms.shaderType == 0) {
         // MNVG_SHADER_FILLGRAD
+        // gradient
         float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy;
         float d = saturate((uniforms.feather * 0.5 + sdroundrect(uniforms, pt))
                            / uniforms.feather);
@@ -205,8 +195,9 @@ fragment float4 fragmentShaderAA(
         color *= scissor;
         color *= strokeAlpha;
         result = color;
-    } else {
+    } else if (uniforms.shaderType == 1) {
         // MNVG_SHADER_FILLIMG
+        // image
         float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
         float4 color = texture.sample(samplr, pt);
         if (uniforms.texType == 1) {
@@ -217,6 +208,19 @@ fragment float4 fragmentShaderAA(
         }
         color *= scissor;
         color *= strokeAlpha;
+        result = color * uniforms.innerCol;
+    }
+    else {
+        // MNVG_SHADER_IMG
+        // stencil
+        float4 color = texture.sample(samplr, in.ftcoord);
+        if (uniforms.texType == 1) {
+            color = float4(color.xyz * color.w, color.w);
+        }
+        else if (uniforms.texType == 2) {
+            color = float4(color.x);
+        }
+        color *= scissor;
         result = color * uniforms.innerCol;
     }
 
