@@ -57,52 +57,52 @@ impl GPUVecExt for GPUVec<u32> {
 //     }
 // }
 
-pub struct PathsLength {
-    pub vertex_count: usize,
-    pub index_count: usize,
-    pub stroke_count: usize,
-    pub triangle_count: usize,
-}
+// pub struct PathsLength {
+//     pub vertex_count: usize,
+//     pub index_count: usize,
+//     pub stroke_count: usize,
+//     pub triangle_count: usize,
+// }
 
-impl PathsLength {
-    pub fn new(cmds: &[Command]) -> Self {
-        let mut vertex_count = 0;
-        let mut index_count = 0;
-        let mut stroke_count = 0;
-        let mut triangle_count = 0;
+// impl PathsLength {
+//     pub fn new(cmds: &[Command]) -> Self {
+//         let mut vertex_count = 0;
+//         let mut index_count = 0;
+//         let mut stroke_count = 0;
+//         let mut triangle_count = 0;
 
-        for cmd in cmds {
-            for drawable in &cmd.drawables {
-                if let Some((_start, count)) = drawable.fill_verts {
-                    if count > 2 {
-                        vertex_count += count;
-                        index_count += (count - 2) * 3;
-                    }
-                }
+//         for cmd in cmds {
+//             for drawable in &cmd.drawables {
+//                 if let Some((_start, count)) = drawable.fill_verts {
+//                     if count > 2 {
+//                         vertex_count += count;
+//                         index_count += (count - 2) * 3;
+//                     }
+//                 }
 
-                if let Some((_start, count)) = drawable.stroke_verts {
-                    if count > 0 {
-                        // todo we shouldn't actually be adding the two since
-                        // the vercies
-                        vertex_count += count + 2;
-                        stroke_count += count;
-                    }
-                }
-            }
+//                 if let Some((_start, count)) = drawable.stroke_verts {
+//                     if count > 0 {
+//                         // todo we shouldn't actually be adding the two since
+//                         // the vercies
+//                         vertex_count += count + 2;
+//                         stroke_count += count;
+//                     }
+//                 }
+//             }
 
-            if let Some((start, count)) = cmd.triangles_verts {
-                triangle_count += count;
-            }
-        }
+//             if let Some((start, count)) = cmd.triangles_verts {
+//                 triangle_count += count;
+//             }
+//         }
 
-        Self {
-            vertex_count,
-            index_count,
-            stroke_count,
-            triangle_count,
-        }
-    }
-}
+//         Self {
+//             vertex_count,
+//             index_count,
+//             stroke_count,
+//             triangle_count,
+//         }
+//     }
+// }
 
 // mod uniform_array;
 // use uniform_array::UniformArray;
@@ -233,7 +233,7 @@ struct ClearRect {
     color: Color,
 }
 
-#[derive(PartialEq, Eq, Copy, Clone)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub struct Blend {
     pub src_rgb: metal::MTLBlendFactor,
     pub dst_rgb: metal::MTLBlendFactor,
@@ -241,29 +241,31 @@ pub struct Blend {
     pub dst_alpha: metal::MTLBlendFactor,
 }
 
-fn convert_blend_factor(factor: BlendFactor) -> metal::MTLBlendFactor {
-    match factor {
-        BlendFactor::Zero => metal::MTLBlendFactor::Zero,
-        BlendFactor::One => metal::MTLBlendFactor::One,
-        BlendFactor::SrcColor => metal::MTLBlendFactor::SourceColor,
-        BlendFactor::OneMinusSrcColor => metal::MTLBlendFactor::OneMinusSourceColor,
-        BlendFactor::DstColor => metal::MTLBlendFactor::DestinationColor,
-        BlendFactor::OneMinusDstColor => metal::MTLBlendFactor::OneMinusDestinationColor,
-        BlendFactor::SrcAlpha => metal::MTLBlendFactor::SourceAlpha,
-        BlendFactor::OneMinusSrcAlpha => metal::MTLBlendFactor::OneMinusSourceAlpha,
-        BlendFactor::DstAlpha => metal::MTLBlendFactor::DestinationAlpha,
-        BlendFactor::OneMinusDstAlpha => metal::MTLBlendFactor::OneMinusDestinationAlpha,
-        BlendFactor::SrcAlphaSaturate => metal::MTLBlendFactor::SourceAlphaSaturated,
+impl From<BlendFactor> for metal::MTLBlendFactor {
+    fn from(a: BlendFactor) -> Self {
+        match a {
+            BlendFactor::Zero => Self::Zero,
+            BlendFactor::One => Self::One,
+            BlendFactor::SrcColor => Self::SourceColor,
+            BlendFactor::OneMinusSrcColor => Self::OneMinusSourceColor,
+            BlendFactor::DstColor => Self::DestinationColor,
+            BlendFactor::OneMinusDstColor => Self::OneMinusDestinationColor,
+            BlendFactor::SrcAlpha => Self::SourceAlpha,
+            BlendFactor::OneMinusSrcAlpha => Self::OneMinusSourceAlpha,
+            BlendFactor::DstAlpha => Self::DestinationAlpha,
+            BlendFactor::OneMinusDstAlpha => Self::OneMinusDestinationAlpha,
+            BlendFactor::SrcAlphaSaturate => Self::SourceAlphaSaturated,
+        }
     }
 }
 
 impl From<CompositeOperationState> for Blend {
     fn from(v: CompositeOperationState) -> Self {
         Self {
-            src_rgb: convert_blend_factor(v.src_rgb),
-            dst_rgb: convert_blend_factor(v.dst_rgb),
-            src_alpha: convert_blend_factor(v.src_alpha),
-            dst_alpha: convert_blend_factor(v.dst_alpha),
+            src_rgb: v.src_rgb.into(),
+            dst_rgb: v.dst_rgb.into(),
+            src_alpha: v.src_alpha.into(),
+            dst_alpha: v.dst_alpha.into(),
         }
     }
 }
@@ -579,6 +581,7 @@ impl Mtl {
         let color_attachment_desc = desc.color_attachments().object_at(0).unwrap();
         color_attachment_desc.set_pixel_format(pixel_format);
 
+        println!("blend: {:?}", blend_func);
         desc.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
         desc.set_vertex_function(Some(&self.vert_func));
         desc.set_fragment_function(Some(&self.frag_func));
@@ -874,15 +877,25 @@ impl Mtl {
         encoder.set_fragment_texture(0, Some(&tex.tex()));
         encoder.set_fragment_sampler_state(0, Some(&tex.sampler()));
 
-        // todo alpha mask
+
+        let mut alpha = false;
         let alpha_tex = if let Some(id) = alpha_tex {
+            alpha = true;
             images.get(id).unwrap()
         } else {
             &self.pseudo_texture
         };
 
+        if alpha {
+            encoder.push_debug_group("alpha_tex");
+        }
+
         encoder.set_fragment_texture(1, Some(&alpha_tex.tex()));
         encoder.set_fragment_sampler_state(1, Some(&alpha_tex.sampler()));
+
+        if alpha {
+            encoder.pop_debug_group();
+        }
     }
 
     // from warrenmoore
@@ -1193,31 +1206,44 @@ impl Renderer for Mtl {
         // self.stencil_texture.resize();
         // self.clear_buffer_on_flush = false;
 
+        fn dump_command_type(cmd: &Command) -> &str {
+            match cmd.cmd_type {
+                CommandType::ConvexFill { .. } => "convex_fill",
+                CommandType::ConcaveFill { .. } => "concave_fill",
+                CommandType::Stroke { .. } => "stroke",
+                CommandType::StencilStroke { .. } => "stencil_stroke",
+                CommandType::Triangles { .. } => "triangles",
+                CommandType::ClearRect { .. } => "clear_rect",
+                CommandType::SetRenderTarget { .. } => "set_render_target",
+            }
+        }
+
         for cmd in commands {
+            // println!("command_type: {:?}", dump_command_type(cmd));
             self.set_composite_operation(cmd.composite_operation, pixel_format);
 
             match cmd.cmd_type {
                 CommandType::ConvexFill { params } => {
-                    counters.convex_fill += 1;
+                    //counters.convex_fill += 1;
                     self.convex_fill(&encoder, images, cmd, params)
                 }
                 CommandType::ConcaveFill {
                     stencil_params,
                     fill_params,
                 } => {
-                    counters.concave_fill += 1;
+                    //counters.concave_fill += 1;
                     self.concave_fill(&encoder, images, cmd, stencil_params, fill_params)
                 }
                 CommandType::Stroke { params } => {
-                    counters.stroke += 1;
+                    //counters.stroke += 1;
                     self.stroke(&encoder, images, cmd, params)
                 }
                 CommandType::StencilStroke { params1, params2 } => {
-                    counters.stencil_stroke += 1;
+                    //counters.stencil_stroke += 1;
                     self.stencil_stroke(&encoder, images, cmd, params1, params2)
                 }
                 CommandType::Triangles { params } => {
-                    counters.triangles += 1;
+                    //counters.triangles += 1;
                     self.triangles(&encoder, images, cmd, params)
                 }
                 CommandType::ClearRect {
@@ -1227,11 +1253,11 @@ impl Renderer for Mtl {
                     height,
                     color,
                 } => {
-                    counters.clear_rect += 1;
+                    //counters.clear_rect += 1;
                     self.clear_rect(&encoder, images, x, y, width, height, color);
                 }
                 CommandType::SetRenderTarget(target) => {
-                    counters.set_render_target += 1;
+                    //counters.set_render_target += 1;
                     self.set_target(images, target);
                 }
             }
@@ -1259,7 +1285,7 @@ impl Renderer for Mtl {
         assert!(index_buffer_hash == self.index_buffer.ptr_hash());
 
         // command_buffer.wait_until_scheduled();
-        println!("counters {:?}", counters);
+        // println!("counters {:?}", counters);
 
         // if !self.layer.presents_with_transaction() {
         //     command_buffer.present_drawable(&drawable);
@@ -1353,6 +1379,14 @@ impl Renderer for Mtl {
 
 mod tests {
     use super::triangle_fan_indices_cw;
+    // use super::{}
+    // use metalgear::GPUVec;
+    // use super::GPUVecExt;
+
+    // #[test]
+    // fn test_triangle_fan_indices() {
+
+    // }
 
     #[test]
     fn test_triangle_fan_indices_cw() {

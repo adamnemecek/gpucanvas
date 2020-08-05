@@ -221,10 +221,25 @@ fragment float4 fragmentShaderAA(
     }
 
     if (uniforms.hasMask == 1.0) {
-        // float4 smpl = alpha_texture.sample(alpha_samplr, pt);
-        // float4 mask = float4(smpl.x) * scissor;
-        // result *= mask;
+        //  float r = alpha_texture.sample(alpha_samplr, in.ftcoord).x;
+        //  float4 smpl = vec4(1.0, 1.0, 1.0, smpl);
+        //  result = vec4(result.xyz, 1.0) * smpl;
+        // if(type.type == TypeText) {
+		//     out_color.a *= texture(font, in_uv).a;
+	    // }
+        // result.a *= alpha_texture.sample(alpha_samplr, in.ftcoord).a;
+
+        // float4 smpl = alpha_texture.sample(alpha_samplr, in.ftcoord);
+        // float4 mask = float4(smpl.x);
+        // result *= smpl;
         return float4(1.0);
+
+        // if (smpl.a < 1.1) {
+        //     discard_fragment();
+        // }
+        // else {
+            // return float4(result.xyz, smpl.a);
+        // }
     }
     // else if (uniforms.type != 2.0) {
 

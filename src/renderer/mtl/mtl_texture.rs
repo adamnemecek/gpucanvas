@@ -132,9 +132,6 @@ impl MtlTexture {
     pub fn sampler(&self) -> &metal::SamplerStateRef {
         &self.sampler
     }
-    // pub fn id(&self) -> u32 {
-    //     self.id
-    // }
 
     #[inline]
     pub fn replace_region(&self, region: metal::MTLRegion, data: &[u8], stride: usize) {
