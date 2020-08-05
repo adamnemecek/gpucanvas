@@ -595,7 +595,7 @@ impl Mtl {
         let color_attachment_desc = desc.color_attachments().object_at(0).unwrap();
         color_attachment_desc.set_pixel_format(pixel_format);
 
-        println!("blend: {:?}", blend_func);
+        // println!("blend: {:?}", blend_func);
         desc.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
         desc.set_vertex_function(Some(&self.vert_func));
         desc.set_fragment_function(Some(&self.frag_func));

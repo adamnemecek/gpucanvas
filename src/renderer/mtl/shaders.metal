@@ -93,6 +93,12 @@ float sdroundrect(constant Uniforms& uniforms, float2 pt) {
     float2 d = abs(pt) - ext2;
     return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - uniforms.radius;
 }
+float sdroundrect2(float2 pt, float2 ext, float rad) {
+    float2 ext2 = ext - float2(rad);
+    float2 d = abs(pt) - ext2;
+    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - rad;
+}
+
 
 float strokeMask(constant Uniforms& uniforms, float2 ftcoord) {
     return min(1.0, (1.0 - abs(ftcoord.x * 2.0 - 1.0)) * uniforms.strokeMult) \
@@ -165,66 +171,62 @@ fragment float4 fragmentShader(
 // Fragment function (AA)
 fragment float4 fragmentShaderAA(
     RasterizerData in [[stage_in]],
-    constant Uniforms& uniforms [[buffer(0)]],
+    constant Uniforms& u [[buffer(0)]],
     texture2d<float> texture [[texture(0)]],
     sampler samplr [[sampler(0)]],
     texture2d<float> alpha_texture [[texture(1)]],
     sampler alpha_samplr [[sampler(1)]]
 ) {
-    float scissor = scissorMask(uniforms, in.fpos);
-    if (scissor == 0) {
-        return float4(0);
-    }
+    float4 result;
+    float scissor = scissorMask(u, in.fpos);
+    // if (scissor == 0) {
+    //     return float4(0);
+    // }
 
-    float strokeAlpha = strokeMask(uniforms, in.ftcoord);
-    if (strokeAlpha < uniforms.strokeThr) {
+    float strokeAlpha = strokeMask(u, in.ftcoord);
+    if (strokeAlpha < u.strokeThr) {
         discard_fragment();
     }
 
-    float4 result;
-
-
-
-    if (uniforms.shaderType == 0) {
+    if (u.shaderType == 0) {
         // MNVG_SHADER_FILLGRAD
         // gradient
-        float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy;
-        float d = saturate((uniforms.feather * 0.5 + sdroundrect(uniforms, pt))
-                           / uniforms.feather);
-        float4 color = mix(uniforms.innerCol, uniforms.outerCol, d);
-        color *= scissor;
-        color *= strokeAlpha;
+        float2 pt = (u.paintMat * float3(in.fpos, 1.0)).xy;
+        float d = clamp((sdroundrect2(pt, u.extent, u.radius) + u.feather*0.5) / u.feather, 0.0, 1.0);
+
+        float4 color = mix(u.innerCol, u.outerCol, d);
         result = color;
-    } else if (uniforms.shaderType == 1) {
+    } else if (u.shaderType == 1) {
         // MNVG_SHADER_FILLIMG
         // image
-        float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
+        float2 pt = (u.paintMat * float3(in.fpos, 1.0)).xy / u.extent;
         float4 color = texture.sample(samplr, pt);
-        if (uniforms.texType == 1) {
+        if (u.texType == 1) {
             color = float4(color.xyz * color.w, color.w);
         }
-        else if (uniforms.texType == 2) {
+        else if (u.texType == 2) {
             color = float4(color.x);
         }
-        color *= scissor;
-        color *= strokeAlpha;
-        result = color * uniforms.innerCol;
+        // color *= scissor;
+        // color *= strokeAlpha;
+        result = color * u.innerCol;
     }
     else {
         // MNVG_SHADER_IMG
         // stencil
         float4 color = texture.sample(samplr, in.ftcoord);
-        if (uniforms.texType == 1) {
+        if (u.texType == 1) {
             color = float4(color.xyz * color.w, color.w);
         }
-        else if (uniforms.texType == 2) {
+        else if (u.texType == 2) {
             color = float4(color.x);
         }
         color *= scissor;
-        result = color * uniforms.innerCol;
+        result = color * u.innerCol;
+        // result = float4(1.0);
     }
 
-    if (uniforms.hasMask == 1.0) {
+    if (u.hasMask == 1.0) {
         // float2 pt;
         // if (uniforms.type == 0) {
         //     pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy;
@@ -233,9 +235,16 @@ fragment float4 fragmentShaderAA(
         //     pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
         // }
          float4 mask = alpha_texture.sample(alpha_samplr, in.ftcoord);
-         mask = float4(mask.x);
+         result.a = mask.a;
+
+        //  mask = float4(mask.x);
         //  mask *= scissor;
-        result *= mask;
+        // mask *= scissor;
+        // result *= mask;
+
+    //     if(type.type == TypeText) {
+	// 	out_color.a *= texture(font, in_uv).a;
+	// }
 
         //  result /= strokeAlpha;
         //  result = float4(result.rgb * r, r);
@@ -259,9 +268,9 @@ fragment float4 fragmentShaderAA(
             // return float4(result.xyz, smpl.a);
         // }
     }
-    // else if (uniforms.type != 2.0) {
-
-    // }
+    else if (u.shaderType != 2.0) {
+        result *= strokeAlpha * scissor;
+    }
 
     return result;
 }
