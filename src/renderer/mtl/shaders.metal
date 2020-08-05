@@ -235,7 +235,7 @@ fragment float4 fragmentShaderAA(
         //     pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
         // }
          float4 mask = alpha_texture.sample(alpha_samplr, in.ftcoord);
-         result.a = mask.a;
+         result.a *= mask.a;
 
         //  mask = float4(mask.x);
         //  mask *= scissor;
