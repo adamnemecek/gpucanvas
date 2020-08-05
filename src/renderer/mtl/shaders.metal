@@ -69,7 +69,7 @@ struct Uniforms {
     float strokeMult;
     float strokeThr;
     int texType;
-    int type;
+    int shaderType;
     float hasMask;
     float padding[19];
 };
@@ -127,14 +127,14 @@ fragment float4 fragmentShader(
 
     float4 result;
 
-    if (uniforms.type == 0) {
+    if (uniforms.shaderType == 0) {
         // MNVG_SHADER_FILLGRAD
         float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy;
         float d = saturate((uniforms.feather * 0.5 + sdroundrect(uniforms, pt))
                            / uniforms.feather);
         float4 color = mix(uniforms.innerCol, uniforms.outerCol, d);
         result = color * scissor;
-    } else if (uniforms.type == 1) {
+    } else if (uniforms.shaderType == 1) {
         // MNVG_SHADER_FILLIMG
         float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
         float4 color = texture.sample(samplr, pt);
@@ -178,7 +178,7 @@ fragment float4 fragmentShaderAA(
 
     float4 result;
 
-    if (uniforms.type == 2) {
+    if (uniforms.shaderType == 2) {
         // MNVG_SHADER_IMG
         float4 color = texture.sample(samplr, in.ftcoord);
         if (uniforms.texType == 1) {
@@ -196,7 +196,7 @@ fragment float4 fragmentShaderAA(
         result = float4(0);
     }
 
-    if (uniforms.type == 0) {
+    if (uniforms.shaderType == 0) {
         // MNVG_SHADER_FILLGRAD
         float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy;
         float d = saturate((uniforms.feather * 0.5 + sdroundrect(uniforms, pt))
@@ -221,9 +221,21 @@ fragment float4 fragmentShaderAA(
     }
 
     if (uniforms.hasMask == 1.0) {
-         float r = alpha_texture.sample(alpha_samplr, in.ftcoord).r;
+        // float2 pt;
+        // if (uniforms.type == 0) {
+        //     pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy;
+        // }
+        // else {
+        //     pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
+        // }
+         float4 mask = alpha_texture.sample(alpha_samplr, in.ftcoord);
+         mask = float4(mask.x);
+        //  mask *= scissor;
+        result *= mask;
+
         //  result /= strokeAlpha;
-         result = float4(result.rgb * r, r);
+        //  result = float4(result.rgb * r, r);
+        //  return float4(1.0);
         //  float4 smpl = vec4(1.0, 1.0, 1.0, smpl);
         //  result = vec4(result.xyz, 1.0) * smpl;
         // if(type.type == TypeText) {
