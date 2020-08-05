@@ -167,9 +167,94 @@ fragment float4 fragmentShader(
 
     return result;
 }
+fragment float4 fragmentShaderAA(
+    RasterizerData in [[stage_in]],
+    constant Uniforms& uniforms [[buffer(0)]],
+    texture2d<float> texture [[texture(0)]],
+    sampler samplr [[sampler(0)]],
+    texture2d<float> alpha_texture [[texture(1)]],
+    sampler alpha_samplr [[sampler(1)]]
+) {
+    float scissor = scissorMask(uniforms, in.fpos);
+    if (scissor == 0) {
+        return float4(0);
+    }
+
+    float4 result;
+
+    if (uniforms.shaderType == 2) {
+        // MNVG_SHADER_IMG
+        float4 color = texture.sample(samplr, in.ftcoord);
+        if (uniforms.texType == 1) {
+            color = float4(color.xyz * color.w, color.w);
+        }
+        else if (uniforms.texType == 2) {
+            color = float4(color.x);
+        }
+        color *= scissor;
+        result = color * uniforms.innerCol;
+    }
+
+    float strokeAlpha = strokeMask(uniforms, in.ftcoord);
+    if (strokeAlpha < uniforms.strokeThr) {
+        result = float4(0);
+    }
+
+    if (uniforms.shaderType == 0) {
+        // MNVG_SHADER_FILLGRAD
+        float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy;
+        float d = saturate((uniforms.feather * 0.5 + sdroundrect(uniforms, pt))
+                           / uniforms.feather);
+        float4 color = mix(uniforms.innerCol, uniforms.outerCol, d);
+        color *= scissor;
+        color *= strokeAlpha;
+        result = color;
+    } else {
+        // MNVG_SHADER_FILLIMG
+        float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
+        float4 color = texture.sample(samplr, pt);
+        if (uniforms.texType == 1) {
+            color = float4(color.xyz * color.w, color.w);
+        }
+        else if (uniforms.texType == 2) {
+            color = float4(color.x);
+        }
+        color *= scissor;
+        color *= strokeAlpha;
+        result = color * uniforms.innerCol;
+    }
+
+    if (uniforms.hasMask == 1.0) {
+        //  float r = alpha_texture.sample(alpha_samplr, in.ftcoord).x;
+        //  float4 smpl = vec4(1.0, 1.0, 1.0, smpl);
+        //  result = vec4(result.xyz, 1.0) * smpl;
+        // if(type.type == TypeText) {
+		//     out_color.a *= texture(font, in_uv).a;
+	    // }
+        // result.a *= alpha_texture.sample(alpha_samplr, in.ftcoord).a;
+
+        // float4 smpl = alpha_texture.sample(alpha_samplr, in.ftcoord);
+        // float4 mask = float4(smpl.x);
+        // result *= smpl;
+        return float4(1.0);
+
+        // if (smpl.a < 1.1) {
+        //     discard_fragment();
+        // }
+        // else {
+            // return float4(result.xyz, smpl.a);
+        // }
+    }
+    // else if (uniforms.type != 2.0) {
+
+    // }
+
+    return result;
+}
+
 
 // Fragment function (AA)
-fragment float4 fragmentShaderAA(
+fragment float4 fragmentShaderAAUpdated(
     RasterizerData in [[stage_in]],
     constant Uniforms& u [[buffer(0)]],
     texture2d<float> texture [[texture(0)]],
@@ -227,15 +312,22 @@ fragment float4 fragmentShaderAA(
     }
 
     if (u.hasMask == 1.0) {
-        // float2 pt;
-        // if (uniforms.type == 0) {
-        //     pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy;
+
+        // this is from vulkan cpp nanovg impl
+        //  float4 mask = alpha_texture.sample(alpha_samplr, in.ftcoord);
+        //  result.a *= mask.a;
+
+        float alpha = alpha_texture.sample(alpha_samplr, in.ftcoord).r;
+
+        // if (alpha <= 0.0) {
+        //     discard_fragment();
         // }
-        // else {
-        //     pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
-        // }
-         float4 mask = alpha_texture.sample(alpha_samplr, in.ftcoord);
-         result.a *= mask.a;
+
+//         half4 baseColor = baseTexture.sample(colorSampler, in.texCoords);
+//   half4 alphaColor = alphaTexture.sample(colorSampler, in.texCoords);
+//   return half4(baseColor.r, baseColor.g, baseColor.b, alphaColor.r);
+        result = float4(result.xyz, alpha);
+        // return vert.color * float4(1.0, 1.0, 1.0, alpha);
 
         //  mask = float4(mask.x);
         //  mask *= scissor;
