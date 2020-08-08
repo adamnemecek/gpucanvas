@@ -2,9 +2,9 @@ use imgref::ImgVec;
 use metal::CGSize;
 use rgb::RGBA8;
 
-use metalgear::{GPUVar, GPUVec};
+use metalgear::{GPUVar, GPUVec, RenderCommandEncoderExt};
 
-use super::mtl::mtl_ext::RenderCommandEncoderExt;
+//use super::mtl::mtl_ext::RenderCommandEncoderExt;
 use super::{Command, CommandType, Params, RenderTarget, Renderer};
 use crate::{
     image::ImageFlags,
@@ -37,6 +37,7 @@ impl GPUVecExt for GPUVec<u32> {
     }
 }
 
+
 struct MtlCompositeOperationState {
     blend_func: Blend,
     pixel_format: metal::MTLPixelFormat,
@@ -45,11 +46,11 @@ struct MtlCompositeOperationState {
     clear_rect_pipeline_state: Option<metal::RenderPipelineState>,
 }
 
-impl MtlCompositeOperationState {
-    pub fn new( ) -> Self {
-        todo!()
-    }
-}
+// impl MtlCompositeOperationState {
+//     pub fn new( ) -> Self {
+//         todo!()
+//     }
+// }
 
 // pub trait VecExt<T> {
 //     fn push_ext(&mut self, value: T) -> usize;

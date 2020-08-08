@@ -225,6 +225,10 @@ fragment float4 fragmentShaderAA(
     }
 
     if (uniforms.hasMask == 1.0) {
+        float alpha = alpha_texture.sample(alpha_samplr, in.ftcoord).r;
+        result = float4(result.xyz, alpha);
+
+        return float4(0.5, 0.5, 0.5, 0.3);
         //  float r = alpha_texture.sample(alpha_samplr, in.ftcoord).x;
         //  float4 smpl = vec4(1.0, 1.0, 1.0, smpl);
         //  result = vec4(result.xyz, 1.0) * smpl;
@@ -236,7 +240,7 @@ fragment float4 fragmentShaderAA(
         // float4 smpl = alpha_texture.sample(alpha_samplr, in.ftcoord);
         // float4 mask = float4(smpl.x);
         // result *= smpl;
-        return float4(1.0);
+        // return float4(1.0);
 
         // if (smpl.a < 1.1) {
         //     discard_fragment();
