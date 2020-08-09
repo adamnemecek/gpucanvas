@@ -13,7 +13,7 @@ use crate::{
 };
 
 mod mtl_texture;
-use mtl_texture::MtlTexture;
+pub use mtl_texture::MtlTexture;
 
 mod stencil_texture;
 use stencil_texture::StencilTexture;

@@ -37,7 +37,7 @@ mod color;
 pub use color::Color;
 
 pub mod renderer;
-pub use renderer::{RenderTarget, Renderer};
+pub use renderer::{RenderTarget, Renderer, MtlTexture};
 
 use renderer::{Command, CommandType, Drawable, Params, ShaderType, Vertex};
 
