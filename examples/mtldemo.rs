@@ -39,7 +39,7 @@ struct Fonts {
 
 fn main() {
     let events_loop = winit::event_loop::EventLoop::new();
-    let size = winit::dpi::LogicalSize::new(800, 600);
+    let size = winit::dpi::LogicalSize::new(1000, 600);
 
     let window = winit::window::WindowBuilder::new()
         .with_inner_size(size)
