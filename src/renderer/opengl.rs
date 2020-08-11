@@ -358,13 +358,12 @@ impl OpenGl {
 
             if let Some(cid) = image_tex {
                 if let Some(ct) = images.get(cid) {
-                    // let p = std::path::Path::from(color_path);
                     ct.save_to_png(&color_path);
                 }
             }
+
             if let Some(aid) = alpha_tex {
                 if let Some(at) = images.get(aid) {
-                    // let p = std::path::Path::from(color_path);
                     at.save_to_png(&alpha_path);
                 }
             }
