@@ -52,7 +52,7 @@ pub struct OpenGl {
     vert_arr: GLuint,
     vert_buff: GLuint,
     framebuffers: FnvHashMap<ImageId, Result<Framebuffer, ErrorKind>>,
-    pub dump_alpha: bool
+    pub dump_alpha: bool,
 }
 
 impl OpenGl {
@@ -77,7 +77,7 @@ impl OpenGl {
             vert_arr: Default::default(),
             vert_buff: Default::default(),
             framebuffers: Default::default(),
-            dump_alpha: false
+            dump_alpha: false,
         };
 
         unsafe {
@@ -330,8 +330,6 @@ impl OpenGl {
         image_tex: Option<ImageId>,
         alpha_tex: Option<ImageId>,
     ) {
-
-
         let arr = UniformArray::from(paint);
         self.main_program.set_config(UniformArray::size() as i32, arr.as_ptr());
         self.check_error("set_uniforms uniforms");
@@ -355,14 +353,8 @@ impl OpenGl {
             let id = next_id();
 
             let root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-            let alpha_path = format!(
-                "{}/dumps/{}_alpha.png",
-                root.to_str().unwrap().to_string(),
-                id);
-            let color_path = format!(
-                "{}/dumps/{}_color.png",
-                root.to_str().unwrap().to_string(),
-                id);
+            let alpha_path = format!("{}/dumps/{}_alpha.png", root.to_str().unwrap().to_string(), id);
+            let color_path = format!("{}/dumps/{}_color.png", root.to_str().unwrap().to_string(), id);
 
             if let Some(cid) = image_tex {
                 if let Some(ct) = images.get(cid) {
@@ -588,8 +580,6 @@ impl Renderer for OpenGl {
 
         Ok(ImgVec::new(flipped, w, h))
     }
-
-
 }
 
 impl Drop for OpenGl {
