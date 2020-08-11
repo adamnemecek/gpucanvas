@@ -902,16 +902,16 @@ impl Mtl {
             &self.pseudo_texture
         };
 
-        if alpha {
-            encoder.push_debug_group("alpha_tex");
-        }
+        // if alpha {
+        //     encoder.push_debug_group("alpha_tex");
+        // }
 
         encoder.set_fragment_texture(1, Some(&alpha_tex.tex()));
         encoder.set_fragment_sampler_state(1, Some(&alpha_tex.sampler()));
 
-        if alpha {
-            encoder.pop_debug_group();
-        }
+        // if alpha {
+            // encoder.pop_debug_group();
+        // }
     }
 
     // from warrenmoore

@@ -30,7 +30,9 @@ mod gl {
     include!(concat!(env!("OUT_DIR"), "/gl_bindings.rs"));
 }
 
+
 use gl::types::*;
+
 
 pub struct OpenGl {
     debug: bool,

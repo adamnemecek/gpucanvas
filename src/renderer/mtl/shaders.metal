@@ -171,16 +171,15 @@ fragment float4 fragmentShaderAA(
     RasterizerData in [[stage_in]],
     constant Uniforms& uniforms [[buffer(0)]],
     texture2d<float> texture [[texture(0)]],
-    sampler samplr [[sampler(0)]],
-    texture2d<float> alpha_texture [[texture(1)]],
-    sampler alpha_samplr [[sampler(1)]]
+    sampler samplr [[sampler(0)]]//,
+    // texture2d<float> alpha_texture [[texture(1)]],
+    // sampler alpha_samplr [[sampler(1)]]
 ) {
+    float4 result;
     float scissor = scissorMask(uniforms, in.fpos);
     if (scissor == 0) {
         return float4(0);
     }
-
-    float4 result;
 
     if (uniforms.shaderType == 2) {
         // MNVG_SHADER_IMG
@@ -198,6 +197,7 @@ fragment float4 fragmentShaderAA(
     float strokeAlpha = strokeMask(uniforms, in.ftcoord);
     if (strokeAlpha < uniforms.strokeThr) {
         result = float4(0);
+        // discard_fragment();
     }
 
     if (uniforms.shaderType == 0) {
@@ -224,33 +224,35 @@ fragment float4 fragmentShaderAA(
         result = color * uniforms.innerCol;
     }
 
-    if (uniforms.hasMask == 1.0) {
-        float2 ftcoord = float2(in.ftcoord.x, -in.ftcoord.y);
-        float alpha = alpha_texture.sample(alpha_samplr, ftcoord).r;
-        // result /= strokeAlpha;
-        result = float4(result.xyz, alpha);
+    // if (uniforms.hasMask == 1.0) {
+    //     float2 ftcoord = float2(in.ftcoord.x, -in.ftcoord.y);
+    //     float alpha = alpha_texture.sample(alpha_samplr, ftcoord).r;
 
-        // return float4(0.5, 0.5, 0.5, 0.3);
-        //  float r = alpha_texture.sample(alpha_samplr, in.ftcoord).x;
-        //  float4 smpl = vec4(1.0, 1.0, 1.0, smpl);
-        //  result = vec4(result.xyz, 1.0) * smpl;
-        // if(type.type == TypeText) {
-		//     out_color.a *= texture(font, in_uv).a;
-	    // }
-        // result.a *= alpha_texture.sample(alpha_samplr, in.ftcoord).a;
+    //     // result /= strokeAlpha;
+    //     result /= 0.02;
+    //     result = float4(result.xyz, alpha);
 
-        // float4 smpl = alpha_texture.sample(alpha_samplr, in.ftcoord);
-        // float4 mask = float4(smpl.x);
-        // result *= smpl;
-        // return float4(1.0);
+    //     // return float4(0.5, 0.5, 0.5, 0.3);
+    //     //  float r = alpha_texture.sample(alpha_samplr, in.ftcoord).x;
+    //     //  float4 smpl = vec4(1.0, 1.0, 1.0, smpl);
+    //     //  result = vec4(result.xyz, 1.0) * smpl;
+    //     // if(type.type == TypeText) {
+	// 	//     out_color.a *= texture(font, in_uv).a;
+	//     // }
+    //     // result.a *= alpha_texture.sample(alpha_samplr, in.ftcoord).a;
 
-        // if (smpl.a < 1.1) {
-        //     discard_fragment();
-        // }
-        // else {
-            // return float4(result.xyz, smpl.a);
-        // }
-    }
+    //     // float4 smpl = alpha_texture.sample(alpha_samplr, in.ftcoord);
+    //     // float4 mask = float4(smpl.x);
+    //     // result *= smpl;
+    //     // return float4(1.0);
+
+    //     // if (smpl.a < 1.1) {
+    //     //     discard_fragment();
+    //     // }
+    //     // else {
+    //         // return float4(result.xyz, smpl.a);
+    //     // }
+    // }
     // else if (uniforms.type != 2.0) {
 
     // }
