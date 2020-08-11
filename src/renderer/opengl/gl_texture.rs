@@ -238,6 +238,57 @@ impl GlTexture {
         Ok(())
     }
 
+    pub fn save_to_png(&self, path: &str) {
+        // let (width, height) =
+        let width = self.info.width();
+        let height = self.info.height();
+
+        // get texture pixels
+        let size: usize = width as usize * height as usize * 4;
+        let mut pixel_buf: Vec<u8> = Vec::with_capacity(size);
+        pixel_buf.extend([0u8].iter().cycle().take(size));
+        unsafe {
+            gl::BindTexture(gl::TEXTURE_2D, self.id);
+            // gl::GetTexImage(gl::TEXTURE_2D,
+            //                 0,
+            //                 gl::RGBA,
+            //                 gl::UNSIGNED_BYTE,
+            //                 pixel_buf.as_ptr() as *mut GLvoid);
+            gl::ReadPixels(
+                0,
+                0,
+                width as i32,
+                height as i32,
+                gl::RGBA,
+                gl::UNSIGNED_BYTE,
+                pixel_buf.as_ptr() as *mut GLvoid,
+            );
+            gl::BindTexture(gl::TEXTURE_2D, 0);
+        }
+
+        // save pixels to file
+        let fname = path.to_owned();
+        // if in_background {
+        //     thread::spawn(move || {
+        //         match image::save_buffer(fname,
+        //                                  &pixel_buf,
+        //                                  width as u32,
+        //                                  height as u32,
+        //                                  image::RGBA(8)).map_err(|e| e.to_string())
+        //         {
+        //             Ok(_) => println!("Save complete"),
+        //             Err(msg) => eprintln!("Cannot save blurred image: {}", msg),
+        //         }
+        //     });
+        // } else {
+        match image::save_buffer(fname, &pixel_buf, width as u32, height as u32, image::ColorType::Rgba8)
+            .map_err(|e| e.to_string())
+        {
+            Ok(_) => println!("Save complete"),
+            Err(msg) => eprintln!("Cannot save blurred image: {}", msg),
+        };
+    }
+
     pub fn delete(self) {
         unsafe {
             gl::DeleteTextures(1, &self.id);

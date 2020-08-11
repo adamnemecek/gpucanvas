@@ -32,6 +32,16 @@ mod gl {
 
 use gl::types::*;
 
+static mut COUNTER: u32 = 0;
+
+fn next_id() -> u32 {
+    unsafe {
+        let id = COUNTER;
+        COUNTER += 1;
+        id
+    }
+}
+
 pub struct OpenGl {
     debug: bool,
     antialias: bool,
@@ -42,6 +52,7 @@ pub struct OpenGl {
     vert_arr: GLuint,
     vert_buff: GLuint,
     framebuffers: FnvHashMap<ImageId, Result<Framebuffer, ErrorKind>>,
+    pub dump_alpha: bool
 }
 
 impl OpenGl {
@@ -66,6 +77,7 @@ impl OpenGl {
             vert_arr: Default::default(),
             vert_buff: Default::default(),
             framebuffers: Default::default(),
+            dump_alpha: false
         };
 
         unsafe {
@@ -318,6 +330,8 @@ impl OpenGl {
         image_tex: Option<ImageId>,
         alpha_tex: Option<ImageId>,
     ) {
+
+
         let arr = UniformArray::from(paint);
         self.main_program.set_config(UniformArray::size() as i32, arr.as_ptr());
         self.check_error("set_uniforms uniforms");
@@ -334,6 +348,27 @@ impl OpenGl {
         unsafe {
             gl::ActiveTexture(gl::TEXTURE0 + 1);
             gl::BindTexture(gl::TEXTURE_2D, masktex);
+        }
+
+        if self.dump_alpha {
+            println!("dumping");
+            let id = next_id();
+
+            let color_path = format!("/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas.bug/dumps/{}_color.png", id);
+            let alpha_mask = format!("/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas.bug/dumps/{}_alpha.png", id);
+
+            if let Some(cid) = image_tex {
+                if let Some(ct) = images.get(cid) {
+                    // let p = std::path::Path::from(color_path);
+                    ct.save_to_png(&color_path);
+                }
+            }
+            if let Some(aid) = alpha_tex {
+                if let Some(at) = images.get(aid) {
+                    // let p = std::path::Path::from(color_path);
+                    at.save_to_png(&alpha_mask);
+                }
+            }
         }
 
         self.check_error("set_uniforms texture");
@@ -546,6 +581,8 @@ impl Renderer for OpenGl {
 
         Ok(ImgVec::new(flipped, w, h))
     }
+
+
 }
 
 impl Drop for OpenGl {

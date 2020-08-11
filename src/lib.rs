@@ -264,6 +264,8 @@ where
         self.append_cmd(cmd);
     }
 
+ 
+
     /// Returns the with of the canvas
     pub fn width(&self) -> f32 {
         self.width as f32
@@ -1058,5 +1060,12 @@ where
 impl<T: Renderer> Drop for Canvas<T> {
     fn drop(&mut self) {
         self.images.clear(&mut self.renderer);
+    }
+}
+
+
+impl Canvas<crate::renderer::OpenGl> {
+    pub fn toggle_alpha(&mut self) {
+        self.renderer.dump_alpha = !self.renderer.dump_alpha;
     }
 }

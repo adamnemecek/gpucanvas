@@ -60,12 +60,12 @@ fn main() {
         icons: canvas.add_font("examples/assets/entypo.ttf").expect("Cannot add font"),
     };
 
-    //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
+    // //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
 
-    //let image_id = canvas.create_image_file("examples/assets/RoomRender.jpg", ImageFlags::FLIP_Y).expect("Cannot create image");
-    //canvas.blur_image(image_id, 10, 1050, 710, 200, 200);
+    // //let image_id = canvas.create_image_file("examples/assets/RoomRender.jpg", ImageFlags::FLIP_Y).expect("Cannot create image");
+    // //canvas.blur_image(image_id, 10, 1050, 710, 200, 200);
 
-    //let image_id = canvas.load_image_file("examples/assets/RoomRender.jpg", ImageFlags::FLIP_Y).expect("Cannot create image");
+    // //let image_id = canvas.load_image_file("examples/assets/RoomRender.jpg", ImageFlags::FLIP_Y).expect("Cannot create image");
 
     let images: Vec<ImageId> = (1..=12)
         .map(|i| {
@@ -76,7 +76,7 @@ fn main() {
         })
         .collect();
 
-    let mut screenshot_image_id = None;
+    // let mut screenshot_image_id = None;
 
     let start = Instant::now();
     let mut prevt = start;
@@ -140,6 +140,7 @@ fn main() {
                         },
                     ..
                 } => {
+                    canvas.toggle_alpha();
                     // if let Some(screenshot_image_id) = screenshot_image_id {
                     //     canvas.delete_image(screenshot_image_id);
                     // }
@@ -152,130 +153,136 @@ fn main() {
                 _ => (),
             },
             Event::RedrawRequested(_) => {
-                let now = Instant::now();
-                let dt = (now - prevt).as_secs_f32();
-                prevt = now;
+                // let now = Instant::now();
+                // let dt = (now - prevt).as_secs_f32();
+                // prevt = now;
 
-                perf.update(dt);
+                // perf.update(dt);
 
                 let dpi_factor = windowed_context.window().scale_factor();
                 let size = windowed_context.window().inner_size();
 
-                let t = start.elapsed().as_secs_f32();
+                // let t = start.elapsed().as_secs_f32();
 
                 canvas.set_size(size.width as u32, size.height as u32, dpi_factor as f32);
                 canvas.clear_rect(0, 0, size.width as u32, size.height as u32, Color::rgbf(0.3, 0.3, 0.32));
 
-                let height = size.height as f32;
-                let width = size.width as f32;
+                // let height = size.height as f32;
+                // let width = size.width as f32;
 
-                let pt = canvas.transform().inversed().transform_point(mousex, mousey);
-                let mousex = pt.0;
-                let mousey = pt.1;
+                // let pt = canvas.transform().inversed().transform_point(mousex, mousey);
+                // let mousex = pt.0;
+                // let mousey = pt.1;
 
-                draw_graph(&mut canvas, 0.0, height / 2.0, width, height / 2.0, t);
+                // draw_graph(&mut canvas, 0.0, height / 2.0, width, height / 2.0, t);
 
-                draw_eyes(&mut canvas, width - 250.0, 50.0, 150.0, 100.0, mousex, mousey, t);
+                // draw_eyes(&mut canvas, width - 250.0, 50.0, 150.0, 100.0, mousex, mousey, t);
 
-                draw_paragraph(
-                    &mut canvas,
-                    fonts.regular,
-                    width - 450.0,
-                    50.0,
-                    150.0,
-                    100.0,
-                    mousex,
-                    mousey,
-                );
+                // draw_paragraph(
+                //     &mut canvas,
+                //     fonts.regular,
+                //     width - 450.0,
+                //     50.0,
+                //     150.0,
+                //     100.0,
+                //     mousex,
+                //     mousey,
+                // );
 
-                draw_colorwheel(&mut canvas, width - 300.0, height - 350.0, 250.0, 250.0, t);
+                // draw_colorwheel(&mut canvas, width - 300.0, height - 350.0, 250.0, 250.0, t);
 
-                draw_lines(&mut canvas, 120.0, height - 50.0, 600.0, 50.0, t);
-                draw_widths(&mut canvas, 10.0, 50.0, 30.0);
-                draw_fills(&mut canvas, width - 200.0, height - 100.0, mousex, mousey);
-                draw_caps(&mut canvas, 10.0, 300.0, 30.0);
+                // draw_lines(&mut canvas, 120.0, height - 50.0, 600.0, 50.0, t);
+                // draw_widths(&mut canvas, 10.0, 50.0, 30.0);
+                // draw_fills(&mut canvas, width - 200.0, height - 100.0, mousex, mousey);
+                // draw_caps(&mut canvas, 10.0, 300.0, 30.0);
 
-                draw_scissor(&mut canvas, 50.0, height - 80.0, t);
+                // draw_scissor(&mut canvas, 50.0, height - 80.0, t);
 
-                draw_window(&mut canvas, &fonts, "Widgets `n Stuff", 50.0, 50.0, 300.0, 400.0);
+                // draw_window(&mut canvas, &fonts, "Widgets `n Stuff", 50.0, 50.0, 300.0, 400.0);
 
-                let x = 60.0;
-                let mut y = 95.0;
+                // let x = 60.0;
+                // let mut y = 95.0;
 
-                draw_search_box(&mut canvas, &fonts, "Search", x, y, 280.0, 25.0);
-                y += 40.0;
-                draw_drop_down(&mut canvas, &fonts, "Effects", 60.0, 135.0, 280.0, 28.0);
-                let popy = y + 14.0;
-                y += 45.0;
+                // draw_search_box(&mut canvas, &fonts, "Search", x, y, 280.0, 25.0);
+                // y += 40.0;
+                // draw_drop_down(&mut canvas, &fonts, "Effects", 60.0, 135.0, 280.0, 28.0);
+                // let popy = y + 14.0;
+                // y += 45.0;
 
-                draw_label(&mut canvas, &fonts, "Login", x, y, 280.0, 20.0);
-                y += 25.0;
-                draw_edit_box(&mut canvas, &fonts, "Email", x, y, 280.0, 28.0);
-                y += 35.0;
-                draw_edit_box(&mut canvas, &fonts, "Password", x, y, 280.0, 28.0);
-                y += 38.0;
-                draw_check_box(&mut canvas, &fonts, "Remember me", x, y, 140.0, 28.0);
-                draw_button(
-                    &mut canvas,
-                    &fonts,
-                    Some("\u{E740}"),
-                    "Sign in",
-                    x + 138.0,
-                    y,
-                    140.0,
-                    28.0,
-                    Color::rgba(0, 96, 128, 255),
-                );
-                y += 45.0;
+                // draw_label(&mut canvas, &fonts, "Login", x, y, 280.0, 20.0);
+                // y += 25.0;
+                // draw_edit_box(&mut canvas, &fonts, "Email", x, y, 280.0, 28.0);
+                // y += 35.0;
+                // draw_edit_box(&mut canvas, &fonts, "Password", x, y, 280.0, 28.0);
+                // y += 38.0;
+                // draw_check_box(&mut canvas, &fonts, "Remember me", x, y, 140.0, 28.0);
+                // draw_button(
+                //     &mut canvas,
+                //     &fonts,
+                //     Some("\u{E740}"),
+                //     "Sign in",
+                //     x + 138.0,
+                //     y,
+                //     140.0,
+                //     28.0,
+                //     Color::rgba(0, 96, 128, 255),
+                // );
+                // y += 45.0;
 
-                // Slider
-                draw_label(&mut canvas, &fonts, "Diameter", x, y, 280.0, 20.0);
-                y += 25.0;
-                draw_edit_box_num(&mut canvas, &fonts, "123.00", "px", x + 180.0, y, 100.0, 28.0);
-                draw_slider(&mut canvas, 0.4, x, y, 170.0, 28.0);
-                y += 55.0;
+                // // Slider
+                // draw_label(&mut canvas, &fonts, "Diameter", x, y, 280.0, 20.0);
+                // y += 25.0;
+                // draw_edit_box_num(&mut canvas, &fonts, "123.00", "px", x + 180.0, y, 100.0, 28.0);
+                // draw_slider(&mut canvas, 0.4, x, y, 170.0, 28.0);
+                // y += 55.0;
 
-                draw_button(
-                    &mut canvas,
-                    &fonts,
-                    Some("\u{E729}"),
-                    "Delete",
-                    x,
-                    y,
-                    160.0,
-                    28.0,
-                    Color::rgba(128, 16, 8, 255),
-                );
-                draw_button(
-                    &mut canvas,
-                    &fonts,
-                    None,
-                    "Cancel",
-                    x + 170.0,
-                    y,
-                    110.0,
-                    28.0,
-                    Color::rgba(0, 0, 0, 0),
-                );
+                // draw_button(
+                //     &mut canvas,
+                //     &fonts,
+                //     Some("\u{E729}"),
+                //     "Delete",
+                //     x,
+                //     y,
+                //     160.0,
+                //     28.0,
+                //     Color::rgba(128, 16, 8, 255),
+                // );
+                // draw_button(
+                //     &mut canvas,
+                //     &fonts,
+                //     None,
+                //     "Cancel",
+                //     x + 170.0,
+                //     y,
+                //     110.0,
+                //     28.0,
+                //     Color::rgba(0, 0, 0, 0),
+                // );
 
-                draw_thumbnails(&mut canvas, 365.0, popy - 30.0, 160.0, 300.0, &images, t);
+                // draw_thumbnails(&mut canvas, 365.0, popy - 30.0, 160.0, 300.0, &images, t);
 
-                /*
-                draw_spinner(&mut canvas, 15.0, 285.0, 10.0, t);
-                */
+                // /*
+                // draw_spinner(&mut canvas, 15.0, 285.0, 10.0, t);
+                // */
+                // if let Some(image_id) = screenshot_image_id {
+                //     let x = size.width as f32 - 512.0;
+                //     let y = size.height as f32 - 512.0;
 
-                if let Some(image_id) = screenshot_image_id {
-                    let x = size.width as f32 - 512.0;
-                    let y = size.height as f32 - 512.0;
+                //     let paint = Paint::image(image_id, x, y, 512.0, 512.0, 0.0, 1.0);
 
-                    let paint = Paint::image(image_id, x, y, 512.0, 512.0, 0.0, 1.0);
+                //     let mut path = Path::new();
+                //     path.rect(x, y, 512.0, 512.0);
+                //     canvas.fill_path(&mut path, paint);
+                //     canvas.stroke_path(&mut path, Paint::color(Color::hex("454545")));
+                // }
 
-                    let mut path = Path::new();
-                    path.rect(x, y, 512.0, 512.0);
-                    canvas.fill_path(&mut path, paint);
-                    canvas.stroke_path(&mut path, Paint::color(Color::hex("454545")));
-                }
+                // draw_clear_rect2(&mut canvas, 60, 10, 50, 50);
+                // // draw_rounded_rect(&mut canvas, 100.0, 100.0, 40.0, 40.0, 5.0, t);
+                // draw_rect(&mut canvas, 100.0, 100.0, 40.0, 40.0);
 
+                // draw_colorwheel(&mut canvas, 200.0, 200.0, 200.0, 200.0, 5.0);
+                // draw_image(&mut canvas, images[0], 300.0, 300.0);
+                draw_text(&mut canvas, &fonts, "title", 400.0, 200.0, 100.0, 100.0);
                 // if true {
                 //     let paint = Paint::image(image_id, size.width as f32, 15.0, 1920.0, 1080.0, 0.0, 1.0);
                 //     let mut path = Path::new();
@@ -283,12 +290,12 @@ fn main() {
                 //     canvas.fill_path(&mut path, paint);
                 // }
 
-                canvas.save_with(|canvas| {
-                    canvas.reset();
-                    perf.render(canvas, 5.0, 5.0);
-                });
+                // canvas.save_with(|canvas| {
+                //     canvas.reset();
+                //     perf.render(canvas, 5.0, 5.0);
+                // });
 
-                //canvas.restore();
+                // canvas.restore();
 
                 canvas.flush();
                 windowed_context.swap_buffers().unwrap();
@@ -301,6 +308,92 @@ fn main() {
         }
     });
 }
+
+fn draw_image<T: Renderer>(canvas: &mut Canvas<T>, image: ImageId, x: f32, y: f32) {
+    canvas.save();
+    let (w, h) = canvas.image_size(image).unwrap();
+    let img_paint = Paint::image(image, x, y, w as _, h as _, 0.0, 1.0);
+
+    let mut path = Path::new();
+    path.rounded_rect(x, y, w as _, h as _, 5.0);
+    canvas.fill_path(&mut path, img_paint);
+    canvas.restore();
+}
+
+fn draw_text<T: Renderer>(canvas: &mut Canvas<T>, fonts: &Fonts, title: &str, x: f32, y: f32, w: f32, h: f32) {
+    canvas.save();
+    let mut text_paint = Paint::color(Color::rgba(200, 200, 200, 255));
+    text_paint.set_font_size(20.0);
+    text_paint.set_font(&[fonts.regular]);
+    text_paint.set_text_align(Align::Left);
+    text_paint.set_text_baseline(Baseline::Middle);
+    let _ = canvas.fill_text(x + h, y + h * 0.5, title, text_paint);
+    canvas.restore();
+}
+
+fn draw_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
+    let mut path = Path::new();
+    // path.rounded_rect(
+    //     x,y,w,h,5.0
+    // );
+    path.rect(x, y, w, h);
+    let ax = 10.0;
+    let ay = 20.0;
+    let bx = 10.0;
+    let by = 20.0;
+
+    let paint = Paint::linear_gradient(
+        ax,
+        ay,
+        bx,
+        by,
+        Color::hsla(0.6 / (PI * 2.0), 1.0, 0.55, 1.0),
+        Color::hsla(0.6 / (PI * 2.0), 1.0, 0.55, 1.0),
+    );
+
+    canvas.fill_path(&mut path, paint);
+}
+
+fn draw_clear_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
+    canvas.save();
+
+    let mut path = Path::new();
+    path.rect(x, y, w, h);
+    canvas.fill_path(&mut path, Paint::color(Color::rgba(255, 192, 0, 255)));
+
+    canvas.restore();
+}
+
+fn draw_clear_rect2<T: Renderer>(canvas: &mut Canvas<T>, x: u32, y: u32, w: u32, h: u32) {
+    canvas.save();
+
+    canvas.clear_rect(x, y, w, h, Color::rgba(255, 192, 0, 255));
+    // canvas.fill_path(&mut path, Paint::color(Color::rgba(255, 192, 0, 255)));
+
+    canvas.restore();
+}
+
+fn draw_rounded_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, r: f32, t: f32) {
+    let mut path = Path::new();
+    path.rounded_rect(x, y, w, h, 5.0);
+    let ax = 10.0;
+    let ay = 20.0;
+    let bx = 10.0;
+    let by = 20.0;
+
+    let paint = Paint::linear_gradient(
+        ax,
+        ay,
+        bx,
+        by,
+        Color::hsla(0.6 / (PI * 2.0), 1.0, 0.55, 1.0),
+        Color::hsla(0.2 / (PI * 2.0), 1.0, 0.55, 1.0),
+    );
+
+    canvas.fill_path(&mut path, paint);
+}
+
+/// original
 
 fn draw_paragraph<T: Renderer>(
     canvas: &mut Canvas<T>,
