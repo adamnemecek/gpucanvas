@@ -354,8 +354,15 @@ impl OpenGl {
             println!("dumping");
             let id = next_id();
 
-            let color_path = format!("/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas.bug/dumps/{}_color.png", id);
-            let alpha_mask = format!("/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas.bug/dumps/{}_alpha.png", id);
+            let root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+            let alpha_path = format!(
+                "{}/dumps/{}_alpha.png",
+                root.to_str().unwrap().to_string(),
+                id);
+            let color_path = format!(
+                "{}/dumps/{}_color.png",
+                root.to_str().unwrap().to_string(),
+                id);
 
             if let Some(cid) = image_tex {
                 if let Some(ct) = images.get(cid) {
@@ -366,7 +373,7 @@ impl OpenGl {
             if let Some(aid) = alpha_tex {
                 if let Some(at) = images.get(aid) {
                     // let p = std::path::Path::from(color_path);
-                    at.save_to_png(&alpha_mask);
+                    at.save_to_png(&alpha_path);
                 }
             }
         }
