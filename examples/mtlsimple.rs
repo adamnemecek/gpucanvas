@@ -49,7 +49,7 @@ fn main() {
 
     let device = Device::system_default().expect("no device found");
 
-    let layer = CoreAnimationLayer::new();
+    let layer = MetalLayer::new();
     layer.set_device(&device);
     layer.set_pixel_format(MTLPixelFormat::BGRA8Unorm);
     layer.set_presents_with_transaction(false);
@@ -318,7 +318,7 @@ fn main() {
                 // draw_rect(&mut canvas, 200.0, 200.0, 40.0, 40.0);
                 // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                 // draw_image(&mut canvas, images[0], 5.0, 300.0);
-                draw_text(&mut canvas, &fonts, "title", 5.0, 200.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "title", 600.0, 200.0, 100.0, 100.0);
                 // draw_rounded_rect(&mut canvas,300.0, 100.0, 40.0, 40.0, 5.0, 1.0);
                 // render_clear_rect(&mut );
 

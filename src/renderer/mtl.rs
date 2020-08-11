@@ -301,7 +301,7 @@ pub struct Mtl {
     antialias: bool,
 
     command_queue: metal::CommandQueue,
-    layer: metal::CoreAnimationLayer,
+    layer: metal::MetalLayer,
     // library: metal::Library,
     // render_encoder: Option<metal::RenderCommandEncoder>,
     frag_size: usize,
@@ -378,7 +378,7 @@ impl Mtl {
 }
 
 impl Mtl {
-    pub fn new(device: &metal::DeviceRef, layer: &metal::CoreAnimationLayerRef) -> Self {
+    pub fn new(device: &metal::DeviceRef, layer: &metal::MetalLayerRef) -> Self {
         let debug = cfg!(debug_assertions);
         let antialias = true;
 
@@ -1208,7 +1208,7 @@ impl Renderer for Mtl {
         })
         .copy();
         command_buffer.add_completed_handler(&block);
-        let mut drawable: Option<metal::CoreAnimationDrawable> = None;
+        let mut drawable: Option<metal::MetalDrawable> = None;
 
         let color_texture = match self.render_target {
             RenderTarget::Screen => {

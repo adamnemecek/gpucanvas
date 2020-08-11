@@ -639,7 +639,7 @@ pub(crate) fn render_atlas<T: Renderer>(
     canvas.set_render_target(initial_render_target);
 
     // debug draw
-    {
+    if true {
         canvas.save();
         canvas.reset();
 
