@@ -1393,6 +1393,8 @@ impl Renderer for Mtl {
     }
 }
 
+
+#[cfg(test)]
 mod tests {
     use super::triangle_fan_indices_cw;
     // use super::{}

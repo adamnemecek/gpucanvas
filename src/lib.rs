@@ -336,6 +336,21 @@ where
         self.restore();
     }
 
+    // 
+    // pub fn debug_draw(&self) {
+    //     self.save();
+    //     self.reset();
+
+    //     let image_id = self.text_context.textures[0].image_id;
+
+    //     let mut path = Path::new();
+    //     path.rect(20.5, 20.5, 512.0, 512.0);
+    //     self.fill_path(&mut path, Paint::image(image_id, 20.5, 20.5, 512.0, 512.0, 0.0, 1.0));
+    //     self.stroke_path(&mut path, Paint::color(Color::black()));
+
+    //     self.restore();
+    // }
+
     // Render styles
 
     /// Sets the transparency applied to all rendered shapes.

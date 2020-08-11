@@ -639,19 +639,19 @@ pub(crate) fn render_atlas<T: Renderer>(
     canvas.set_render_target(initial_render_target);
 
     // debug draw
-    // {
-    //     canvas.save();
-    //     canvas.reset();
+    {
+        canvas.save();
+        canvas.reset();
 
-    //     let image_id = canvas.text_renderer_context.textures[0].image_id;
+        let image_id = canvas.text_context.textures[0].image_id;
 
-    //     let mut path = Path::new();
-    //     path.rect(20.5, 20.5, 512.0, 512.0);
-    //     canvas.fill_path(&mut path, Paint::image(image_id, 20.5, 20.5, 512.0, 512.0, 0.0, 1.0));
-    //     canvas.stroke_path(&mut path, Paint::color(Color::black()));
+        let mut path = Path::new();
+        path.rect(20.5, 20.5, 512.0, 512.0);
+        canvas.fill_path(&mut path, Paint::image(image_id, 20.5, 20.5, 512.0, 512.0, 0.0, 1.0));
+        canvas.stroke_path(&mut path, Paint::color(Color::black()));
 
-    //     canvas.restore();
-    // }
+        canvas.restore();
+    }
 
     Ok(cmd_map.drain().map(|(_, cmd)| cmd).collect())
 }

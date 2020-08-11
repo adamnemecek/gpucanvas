@@ -54,6 +54,7 @@ fn main() {
     layer.set_pixel_format(MTLPixelFormat::BGRA8Unorm);
     layer.set_presents_with_transaction(false);
 
+
     unsafe {
         let view = window.ns_view() as cocoa_id;
         view.setWantsLayer(YES);

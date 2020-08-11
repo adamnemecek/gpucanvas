@@ -8,7 +8,7 @@ impl From<PixelFormat> for metal::MTLPixelFormat {
             // PixelFormat::Rgba8 | PixelFormat::Rgb8
             //  => metal::MTLPixelFormat::RGBA8Unorm,
             PixelFormat::Rgba8 => metal::MTLPixelFormat::BGRA8Unorm,
-            PixelFormat::Rgb8 => todo!(),
+            PixelFormat::Rgb8 => unimplemented!("metal doesn't support the RGB8 pixel format"),
             PixelFormat::Gray8 => metal::MTLPixelFormat::R8Unorm,
         }
     }
