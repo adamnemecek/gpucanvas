@@ -248,7 +248,7 @@ impl GlTexture {
         let mut pixel_buf: Vec<u8> = Vec::with_capacity(size);
         pixel_buf.extend([0u8].iter().cycle().take(size));
         unsafe {
-            gl::BindTexture(gl::TEXTURE_2D, self.id);
+            // gl::BindTexture(gl::TEXTURE_2D, self.id);
             // gl::GetTexImage(gl::TEXTURE_2D,
             //                 0,
             //                 gl::RGBA,
@@ -263,7 +263,7 @@ impl GlTexture {
                 gl::UNSIGNED_BYTE,
                 pixel_buf.as_ptr() as *mut GLvoid,
             );
-            gl::BindTexture(gl::TEXTURE_2D, 0);
+            // gl::BindTexture(gl::TEXTURE_2D, 0);
         }
 
         // save pixels to file
