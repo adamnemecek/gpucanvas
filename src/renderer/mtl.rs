@@ -309,6 +309,7 @@ pub struct Mtl {
     // int flags?
     clear_color: Color,
     view_size_buffer: GPUVar<Size>,
+    // screen_view: [f32; 2],
 
     vertex_descriptor: metal::VertexDescriptor,
 
@@ -530,6 +531,7 @@ impl Mtl {
             frag_func,
             vert_func,
             pipeline_state: None,
+            // screen_view: [0.0, 0.0],
             // clear_buffer_on_flush,
             default_stencil_state,
             fill_shape_stencil_state,
@@ -973,6 +975,17 @@ impl Mtl {
 
     pub fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
         self.render_target = target;
+        *self.view_size_buffer = match target {
+            RenderTarget::Screen => {
+                 self.layer.drawable_size().into()
+            }
+            RenderTarget::Image(id) => {
+                let texture= images.get(id).unwrap();
+                let w = texture.info().width() as f32;
+                let h = texture.info().height() as f32;
+                Size::new(w, h)
+            }
+        }
     }
 
     // pub fn get_target(&self, images: &ImageStore<MtlTexture>) -> metal::TextureRef {
@@ -1088,7 +1101,10 @@ impl Renderer for Mtl {
 
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
         let size = Size::new(width as f32, height as f32);
+        // self.screen_view = [width as _, height as _];
         *self.view_size_buffer = size;
+
+
     }
 
     // called flush in ollix and nvg
