@@ -40,7 +40,7 @@ fn main() {
     let el = EventLoop::new();
     let wb = WindowBuilder::new()
         .with_inner_size(glutin::dpi::PhysicalSize::new(1000, 600))
-        .with_title("gpucanvas demo");
+        .with_title("OpenGL gpucanvas demo");
 
     //let windowed_context = ContextBuilder::new().with_gl(GlRequest::Specific(Api::OpenGlEs, (2, 0))).with_vsync(false).build_windowed(wb, &el).unwrap();
     //let windowed_context = ContextBuilder::new().with_vsync(false).with_multisampling(8).build_windowed(wb, &el).unwrap();
