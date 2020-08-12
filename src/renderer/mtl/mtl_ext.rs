@@ -70,7 +70,7 @@ impl MtlTextureExt for metal::TextureRef {
         .map_err(|e| e.to_string())
         {
             Ok(_) => println!("Save complete"),
-            Err(msg) => eprintln!("Cannot save blurred image: {}", msg),
+            Err(msg) => eprintln!("Cannot save image: {}", msg),
         };
     }
 }

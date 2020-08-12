@@ -19,7 +19,7 @@ mod stencil_texture;
 use stencil_texture::StencilTexture;
 
 mod mtl_ext;
-pub use mtl_ext::generate_mipmaps;
+pub use mtl_ext::{generate_mipmaps, MtlTextureExt};
 
 pub trait GPUVecExt {
     fn extend_with_triange_fan_indices_cw(&mut self, start: u32, count: u32) -> usize;
@@ -352,6 +352,7 @@ pub struct Mtl {
     // Needed for screenshoting,
     //
     last_rendered_texture: Option<metal::Texture>,
+    frame: usize,
 }
 
 impl From<CGSize> for Size {
@@ -561,26 +562,9 @@ impl Mtl {
             clear_rect_frag_func,
             clear_rect_pipeline_state: None,
             last_rendered_texture: None,
+            frame: 0,
         }
     }
-
-    // fn factor(factor: BlendFactor) -> metal::MTLBlendFactor {
-    //     use metal::MTLBlendFactor;
-
-    //     match factor {
-    //         BlendFactor::Zero => MTLBlendFactor::Zero,
-    //         BlendFactor::One => MTLBlendFactor::One,
-    //         BlendFactor::SrcColor => MTLBlendFactor::SourceColor,
-    //         BlendFactor::OneMinusSrcColor => MTLBlendFactor::OneMinusSourceColor,
-    //         BlendFactor::DstColor => MTLBlendFactor::DestinationColor,
-    //         BlendFactor::OneMinusDstColor => MTLBlendFactor::OneMinusDestinationColor,
-    //         BlendFactor::SrcAlpha => MTLBlendFactor::SourceAlpha,
-    //         BlendFactor::OneMinusSrcAlpha => MTLBlendFactor::OneMinusSourceAlpha,
-    //         BlendFactor::DstAlpha => MTLBlendFactor::DestinationAlpha,
-    //         BlendFactor::OneMinusDstAlpha => MTLBlendFactor::OneMinusDestinationAlpha,
-    //         BlendFactor::SrcAlphaSaturate => MTLBlendFactor::SourceAlphaSaturated,
-    //     }
-    // }
 
     /// updaterenderpipelinstateforblend
     pub fn set_composite_operation(
@@ -1317,17 +1301,22 @@ impl Renderer for Mtl {
             command_buffer.present_drawable(&drawable);
         }
 
-        // todo
-        // #[cfg(target_os = "macos")]
-        // {
-        //     if self.render_target == RenderTarget::Screen {
-        //         let blit = command_buffer.new_blit_command_encoder();
-        //         blit.synchronize_resource(&color_texture);
-        //         blit.end_encoding();
-        //     }
-        // }
+        // Makes mnvgReadPixels() work as expected on Mac.
+        #[cfg(target_os = "macos")]
+        {
+            if self.render_target == RenderTarget::Screen {
+                let blit = command_buffer.new_blit_command_encoder();
+                blit.synchronize_resource(&color_texture);
+                blit.end_encoding();
+            }
+        }
 
         command_buffer.commit();
+
+        if self.frame == 1 {
+            color_texture.save_to("/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas/out.png");
+        }
+        self.frame += 1;
 
         assert!(vertex_buffer_hash == self.vertex_buffer.ptr_hash());
         assert!(index_buffer_hash == self.index_buffer.ptr_hash());
