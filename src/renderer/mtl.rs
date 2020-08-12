@@ -863,7 +863,7 @@ impl Mtl {
         paint: Params,
     ) {
         #[cfg(debug_assertions)]
-        encoder.push_debug_group("screen triangles");
+        encoder.push_debug_group("triangles");
 
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
@@ -1359,35 +1359,48 @@ impl Renderer for Mtl {
     // }
 
     fn screenshot(&mut self, images: &ImageStore<Self::Image>) -> Result<ImgVec<RGBA8>, ErrorKind> {
+        let texture = match self.render_target {
+            RenderTarget::Screen => {
+                self.layer.next_drawable().map(|x| x.texture())
+            }
+            RenderTarget::Image(id) => {
+                images.get(id).map(|x| x.tex())
+            }
+        }.unwrap();
+
         // todo!()
         // look at headless renderer in metal-rs
         let size = *self.view_size_buffer;
-        let width = size.w as u64;
-        let height = size.h as u64;
+        let w = size.w as u64;
+        let h = size.h as u64;
 
-        let mut buffer = vec![
+        let mut buffer = ImgVec::new(vec![
             RGBA8 {
                 r: 255,
                 g: 255,
                 b: 255,
                 a: 255
             };
-            (width * height) as usize
-        ];
+            (w * h) as usize
+        ],
+            w as usize,
+            h as usize
+        );
 
-        // texture.get_bytes(
-        //     buffer.as_mut_ptr() as *mut std::ffi::c_void,
-        //     width * 4,
-        //     metal::MTLRegion {
-        //         origin: metal::MTLOrigin::default(),
-        //         size: metal::MTLSize {
-        //             width,
-        //             height,
-        //             depth: 1,
-        //         },
-        //     },
-        //     0,
-        // );
+        texture.get_bytes(
+            buffer.buf_mut().as_ptr() as *mut std::ffi::c_void,
+            w * 4,
+            metal::MTLRegion {
+                origin: metal::MTLOrigin::default(),
+                size: metal::MTLSize {
+                    width: w,
+                    height: h,
+                    depth: 1,
+                },
+            },
+            0,
+        );
+        todo!()
 
         // let mut image = ImgVec::new(
         //     vec![
@@ -1411,7 +1424,7 @@ impl Renderer for Mtl {
         //image = image::imageops::flip_vertical(&image);
 
         // Ok(image)
-        todo!()
+        // todo!()
     }
 }
 

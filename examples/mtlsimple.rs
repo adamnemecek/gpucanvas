@@ -193,17 +193,6 @@ fn main() {
                 // // let size = renderer.size();
 
                 if first && capture {
-                    // let mut cd = metal::CaptureDescriptor::new();
-                    // cd.set_destination(metal::MTLCaptureDestination::DeveloperTools);
-                    // cd.set_destination(metal::MTLCaptureDestination::GpuTraceDocument);
-                    // cd.set_output_url("/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/metal8/output.gputrace");
-                    // cd.set_capture_device(&device);
-
-                    // let shared = metal::CaptureManager::shared();
-
-                    // shared.start_capture(&cd);
-                    // shared.start_capture_with_command_queue(&command_queue);
-                    // println!("{:?}", shared.is_capturing());
                     canvas.start_capture();
                 }
 
