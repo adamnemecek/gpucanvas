@@ -348,6 +348,11 @@ pub struct Mtl {
     clear_rect_vert_func: metal::Function,
     clear_rect_frag_func: metal::Function,
     clear_rect_pipeline_state: Option<metal::RenderPipelineState>,
+
+
+    // Needed for screenshoting,
+    //
+    last_rendered_texture: Option<metal::Texture>,
 }
 
 impl From<CGSize> for Size {
@@ -556,6 +561,7 @@ impl Mtl {
             clear_rect_vert_func,
             clear_rect_frag_func,
             clear_rect_pipeline_state: None,
+            last_rendered_texture: None
         }
     }
 
@@ -1228,6 +1234,9 @@ impl Renderer for Mtl {
             RenderTarget::Image(id) => images.get(id).unwrap().tex().to_owned(),
         };
 
+        // this is needed for screenshotting
+        self.last_rendered_texture = Some(color_texture.to_owned());
+
         let size = Size::new(color_texture.width() as _, color_texture.height() as _);
         self.stencil_texture.resize(size);
 
@@ -1363,11 +1372,12 @@ impl Renderer for Mtl {
     fn screenshot(&mut self, images: &ImageStore<Self::Image>) -> Result<ImgVec<RGBA8>, ErrorKind> {
         println!("screenshot: {:?}", self.render_target);
 
-        let texture = match self.render_target {
-            RenderTarget::Screen => self.layer.next_drawable().map(|x| x.texture()),
-            RenderTarget::Image(id) => images.get(id).map(|x| x.tex()),
-        }
-        .unwrap();
+        // let texture = match self.render_target {
+        //     RenderTarget::Screen => self.layer.next_drawable().map(|x| x.texture()),
+        //     RenderTarget::Image(id) => images.get(id).map(|x| x.tex()),
+        // }
+        // .unwrap();
+        let texture = self.last_rendered_texture.as_ref().unwrap();
 
         // todo!()
         // look at headless renderer in metal-rs
@@ -1380,7 +1390,7 @@ impl Renderer for Mtl {
         let mut buffer = ImgVec::new(
             vec![
                 RGBA8 {
-                    r: 255,
+                    r: 0,
                     g: 255,
                     b: 255,
                     a: 255
@@ -1391,19 +1401,19 @@ impl Renderer for Mtl {
             h as usize,
         );
 
-        texture.get_bytes(
-            buffer.buf_mut().as_ptr() as *mut std::ffi::c_void,
-            w * 4,
-            metal::MTLRegion {
-                origin: metal::MTLOrigin::default(),
-                size: metal::MTLSize {
-                    width: w,
-                    height: h,
-                    depth: 1,
-                },
-            },
-            0,
-        );
+        // texture.get_bytes(
+        //     buffer.buf_mut().as_ptr() as *mut std::ffi::c_void,
+        //     w * 4,
+        //     metal::MTLRegion {
+        //         origin: metal::MTLOrigin::default(),
+        //         size: metal::MTLSize {
+        //             width: w,
+        //             height: h,
+        //             depth: 1,
+        //         },
+        //     },
+        //     0,
+        // );
 
         Ok(buffer)
     }
