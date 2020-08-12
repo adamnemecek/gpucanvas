@@ -1103,7 +1103,6 @@ impl<T: Renderer> Drop for Canvas<T> {
     }
 }
 
-
 impl<T: Renderer> Canvas<T> {
     pub fn start_capture(&self) {
         self.renderer.start_capture()
@@ -1111,5 +1110,9 @@ impl<T: Renderer> Canvas<T> {
 
     pub fn stop_capture(&self) {
         self.renderer.stop_capture()
+    }
+
+    pub fn atlas_id(&self) -> Option<ImageId> {
+        self.text_context.atlas_id()
     }
 }

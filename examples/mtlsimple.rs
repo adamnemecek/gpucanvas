@@ -99,6 +99,7 @@ fn main() {
         .collect();
 
     let mut first = true;
+    let capture = true;
 
     //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
 
@@ -191,7 +192,7 @@ fn main() {
                 // // let size = windowed_context.window().inner_size();
                 // // let size = renderer.size();
 
-                if first {
+                if first && capture {
                     // let mut cd = metal::CaptureDescriptor::new();
                     // cd.set_destination(metal::MTLCaptureDestination::DeveloperTools);
                     // cd.set_destination(metal::MTLCaptureDestination::GpuTraceDocument);
@@ -203,7 +204,7 @@ fn main() {
                     // shared.start_capture(&cd);
                     // shared.start_capture_with_command_queue(&command_queue);
                     // println!("{:?}", shared.is_capturing());
-                    // canvas.start_capture();
+                    canvas.start_capture();
                 }
 
                 let size = layer.drawable_size();
@@ -354,8 +355,8 @@ fn main() {
                 // canvas.restore();
 
                 canvas.flush();
-                if first {
-                    // canvas.stop_capture();
+                if first && capture {
+                    canvas.stop_capture();
                     first = false;
                 }
                 // windowed_context.swap_buffers().unwrap();

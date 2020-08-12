@@ -863,7 +863,7 @@ impl Mtl {
         paint: Params,
     ) {
         #[cfg(debug_assertions)]
-        encoder.push_debug_group("triangles");
+        encoder.push_debug_group("screen triangles");
 
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());

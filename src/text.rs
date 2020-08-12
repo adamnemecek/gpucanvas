@@ -155,7 +155,7 @@ type ShapingRunCache<H> = LruCache<ShapingId, TextMetrics, H>;
 
 struct FontTexture {
     atlas: Atlas,
-    image_id: ImageId,
+    pub(crate) image_id: ImageId,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -167,6 +167,12 @@ pub(crate) struct TextContext {
     shaped_words_cache: ShapedWordsCache<FnvBuildHasher>,
     textures: Vec<FontTexture>,
     rendered_glyphs: FnvHashMap<RenderedGlyphId, RenderedGlyph>,
+}
+
+impl TextContext {
+    pub fn atlas_id(&self) -> Option<ImageId> {
+        self.textures.first().map(|x| x.image_id)
+    }
 }
 
 impl Default for TextContext {
@@ -663,7 +669,6 @@ fn render_glyph<T: Renderer>(
     glyph: &ShapedGlyph,
 ) -> Result<RenderedGlyph, ErrorKind> {
     let padding = GLYPH_PADDING;
-
 
     let line_width = if mode == RenderMode::Stroke {
         paint.line_width
