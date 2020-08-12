@@ -349,7 +349,6 @@ pub struct Mtl {
     clear_rect_frag_func: metal::Function,
     clear_rect_pipeline_state: Option<metal::RenderPipelineState>,
 
-
     // Needed for screenshoting,
     //
     last_rendered_texture: Option<metal::Texture>,
@@ -561,7 +560,7 @@ impl Mtl {
             clear_rect_vert_func,
             clear_rect_frag_func,
             clear_rect_pipeline_state: None,
-            last_rendered_texture: None
+            last_rendered_texture: None,
         }
     }
 
@@ -1390,7 +1389,7 @@ impl Renderer for Mtl {
         let mut buffer = ImgVec::new(
             vec![
                 RGBA8 {
-                    r: 0,
+                    r: 255,
                     g: 255,
                     b: 255,
                     a: 255
@@ -1401,19 +1400,19 @@ impl Renderer for Mtl {
             h as usize,
         );
 
-        // texture.get_bytes(
-        //     buffer.buf_mut().as_ptr() as *mut std::ffi::c_void,
-        //     w * 4,
-        //     metal::MTLRegion {
-        //         origin: metal::MTLOrigin::default(),
-        //         size: metal::MTLSize {
-        //             width: w,
-        //             height: h,
-        //             depth: 1,
-        //         },
-        //     },
-        //     0,
-        // );
+        texture.get_bytes(
+            buffer.buf_mut().as_ptr() as *mut std::ffi::c_void,
+            w * 4,
+            metal::MTLRegion {
+                origin: metal::MTLOrigin::default(),
+                size: metal::MTLSize {
+                    width: w,
+                    height: h,
+                    depth: 1,
+                },
+            },
+            0,
+        );
 
         Ok(buffer)
     }

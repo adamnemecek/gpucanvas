@@ -8,16 +8,14 @@ pub fn generate_mipmaps(command_queue: &metal::CommandQueueRef, tex: &metal::Tex
     command_buffer.wait_until_completed();
 }
 
-use rgb::ComponentBytes;
 use imgref::ImgVec;
+use rgb::ComponentBytes;
 use rgb::RGBA8;
-
 
 pub trait MtlTextureExt {
     fn save(&self) -> ImgVec<RGBA8>;
     fn save_to(&self, path: &str);
 }
-
 
 impl MtlTextureExt for metal::TextureRef {
     fn save(&self) -> ImgVec<RGBA8> {
