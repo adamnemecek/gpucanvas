@@ -351,7 +351,7 @@ pub struct Mtl {
 
     // Needed for screenshoting,
     //
-    last_rendered_texture: Option<metal::Texture>,
+    // last_rendered_texture: Option<metal::Texture>,
     frame: usize,
 }
 
@@ -561,7 +561,7 @@ impl Mtl {
             clear_rect_vert_func,
             clear_rect_frag_func,
             clear_rect_pipeline_state: None,
-            last_rendered_texture: None,
+            // last_rendered_texture: None,
             frame: 0,
         }
     }
@@ -1218,7 +1218,7 @@ impl Renderer for Mtl {
         };
 
         // this is needed for screenshotting
-        self.last_rendered_texture = Some(color_texture.to_owned());
+        // self.last_rendered_texture = Some(color_texture.to_owned());
 
         let size = Size::new(color_texture.width() as _, color_texture.height() as _);
         self.stencil_texture.resize(size);
@@ -1313,9 +1313,9 @@ impl Renderer for Mtl {
 
         command_buffer.commit();
 
-        if self.frame == 1 {
-            color_texture.save_to("/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas/out.png");
-        }
+        // if self.frame == 1 {
+        //     color_texture.save_to("/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas/out.png");
+        // }
         self.frame += 1;
 
         assert!(vertex_buffer_hash == self.vertex_buffer.ptr_hash());
@@ -1360,12 +1360,12 @@ impl Renderer for Mtl {
     fn screenshot(&mut self, images: &ImageStore<Self::Image>) -> Result<ImgVec<RGBA8>, ErrorKind> {
         println!("screenshot: {:?}", self.render_target);
 
-        // let texture = match self.render_target {
-        //     RenderTarget::Screen => self.layer.next_drawable().map(|x| x.texture()),
-        //     RenderTarget::Image(id) => images.get(id).map(|x| x.tex()),
-        // }
-        // .unwrap();
-        let texture = self.last_rendered_texture.as_ref().unwrap();
+        let texture = match self.render_target {
+            RenderTarget::Screen => self.layer.next_drawable().map(|x| x.texture()),
+            RenderTarget::Image(id) => images.get(id).map(|x| x.tex()),
+        }
+        .unwrap();
+        // let texture = self.last_rendered_texture.as_ref().unwrap();
 
         // todo!()
         // look at headless renderer in metal-rs
