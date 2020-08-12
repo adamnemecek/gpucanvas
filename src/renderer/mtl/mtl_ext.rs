@@ -203,7 +203,6 @@ fn triangle_fan_indices_ext(start: u32, len: usize, buf: &mut GPUVec<u32>) {
 
 #[cfg(test)]
 mod tests {
-
     use super::GPUVecExt;
     use metalgear::GPUVec;
 

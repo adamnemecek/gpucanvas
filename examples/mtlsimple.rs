@@ -117,6 +117,28 @@ fn main() {
 
     // let mut perf = PerfGraph::new();
 
+    let blue_rect = {
+        let width = 100;
+        let height = 100;
+        let blue_rect = canvas
+            .create_image_empty(width, height, gpucanvas::PixelFormat::Rgba8, ImageFlags::empty())
+            .unwrap();
+        canvas.save();
+        canvas.reset();
+
+        // let image_id = canvas.text_context.textures[0].image_id;
+        canvas.set_render_target(gpucanvas::RenderTarget::Image(blue_rect));
+        let mut path = Path::new();
+        path.rect(0.0, 0.0, 100.0, 100.0);
+
+        canvas.stroke_path(&mut path, Paint::color(Color::blue()));
+
+        canvas.restore();
+
+        canvas.set_render_target(gpucanvas::RenderTarget::Screen);
+        blue_rect
+    };
+
     events_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
 
