@@ -203,7 +203,7 @@ fn main() {
                     // shared.start_capture(&cd);
                     // shared.start_capture_with_command_queue(&command_queue);
                     // println!("{:?}", shared.is_capturing());
-                    canvas.start_capture();
+                    // canvas.start_capture();
                 }
 
                 let size = layer.drawable_size();
@@ -355,7 +355,7 @@ fn main() {
 
                 canvas.flush();
                 if first {
-                    canvas.stop_capture();
+                    // canvas.stop_capture();
                     first = false;
                 }
                 // windowed_context.swap_buffers().unwrap();

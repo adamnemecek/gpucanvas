@@ -4,7 +4,6 @@ use std::path::PathBuf;
 
 use gl_generator::{Api, Fallbacks, GlobalGenerator, Profile, Registry};
 
-
 fn gl_main() {
     let dest = PathBuf::from(&env::var("OUT_DIR").unwrap());
 
@@ -17,9 +16,7 @@ fn gl_main() {
         .unwrap();
 }
 
-fn mtl_main() {
-
-}
+fn mtl_main() {}
 
 fn main() {
     gl_main();

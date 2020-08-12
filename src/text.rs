@@ -664,6 +664,7 @@ fn render_glyph<T: Renderer>(
 ) -> Result<RenderedGlyph, ErrorKind> {
     let padding = GLYPH_PADDING;
 
+
     let line_width = if mode == RenderMode::Stroke {
         paint.line_width
     } else {

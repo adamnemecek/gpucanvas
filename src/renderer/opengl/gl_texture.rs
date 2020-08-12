@@ -247,5 +247,4 @@ impl GlTexture {
     pub fn info(&self) -> ImageInfo {
         self.info
     }
-
 }

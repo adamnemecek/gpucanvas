@@ -37,7 +37,7 @@ mod color;
 pub use color::Color;
 
 pub mod renderer;
-pub use renderer::{RenderTarget, Renderer, MtlTexture};
+pub use renderer::{MtlTexture, RenderTarget, Renderer};
 
 use renderer::{Command, CommandType, Drawable, Params, ShaderType, Vertex};
 
@@ -336,7 +336,7 @@ where
         self.restore();
     }
 
-    // 
+    //
     // pub fn debug_draw(&self) {
     //     self.save();
     //     self.reset();
@@ -1104,7 +1104,7 @@ impl<T: Renderer> Drop for Canvas<T> {
 }
 
 
-impl Canvas<crate::renderer::Mtl> {
+impl<T: Renderer> Canvas<T> {
     pub fn start_capture(&self) {
         self.renderer.start_capture()
     }

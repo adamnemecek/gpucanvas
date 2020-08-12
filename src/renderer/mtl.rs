@@ -37,7 +37,6 @@ impl GPUVecExt for GPUVec<u32> {
     }
 }
 
-
 struct MtlCompositeOperationState {
     blend_func: Blend,
     pixel_format: metal::MTLPixelFormat,
@@ -292,7 +291,6 @@ impl From<CompositeOperationState> for Blend {
 
 // }
 
-
 pub struct Mtl {
     device: metal::Device, // not present in metalnanovg
     // metal has debug and antialias in the flags, opengl
@@ -310,7 +308,6 @@ pub struct Mtl {
     clear_color: Color,
     view_size_buffer: GPUVar<Size>,
     // screen_view: [f32; 2],
-
     vertex_descriptor: metal::VertexDescriptor,
 
     blend_func: Blend,
@@ -378,28 +375,17 @@ impl Mtl {
 }
 
 impl Mtl {
-
-    pub fn start_capture(&self) {
-        let shared = metal::CaptureManager::shared();
-        shared.start_capture_with_command_queue(&self.command_queue);
-    }
-
-    pub fn stop_capture(&self) {
-        let shared = metal::CaptureManager::shared();
-        shared.stop_capture();
-    }
-
     pub fn new(device: &metal::DeviceRef, layer: &metal::MetalLayerRef) -> Self {
         let debug = cfg!(debug_assertions);
         let antialias = true;
 
-        #[cfg(target_os = "macos")] {
+        #[cfg(target_os = "macos")]
+        {
             layer.set_opaque(false);
         }
 
         let root_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        let library_path =
-            root_path.join("src/renderer/mtl/shaders.metallib");
+        let library_path = root_path.join("src/renderer/mtl/shaders.metallib");
         let library = device.new_library_with_file(library_path).expect("library not found");
         let command_queue = device.new_command_queue();
 
@@ -692,7 +678,9 @@ impl Mtl {
 
                 // original uses fans so we fake it with indices
                 // let indices = triangle_fan_indices_cw(start as u32, count as u32);
-                let triangle_fan_index_count = self.index_buffer.extend_with_triange_fan_indices_cw(start as u32, count as u32);
+                let triangle_fan_index_count = self
+                    .index_buffer
+                    .extend_with_triange_fan_indices_cw(start as u32, count as u32);
                 //println!("\tindex_buffer.extend_from_slice {:?}", indices);
                 // self.index_buffer.extend_from_slice(&indices);
 
@@ -753,7 +741,9 @@ impl Mtl {
                 // let indices = triangle_fan_indices_cw(start as u32, count as u32);
                 //println!("\tindex_buffer.extend_from_slice {:?}", indices);
                 // self.index_buffer.extend_from_slice(&indices);
-                let triangle_fan_index_count = self.index_buffer.extend_with_triange_fan_indices_cw(start as u32, count as u32);
+                let triangle_fan_index_count = self
+                    .index_buffer
+                    .extend_with_triange_fan_indices_cw(start as u32, count as u32);
                 // original uses fans
                 encoder.draw_indexed_primitives(
                     metal::MTLPrimitiveType::Triangle,
@@ -906,7 +896,6 @@ impl Mtl {
         encoder.set_fragment_texture(0, Some(&tex.tex()));
         encoder.set_fragment_sampler_state(0, Some(&tex.sampler()));
 
-
         let mut alpha = false;
         let alpha_tex = if let Some(id) = alpha_tex {
             alpha = true;
@@ -923,7 +912,7 @@ impl Mtl {
         encoder.set_fragment_sampler_state(1, Some(&alpha_tex.sampler()));
 
         // if alpha {
-            // encoder.pop_debug_group();
+        // encoder.pop_debug_group();
         // }
     }
 
@@ -987,11 +976,9 @@ impl Mtl {
     pub fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
         self.render_target = target;
         *self.view_size_buffer = match target {
-            RenderTarget::Screen => {
-                 self.layer.drawable_size().into()
-            }
+            RenderTarget::Screen => self.layer.drawable_size().into(),
             RenderTarget::Image(id) => {
-                let texture= images.get(id).unwrap();
+                let texture = images.get(id).unwrap();
                 let w = texture.info().width() as f32;
                 let h = texture.info().height() as f32;
                 Size::new(w, h)
@@ -1114,8 +1101,16 @@ impl Renderer for Mtl {
         let size = Size::new(width as f32, height as f32);
         // self.screen_view = [width as _, height as _];
         *self.view_size_buffer = size;
+    }
 
+    fn start_capture(&self) {
+        let shared = metal::CaptureManager::shared();
+        shared.start_capture_with_command_queue(&self.command_queue);
+    }
 
+    fn stop_capture(&self) {
+        let shared = metal::CaptureManager::shared();
+        shared.stop_capture();
     }
 
     // called flush in ollix and nvg
@@ -1419,7 +1414,6 @@ impl Renderer for Mtl {
         todo!()
     }
 }
-
 
 #[cfg(test)]
 mod tests {

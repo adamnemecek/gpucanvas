@@ -97,6 +97,9 @@ pub trait Renderer {
     fn delete_image(&mut self, image: Self::Image);
 
     fn screenshot(&mut self, images: &ImageStore<Self::Image>) -> Result<ImgVec<RGBA8>, ErrorKind>;
+
+    fn start_capture(&self);
+    fn stop_capture(&self);
 }
 
 /// Vertex struct for specifying triangle geometry

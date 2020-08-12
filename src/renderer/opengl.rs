@@ -30,9 +30,7 @@ mod gl {
     include!(concat!(env!("OUT_DIR"), "/gl_bindings.rs"));
 }
 
-
 use gl::types::*;
-
 
 pub struct OpenGl {
     debug: bool,
@@ -400,6 +398,10 @@ impl Renderer for OpenGl {
             gl::Viewport(0, 0, width as i32, height as i32);
         }
     }
+
+    fn start_capture(&self) {}
+
+    fn stop_capture(&self) {}
 
     fn render(&mut self, images: &ImageStore<GlTexture>, verts: &[Vertex], commands: &[Command]) {
         self.main_program.bind();

@@ -21,6 +21,10 @@ impl Renderer for Void {
         Ok(VoidImage { info })
     }
 
+    fn start_capture(&self) {}
+
+    fn stop_capture(&self) {}
+
     fn update_image(
         &mut self,
         image: &mut Self::Image,
