@@ -62,6 +62,7 @@ fn main() {
 
     let draw_size = window.inner_size();
     layer.set_drawable_size(CGSize::new(draw_size.width as f64, draw_size.height as f64));
+    layer.set_framebuffer_only(0);
 
     // let shader_code = include_bytes!("src/renderer/mtl/shaders.metal");
 
@@ -99,7 +100,7 @@ fn main() {
         .collect();
 
     let mut first = true;
-    let capture = false;
+    let capture = true;
 
     //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
 
@@ -117,29 +118,28 @@ fn main() {
 
     // let mut perf = PerfGraph::new();
 
+    // let blue_rect = {
+    //     let width = 100;
+    //     let height = 100;
+    //     let blue_rect = canvas
+    //         .create_image_empty(width, height, gpucanvas::PixelFormat::Rgba8, ImageFlags::empty())
+    //         .unwrap();
+    //     canvas.save();
+    //     canvas.reset();
 
-    let blue_rect = {
-        let width = 100;
-        let height = 100;
-        let blue_rect = canvas
-            .create_image_empty(width, height, gpucanvas::PixelFormat::Rgba8, ImageFlags::empty())
-            .unwrap();
-        canvas.save();
-        canvas.reset();
+    //     // let image_id = canvas.text_context.textures[0].image_id;
+    //     canvas.set_render_target(gpucanvas::RenderTarget::Image(blue_rect));
+    //     let mut path = Path::new();
+    //     path.rect(0.0, 0.0, 100.0, 100.0);
 
-        // let image_id = canvas.text_context.textures[0].image_id;
-        canvas.set_render_target(gpucanvas::RenderTarget::Image(blue_rect));
-        let mut path = Path::new();
-        path.rect(0.0, 0.0, 100.0, 100.0);
+    //     canvas.fill_path(&mut path, Paint::color(Color::blue()));
 
-        canvas.fill_path(&mut path, Paint::color(Color::blue()));
+    //     canvas.flush();
+    //     canvas.restore();
 
-        canvas.restore();
-
-        canvas.set_render_target(gpucanvas::RenderTarget::Screen);
-        blue_rect
-    };
-
+    //     canvas.set_render_target(gpucanvas::RenderTarget::Screen);
+    //     blue_rect
+    // };
 
     events_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
@@ -349,8 +349,9 @@ fn main() {
                 // draw_rect(&mut canvas, 200.0, 200.0, 40.0, 40.0);
                 // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                 // draw_image(&mut canvas, images[0], 5.0, 300.0);
-                draw_text(&mut canvas, &fonts, "title", 600.0, 200.0, 100.0, 100.0);
-                draw_image(&mut canvas, blue_rect, 100.0, 100.0);
+                // draw_text(&mut canvas, &fonts, "title", 600.0, 200.0, 100.0, 100.0);
+                // draw_image(&mut canvas, blue_rect, 100.0, 100.0);
+                draw_clear_rect2(&mut canvas, 20, 20, 100, 100);
 
                 // draw_rounded_rect(&mut canvas,300.0, 100.0, 40.0, 40.0, 5.0, 1.0);
                 // render_clear_rect(&mut );

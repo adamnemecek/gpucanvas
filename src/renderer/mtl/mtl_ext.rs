@@ -186,7 +186,7 @@ impl GPUVecExt for GPUVec<u32> {
 
 //     vec
 // }
-/// expects buffer to be able to allocate vertices
+// expects buffer to be able to allocate vertices
 fn triangle_fan_indices_ext(start: u32, len: usize, buf: &mut GPUVec<u32>) {
     // let mut indices: Vec<u32> = vec![];
     let invariant = buf.capacity();

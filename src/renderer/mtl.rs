@@ -828,59 +828,62 @@ impl Mtl {
         height: u32,
         color: Color,
     ) {
-        #[cfg(debug_assertions)]
+        // #[cfg(debug_assertions)]
         encoder.push_debug_group("clear_rect");
+        let view_size = *self.view_size_buffer;
 
-        let clear_rect = ClearRect {
-            rect: Rect {
-                x: -1.0,
-                y: -1.0,
-                w: 2.0,
-                h: 2.0,
-            },
-            color,
+        let rect = Rect {
+            x: x as _,
+            y: y as _,
+            w: width as _,
+            h: height as _,
         };
+        println!("rect {:?}", rect);
+        let ndc_rect = rect.as_ndc((view_size.w, view_size.h));
+        println!("ndc {:?}", ndc_rect);
+        // println!("ndc_rect: {:?}", ndc_rect);
+
+        let clear_rect = ClearRect { rect: ndc_rect, color };
 
         encoder.set_render_pipeline_state(&self.clear_rect_pipeline_state.as_ref().unwrap());
         encoder.set_vertex_value(0, &clear_rect);
-        encoder.set_scissor_rect(metal::MTLScissorRect {
-            x: x as _,
-            y: y as _,
-            width: width as _,
-            height: height as _,
-        });
+        // encoder.set_scissor_rect(metal::MTLScissorRect {
+        //     x: x as _,
+        //     y: y as _,
+        //     width: width as _,
+        //     height: height as _,
+        // });
 
         encoder.draw_primitives_instanced(metal::MTLPrimitiveType::TriangleStrip, 0, 4, 1);
 
         // reset state
-        let size = *self.view_size_buffer;
-        encoder.set_scissor_rect(metal::MTLScissorRect {
-            x: 0,
-            y: 0,
-            width: size.w as _,
-            height: size.h as _,
-        });
+        // let size = *self.view_size_buffer;
+        // encoder.set_scissor_rect(metal::MTLScissorRect {
+        //     x: 0,
+        //     y: 0,
+        //     width: size.w as _,
+        //     height: size.h as _,
+        // });
 
         // reset buffers for the other commands
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
         encoder.set_vertex_buffer(0, Some(self.vertex_buffer.as_ref()), 0);
         encoder.set_vertex_buffer(1, Some(self.view_size_buffer.as_ref()), 0);
 
-        #[cfg(debug_assertions)]
+        // #[cfg(debug_assertions)]
         encoder.pop_debug_group();
     }
 
     pub fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
         self.render_target = target;
-        // *self.view_size_buffer = match target {
-        //     RenderTarget::Screen => self.layer.drawable_size().into(),
-        //     RenderTarget::Image(id) => {
-        //         let texture = images.get(id).unwrap();
-        //         let w = texture.info().width() as f32;
-        //         let h = texture.info().height() as f32;
-        //         Size::new(w, h)
-        //     }
-        // }
+        let size = match target {
+            RenderTarget::Screen => self.layer.drawable_size().into(),
+            RenderTarget::Image(id) => {
+                let texture = images.get(id).unwrap();
+                texture.info().size()
+            }
+        };
+        *self.view_size_buffer = size;
     }
 
     // pub fn get_target(&self, images: &ImageStore<MtlTexture>) -> metal::TextureRef {
@@ -897,6 +900,36 @@ impl Mtl {
     // pub fn reset(&mut self) {
 
     // }
+}
+
+fn to_ndc(position: (f32, f32), drawable_size: (f32, f32)) -> (f32, f32) {
+    let x_scale = 2.0 / drawable_size.0;
+    let y_scale = 2.0 / drawable_size.1;
+    let x_bias = -1.0;
+    let y_bias = 1.0;
+
+    let x = position.0 * x_scale + x_bias;
+    let y = position.1 * y_scale + y_bias;
+    // let x = 2.0 * pt.0 / size.0 - 1.0;
+    // let y = 1.0 - 2.0 * pt.1 / size.1;
+    (x, y)
+}
+
+impl Rect {
+    pub fn as_ndc(&self, screen_size: (f32, f32)) -> Self {
+        let src = (self.x, self.y);
+        let dst = (self.x + self.w, self.y + self.h);
+        // let size = (self.w, self.h);
+
+        let ndc_src = to_ndc(src, screen_size);
+        let ndc_dst = to_ndc(dst, screen_size);
+        Self {
+            x: ndc_src.0,
+            y: ndc_src.1,
+            w: ndc_dst.0 - ndc_src.0,
+            h: ndc_dst.1 - ndc_src.1,
+        }
+    }
 }
 
 impl From<Color> for metal::MTLClearColor {
@@ -940,11 +973,11 @@ fn new_render_command_encoder<'a>(
         // if clear_buffer_on_flush {
             // metal::MTLLoadAction::Clear;
         // } else {
-            metal::MTLLoadAction::Load;
+            metal::MTLLoadAction::Clear;
         // };
         let desc = metal::RenderPassDescriptor::new();
 
-        let view_size = &*view_size_buffer;
+        let view_size = **view_size_buffer;
 
         let color_attachment = desc.color_attachments().object_at(0).unwrap();
         color_attachment.set_clear_color(clear_color.into());
@@ -964,6 +997,7 @@ fn new_render_command_encoder<'a>(
         encoder.set_cull_mode(metal::MTLCullMode::Back);
         encoder.set_front_facing_winding(metal::MTLWinding::CounterClockwise);
         encoder.set_stencil_reference_value(0);
+
         encoder.set_viewport(metal::MTLViewport {
             originX: 0.0,
             originY: 0.0,

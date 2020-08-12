@@ -92,8 +92,12 @@ impl Color {
         Self::rgbaf(0.0, 0.0, 0.0, 1.0)
     }
 
+    pub fn red() -> Self {
+        Self::rgbaf(1.0, 0.0, 0.0, 1.0)
+    }
+
     pub fn blue() -> Self {
-        Self::rgbaf(0.0, 0.0, 1.0, 1.0)
+        Self::rgbaf(0.1, 0.2, 0.7, 1.0)
     }
 
     /// Sets transparency of a color value.
