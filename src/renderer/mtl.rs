@@ -378,13 +378,24 @@ impl Mtl {
 }
 
 impl Mtl {
+
+    pub fn start_capture(&self) {
+        let shared = metal::CaptureManager::shared();
+        shared.start_capture_with_command_queue(&self.command_queue);
+    }
+
+    pub fn stop_capture(&self) {
+        let shared = metal::CaptureManager::shared();
+        shared.stop_capture();
+    }
+
     pub fn new(device: &metal::DeviceRef, layer: &metal::MetalLayerRef) -> Self {
         let debug = cfg!(debug_assertions);
         let antialias = true;
 
-        // #[cfg(target_os = "macos")] {
-        //     layer.set_opaque(false);
-        // }
+        #[cfg(target_os = "macos")] {
+            layer.set_opaque(false);
+        }
 
         let root_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         let library_path =

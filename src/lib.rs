@@ -1102,3 +1102,14 @@ impl<T: Renderer> Drop for Canvas<T> {
         self.images.clear(&mut self.renderer);
     }
 }
+
+
+impl Canvas<crate::renderer::Mtl> {
+    pub fn start_capture(&self) {
+        self.renderer.start_capture()
+    }
+
+    pub fn stop_capture(&self) {
+        self.renderer.stop_capture()
+    }
+}

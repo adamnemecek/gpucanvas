@@ -98,6 +98,8 @@ fn main() {
         })
         .collect();
 
+    let mut first = true;
+
     //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
 
     //let image_id = canvas.create_image_file("examples/assets/RoomRender.jpg", ImageFlags::FLIP_Y).expect("Cannot create image");
@@ -188,6 +190,21 @@ fn main() {
                 // // let dpi_factor = windowed_context.window().scale_factor();
                 // // let size = windowed_context.window().inner_size();
                 // // let size = renderer.size();
+
+                if first {
+                    // let mut cd = metal::CaptureDescriptor::new();
+                    // cd.set_destination(metal::MTLCaptureDestination::DeveloperTools);
+                    // cd.set_destination(metal::MTLCaptureDestination::GpuTraceDocument);
+                    // cd.set_output_url("/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/metal8/output.gputrace");
+                    // cd.set_capture_device(&device);
+
+                    // let shared = metal::CaptureManager::shared();
+
+                    // shared.start_capture(&cd);
+                    // shared.start_capture_with_command_queue(&command_queue);
+                    // println!("{:?}", shared.is_capturing());
+                    canvas.start_capture();
+                }
 
                 let size = layer.drawable_size();
                 // // let size = Size::new(size.width, size.height);
@@ -337,6 +354,10 @@ fn main() {
                 // canvas.restore();
 
                 canvas.flush();
+                if first {
+                    canvas.stop_capture();
+                    first = false;
+                }
                 // windowed_context.swap_buffers().unwrap();
             }
             Event::MainEventsCleared => {
