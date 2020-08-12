@@ -1360,13 +1360,10 @@ impl Renderer for Mtl {
 
     fn screenshot(&mut self, images: &ImageStore<Self::Image>) -> Result<ImgVec<RGBA8>, ErrorKind> {
         let texture = match self.render_target {
-            RenderTarget::Screen => {
-                self.layer.next_drawable().map(|x| x.texture())
-            }
-            RenderTarget::Image(id) => {
-                images.get(id).map(|x| x.tex())
-            }
-        }.unwrap();
+            RenderTarget::Screen => self.layer.next_drawable().map(|x| x.texture()),
+            RenderTarget::Image(id) => images.get(id).map(|x| x.tex()),
+        }
+        .unwrap();
 
         // todo!()
         // look at headless renderer in metal-rs
@@ -1374,17 +1371,18 @@ impl Renderer for Mtl {
         let w = size.w as u64;
         let h = size.h as u64;
 
-        let mut buffer = ImgVec::new(vec![
-            RGBA8 {
-                r: 255,
-                g: 255,
-                b: 255,
-                a: 255
-            };
-            (w * h) as usize
-        ],
+        let mut buffer = ImgVec::new(
+            vec![
+                RGBA8 {
+                    r: 255,
+                    g: 255,
+                    b: 255,
+                    a: 255
+                };
+                (w * h) as usize
+            ],
             w as usize,
-            h as usize
+            h as usize,
         );
 
         texture.get_bytes(
@@ -1400,31 +1398,8 @@ impl Renderer for Mtl {
             },
             0,
         );
-        todo!()
 
-        // let mut image = ImgVec::new(
-        //     vec![
-        //         RGBA8 {
-        //             r: 255,
-        //             g: 255,
-        //             b: 255,
-        //             a: 255
-        //         };
-        //         w * h
-        //     ],
-        //     w,
-        //     h,
-        // );
-        // todo!()
-        // unsafe {
-        //     gl::ReadPixels(0, 0, self.view[0] as i32, self.view[1] as i32, gl::RGBA, gl::UNSIGNED_BYTE, image.buf_mut().as_ptr() as *mut GLvoid);
-        // }
-        // todo!()
-        // TODO: flip image
-        //image = image::imageops::flip_vertical(&image);
-
-        // Ok(image)
-        // todo!()
+        Ok(buffer)
     }
 }
 
