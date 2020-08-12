@@ -117,6 +117,7 @@ fn main() {
 
     // let mut perf = PerfGraph::new();
 
+
     let blue_rect = {
         let width = 100;
         let height = 100;
@@ -131,13 +132,14 @@ fn main() {
         let mut path = Path::new();
         path.rect(0.0, 0.0, 100.0, 100.0);
 
-        canvas.stroke_path(&mut path, Paint::color(Color::blue()));
+        canvas.fill_path(&mut path, Paint::color(Color::blue()));
 
         canvas.restore();
 
         canvas.set_render_target(gpucanvas::RenderTarget::Screen);
         blue_rect
     };
+
 
     events_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;

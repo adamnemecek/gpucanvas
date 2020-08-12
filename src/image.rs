@@ -10,7 +10,7 @@ use ::image::DynamicImage;
 #[cfg(feature = "image-loading")]
 use std::convert::TryFrom;
 
-use crate::{ErrorKind, Renderer};
+use crate::{ErrorKind, Renderer, Size};
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct ImageId(pub Index);
@@ -143,6 +143,12 @@ impl ImageInfo {
 
     pub fn height(&self) -> usize {
         self.height
+    }
+
+    pub fn size(&self) -> Size {
+        let w = self.width() as f32;
+        let h = self.height() as f32;
+        Size::new(w, h)
     }
 
     pub fn format(&self) -> PixelFormat {

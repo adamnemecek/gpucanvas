@@ -872,15 +872,15 @@ impl Mtl {
 
     pub fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
         self.render_target = target;
-        *self.view_size_buffer = match target {
-            RenderTarget::Screen => self.layer.drawable_size().into(),
-            RenderTarget::Image(id) => {
-                let texture = images.get(id).unwrap();
-                let w = texture.info().width() as f32;
-                let h = texture.info().height() as f32;
-                Size::new(w, h)
-            }
-        }
+        // *self.view_size_buffer = match target {
+        //     RenderTarget::Screen => self.layer.drawable_size().into(),
+        //     RenderTarget::Image(id) => {
+        //         let texture = images.get(id).unwrap();
+        //         let w = texture.info().width() as f32;
+        //         let h = texture.info().height() as f32;
+        //         Size::new(w, h)
+        //     }
+        // }
     }
 
     // pub fn get_target(&self, images: &ImageStore<MtlTexture>) -> metal::TextureRef {
@@ -1207,7 +1207,7 @@ impl Renderer for Mtl {
             command_buffer.present_drawable(&drawable);
         }
 
-        // Makes mnvgReadPixels() work as expected on Mac.
+        // Makes mnvgReadPixels-like functions (e.g. screenshot) work as expected on Mac.
         #[cfg(target_os = "macos")]
         {
             if self.render_target == RenderTarget::Screen {
