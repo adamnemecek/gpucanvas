@@ -37,6 +37,8 @@ impl GPUVecExt for GPUVec<u32> {
     }
 }
 
+/// Cached render pipeline states
+#[allow(dead_code)]
 struct MtlCompositeOperationState {
     blend_func: Blend,
     pixel_format: metal::MTLPixelFormat,
@@ -1359,6 +1361,8 @@ impl Renderer for Mtl {
     // }
 
     fn screenshot(&mut self, images: &ImageStore<Self::Image>) -> Result<ImgVec<RGBA8>, ErrorKind> {
+        println!("screenshot: {:?}", self.render_target);
+
         let texture = match self.render_target {
             RenderTarget::Screen => self.layer.next_drawable().map(|x| x.texture()),
             RenderTarget::Image(id) => images.get(id).map(|x| x.tex()),
