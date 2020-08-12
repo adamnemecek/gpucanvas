@@ -1371,9 +1371,11 @@ impl Renderer for Mtl {
 
         // todo!()
         // look at headless renderer in metal-rs
-        let size = *self.view_size_buffer;
-        let w = size.w as u64;
-        let h = size.h as u64;
+        // let size = *self.view_size_buffer;
+        let width = texture.width();
+        let height = texture.height();
+        let w = width as u64;
+        let h = height as u64;
 
         let mut buffer = ImgVec::new(
             vec![

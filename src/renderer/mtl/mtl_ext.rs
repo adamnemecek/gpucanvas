@@ -8,28 +8,51 @@ pub fn generate_mipmaps(command_queue: &metal::CommandQueueRef, tex: &metal::Tex
     command_buffer.wait_until_completed();
 }
 
+use rgb::ComponentBytes;
+use imgref::ImgVec;
+use rgb::RGBA8;
+
+
 pub trait MtlTextureExt {
-    fn save(&self) -> Vec<rgb::RGBA<u8>>;
+    fn save(&self) -> ImgVec<RGBA8>;
     fn save_to(&self, path: &str);
 }
 
-use rgb::ComponentBytes;
 
 impl MtlTextureExt for metal::TextureRef {
-    fn save(&self) -> Vec<rgb::RGBA<u8>> {
+    fn save(&self) -> ImgVec<RGBA8> {
         let w = self.width();
         let h = self.height();
 
-        let pixel_buf = vec![
-            rgb::RGBA8 {
-                r: 255,
-                g: 255,
-                b: 255,
-                a: 255
-            };
-            (w * h) as usize
-        ];
-        pixel_buf
+        let mut buffer = ImgVec::new(
+            vec![
+                RGBA8 {
+                    r: 255,
+                    g: 255,
+                    b: 255,
+                    a: 255
+                };
+                (w * h) as usize
+            ],
+            w as usize,
+            h as usize,
+        );
+
+        self.get_bytes(
+            buffer.buf_mut().as_ptr() as *mut std::ffi::c_void,
+            w * 4,
+            metal::MTLRegion {
+                origin: metal::MTLOrigin::default(),
+                size: metal::MTLSize {
+                    width: w,
+                    height: h,
+                    depth: 1,
+                },
+            },
+            0,
+        );
+
+        buffer
     }
 
     fn save_to(&self, path: &str) {
@@ -41,7 +64,7 @@ impl MtlTextureExt for metal::TextureRef {
         let fname = path.to_owned();
         match image::save_buffer(
             fname,
-            &pixel_buf.as_bytes(),
+            &pixel_buf.buf().as_bytes(),
             w as u32,
             h as u32,
             image::ColorType::Rgba8,
