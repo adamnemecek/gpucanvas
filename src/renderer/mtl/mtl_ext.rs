@@ -9,9 +9,9 @@ pub fn generate_mipmaps(command_queue: &metal::CommandQueueRef, tex: &metal::Tex
 }
 
 use imgref::ImgVec;
+use metalgear::GPUVec;
 use rgb::ComponentBytes;
 use rgb::RGBA8;
-use metalgear::GPUVec;
 
 pub trait MtlTextureExt {
     fn save(&self) -> ImgVec<RGBA8>;
@@ -107,7 +107,6 @@ impl MtlTextureExt for metal::TextureRef {
 //     }
 // }
 
-
 pub trait GPUVecExt {
     fn extend_with_triange_fan_indices_cw(&mut self, start: u32, count: u32) -> usize;
 }
@@ -128,23 +127,22 @@ impl GPUVecExt for GPUVec<u32> {
     }
 }
 
-fn triangle_fan_indices_cw(start: u32, len: u32) -> Vec<u32> {
-    let mut indices: Vec<u32> = vec![];
-    for index in 1..(len - 1) {
-        indices.extend_from_slice(&[start, start + index, start + index + 1]);
-    }
+// fn triangle_fan_indices_cw(start: u32, len: u32) -> Vec<u32> {
+//     let mut indices: Vec<u32> = vec![];
+//     for index in 1..(len - 1) {
+//         indices.extend_from_slice(&[start, start + index, start + index + 1]);
+//     }
 
-    indices
-}
-fn triangle_fan_indices_ccw(start: u32, len: u32) -> Vec<u32> {
-    let mut indices: Vec<u32> = vec![];
-    for index in 1..(len - 1) {
-        indices.extend_from_slice(&[start, start + index + 1, start + index]);
-    }
+//     indices
+// }
+// fn triangle_fan_indices_ccw(start: u32, len: u32) -> Vec<u32> {
+//     let mut indices: Vec<u32> = vec![];
+//     for index in 1..(len - 1) {
+//         indices.extend_from_slice(&[start, start + index + 1, start + index]);
+//     }
 
-    indices
-}
-
+//     indices
+// }
 
 // from https://github.com/OpenSmalltalk/opensmalltalk-vm/blob/4ee8bb6e7960e5776558f0baca10daee7ec5d653/platforms/iOS/plugins/B3DAcceleratorPlugin/sqMetalRenderer.m#L718
 // unsigned int triangleCount = vertexCount - 2;
@@ -160,18 +158,18 @@ fn triangle_fan_indices_ccw(start: u32, len: u32) -> Vec<u32> {
 //     destIndices += 3;
 // }
 
-fn triangle_fan_indices2(device: &metal::DeviceRef, start: u32, len: u32) -> GPUVec<u32> {
-    let triangle_len = len - 2;
-    let index_len = 3 * triangle_len;
-    let mut vec = GPUVec::<u32>::with_capacity(device, index_len as usize);
+// fn triangle_fan_indices2(device: &metal::DeviceRef, start: u32, len: u32) -> GPUVec<u32> {
+//     let triangle_len = len - 2;
+//     let index_len = 3 * triangle_len;
+//     let mut vec = GPUVec::<u32>::with_capacity(device, index_len as usize);
 
-    // let mut indices: Vec<u32> = vec![];
-    for index in 2..(len) {
-        vec.extend_from_slice(&[start, start + index - 1, start + index]);
-    }
+//     // let mut indices: Vec<u32> = vec![];
+//     for index in 2..(len) {
+//         vec.extend_from_slice(&[start, start + index - 1, start + index]);
+//     }
 
-    vec
-}
+//     vec
+// }
 
 // fn triangle_fan_indices3(
 //     start: u32,
@@ -206,16 +204,8 @@ fn triangle_fan_indices_ext(start: u32, len: usize, buf: &mut GPUVec<u32>) {
 #[cfg(test)]
 mod tests {
 
-    use metalgear::GPUVec;
     use super::GPUVecExt;
-    // use super::{}
-    // use metalgear::GPUVec;
-    // use super::GPUVecExt;
-
-    // #[test]
-    // fn test_triangle_fan_indices() {
-
-    // }
+    use metalgear::GPUVec;
 
     #[test]
     fn test_triangle_fan_indices_cw() {

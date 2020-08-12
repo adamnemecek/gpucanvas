@@ -19,9 +19,7 @@ mod stencil_texture;
 use stencil_texture::StencilTexture;
 
 mod mtl_ext;
-pub use mtl_ext::{generate_mipmaps, MtlTextureExt, GPUVecExt};
-
-
+pub use mtl_ext::{generate_mipmaps, GPUVecExt, MtlTextureExt};
 
 /// Cached render pipeline states
 #[allow(dead_code)]
@@ -113,8 +111,6 @@ struct MtlCompositeOperationState {
 // mod gl {
 //     include!(concat!(env!("OUT_DIR"), "/gl_bindings.rs"));
 // }
-
-
 
 // fn prepare_pipeline_state<'a>(
 //     device: &DeviceRef,
@@ -1316,7 +1312,6 @@ impl Renderer for Mtl {
         Ok(buffer)
     }
 }
-
 
 // pub struct SolidTexture {
 //     w: usize,
