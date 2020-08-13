@@ -916,8 +916,6 @@ fn to_ndc(position: (f32, f32), drawable_size: (f32, f32)) -> (f32, f32) {
 
     let x = position.0 * x_scale + x_bias;
     let y = position.1 * y_scale + y_bias;
-    // let x = 2.0 * pt.0 / size.0 - 1.0;
-    // let y = 1.0 - 2.0 * pt.1 / size.1;
     (x, y)
 }
 
@@ -929,11 +927,16 @@ impl Rect {
 
         let ndc_src = to_ndc(src, screen_size);
         let ndc_dst = to_ndc(dst, screen_size);
+
+        let x = ndc_src.0;
+        let y = ndc_src.1;
+        let w = ndc_dst.0 - ndc_src.0;
+        let h = ndc_dst.1 - ndc_src.1;
         Self {
-            x: ndc_src.0,
-            y: ndc_src.1,
-            w: ndc_dst.0 - ndc_src.0,
-            h: ndc_dst.1 - ndc_src.1,
+            x,
+            y,
+            w,
+            h
         }
     }
 }
