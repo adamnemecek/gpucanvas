@@ -146,7 +146,7 @@ fn main() {
             canvas.flush();
             canvas.restore();
             println!("red_image end");
-        // canvas.set_render_target(gpucanvas::RenderTarget::Screen);
+            canvas.set_render_target(gpucanvas::RenderTarget::Screen);
         } else {
             let texture = canvas.get_image(red_rect).unwrap();
             use rgb::RGBA8;
@@ -234,8 +234,8 @@ fn main() {
                 _ => (),
             },
             Event::RedrawRequested(_) => {
-                println!("frame: {}", canvas.frame());
-                canvas.set_render_target(gpucanvas::RenderTarget::Screen);
+                // println!("frame: {}", canvas.frame());
+
                 // let now = Instant::now();
                 // let dt = (now - prevt).as_secs_f32();
                 // prevt = now;
@@ -379,7 +379,7 @@ fn main() {
                 // draw_rect(&mut canvas, 200.0, 200.0, 40.0, 40.0);
                 // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                 // draw_image(&mut canvas, images[0], 5.0, 300.0);
-                // draw_text(&mut canvas, &fonts, "title", 600.0, 200.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "title", 600.0, 200.0, 100.0, 100.0);
                 draw_image(&mut canvas, red_rect, 100.0, 100.0);
                 // draw_clear_rect2(&mut canvas, 20, 20, 200, 150);
 
@@ -410,11 +410,11 @@ fn main() {
                 //     first = false;
                 // }
                 // if canvas.frame() == 8 {
-                    // use gpucanvas::renderer::MtlTexture
-                    // canvas.stop_capture();
-                    // std::process::exit(0);
-                    // let texture = canvas.get_image(blue_rect).unwrap();
-                    // texture.save_to("/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas/blue_rect.png");
+                // use gpucanvas::renderer::MtlTexture
+                // canvas.stop_capture();
+                // std::process::exit(0);
+                // let texture = canvas.get_image(blue_rect).unwrap();
+                // texture.save_to("/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas/blue_rect.png");
                 // }
                 // windowed_context.swap_buffers().unwrap();
             }

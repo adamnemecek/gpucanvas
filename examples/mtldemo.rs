@@ -167,13 +167,13 @@ fn main() {
                         },
                     ..
                 } => {
-                    if let Some(screenshot_image_id) = screenshot_image_id {
-                        canvas.delete_image(screenshot_image_id);
-                    }
+                    // if let Some(screenshot_image_id) = screenshot_image_id {
+                    //     canvas.delete_image(screenshot_image_id);
+                    // }
 
-                    if let Ok(image) = canvas.screenshot() {
-                        screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
-                    }
+                    // if let Ok(image) = canvas.screenshot() {
+                    //     screenshot_image_id = Some(canvas.create_image(image.as_ref(), ImageFlags::empty()).unwrap());
+                    // }
                 }
                 WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                 _ => (),

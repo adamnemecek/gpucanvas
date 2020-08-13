@@ -487,8 +487,6 @@ impl Mtl {
         }
     }
 
-
-
     /// updaterenderpipelinstateforblend
     pub fn set_composite_operation(
         &mut self,
@@ -797,19 +795,19 @@ impl Mtl {
         image_tex: Option<ImageId>,
         alpha_tex: Option<ImageId>,
     ) {
-        println!("-------");
-        println!("start: set_uniforms {:?}", image_tex);
-        println!("uniforms render_target {:?}", self.render_target);
+        // println!("-------");
+        // println!("start: set_uniforms {:?}", image_tex);
+        // println!("uniforms render_target {:?}", self.render_target);
         let tex = if let Some(id) = image_tex {
             if self.render_target == RenderTarget::Image(id) {
-                println!("render_target == image({:?}), setting pseudotexture", id);
+                // println!("render_target == image({:?}), setting pseudotexture", id);
                 &self.pseudo_texture
             } else {
-                println!("render_target != image, setting id {:?}", id);
+                // println!("render_target != image, setting id {:?}", id);
                 images.get(id).unwrap()
             }
         } else {
-            println!("image_tex == None, setting pseudo texture");
+            // println!("image_tex == None, setting pseudo texture");
             &self.pseudo_texture
         };
 
@@ -835,7 +833,7 @@ impl Mtl {
 
         encoder.set_fragment_texture(1, Some(&alpha_tex.tex()));
         encoder.set_fragment_sampler_state(1, Some(&alpha_tex.sampler()));
-        println!("end: set_uniforms {:?}", image_tex);
+        // println!("end: set_uniforms {:?}", image_tex);
         // if alpha {
         // encoder.pop_debug_group();
         // }
@@ -915,7 +913,7 @@ impl Mtl {
         // if self.render_target == target {
         //     return;
         // }
-        println!("setting target from {:?} to {:?}", self.render_target, target);
+        // println!("setting target from {:?} to {:?}", self.render_target, target);
 
         self.render_target = target;
         let size = match target {
@@ -1305,14 +1303,18 @@ impl Renderer for Mtl {
                     self.clear_rect(&encoder, images, x, y, width, height, color);
                 }
                 CommandType::SetRenderTarget(target) => {
+                    if self.render_target == target {
+                        println!("skipping target setting");
+                        continue;
+                    }
                     //counters.set_render_target += 1;
                     // println!("---------switching from {:?} to {:?}", self.render_target, target);
                     self.set_target(images, target);
-                    // encoder.end_encoding();
+                    encoder.end_encoding();
 
-                    if let Some(drawable) = drawable.as_ref() {
-                        command_buffer.present_drawable(&drawable);
-                    }
+                    // if let Some(drawable) = drawable.as_ref() {
+                    //     command_buffer.present_drawable(&drawable);
+                    // }
 
                     let color_texture1 = match self.render_target {
                         RenderTarget::Screen => {
