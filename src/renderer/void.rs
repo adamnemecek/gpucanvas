@@ -25,8 +25,8 @@ impl Renderer for Void {
 
     fn stop_capture(&self) {}
 
-    fn label(&self, images: &ImageStore<Self::Image>, id: ImageId) -> &str {
-        "labels not supported for void backend"
+    fn label(&self, images: &ImageStore<Self::Image>, id: ImageId) -> String {
+        "labels not supported for void backend".to_owned()
     }
 
     fn set_label(&self, images: &ImageStore<Self::Image>, id: ImageId, label: &str) {}

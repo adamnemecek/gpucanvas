@@ -101,7 +101,7 @@ pub trait Renderer {
     fn start_capture(&self);
     fn stop_capture(&self);
 
-    fn label(&self, images: &ImageStore<Self::Image>, id: ImageId) -> &str;
+    fn label(&self, images: &ImageStore<Self::Image>, id: ImageId) -> String;
     fn set_label(&self, images: &ImageStore<Self::Image>, id: ImageId, label: &str);
 }
 

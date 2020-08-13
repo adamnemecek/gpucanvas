@@ -175,8 +175,10 @@ impl<T> ImageStore<T> {
 
     pub fn alloc<R: Renderer<Image = T>>(&mut self, renderer: &mut R, info: ImageInfo) -> Result<ImageId, ErrorKind> {
         let image = renderer.alloc_image(info)?;
-
-        Ok(ImageId(self.0.insert((info, image))))
+        let id = ImageId(self.0.insert((info, image)));
+        let label = format!("{:?}", id);
+        renderer.set_label(self, id, &label);
+        Ok(id)
     }
 
     ///

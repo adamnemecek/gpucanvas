@@ -403,8 +403,8 @@ impl Renderer for OpenGl {
 
     fn stop_capture(&self) {}
 
-    fn label(&self, images: &ImageStore<Self::Image>, id: ImageId) -> &str {
-        "labels are not supported on opengl"
+    fn label(&self, images: &ImageStore<Self::Image>, id: ImageId) -> String {
+        "labels are not supported on opengl".to_owned()
     }
 
     fn set_label(&self, images: &ImageStore<Self::Image>, id: ImageId, label: &str) {}

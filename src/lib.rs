@@ -1118,7 +1118,7 @@ impl<T: Renderer> Canvas<T> {
 }
 
 impl<T: Renderer> Canvas<T> {
-    pub fn label(&self, id: ImageId) -> &str {
+    pub fn label(&self, id: ImageId) -> String {
         self.renderer.label(&self.images, id)
     }
 

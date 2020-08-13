@@ -1065,12 +1065,14 @@ impl Renderer for Mtl {
         shared.stop_capture();
     }
 
-    fn label(&self, images: &ImageStore<Self::Image>, id: ImageId) -> &str {
-        todo!()
+    fn label(&self, images: &ImageStore<Self::Image>, id: ImageId) -> String {
+        let img = images.get(id).unwrap();
+        img.label().to_owned()
     }
 
     fn set_label(&self, images: &ImageStore<Self::Image>, id: ImageId, label: &str) {
-        todo!()
+        let img = images.get(id).unwrap();
+        img.set_label(label)
     }
 
     // called flush in ollix and nvg
