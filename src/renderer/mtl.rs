@@ -838,11 +838,17 @@ impl Mtl {
             w: width as _,
             h: height as _,
         };
-        println!("rect {:?}", rect);
+        // println!("rect {:?}", rect);
         let ndc_rect = rect.as_ndc((view_size.w, view_size.h));
-        println!("ndc {:?}", ndc_rect);
-        // println!("ndc_rect: {:?}", ndc_rect);
+        println!("ndc {:?}", rect);
+        println!("ndc_rect: {:?}", ndc_rect);
 
+        // let ndc_rect = Rect {
+        //     x: -1.0,
+        //     y: -1.0,
+        //     w: 1.0,
+        //     h: 1.0,
+        // };
         let clear_rect = ClearRect { rect: ndc_rect, color };
 
         encoder.set_render_pipeline_state(&self.clear_rect_pipeline_state.as_ref().unwrap());
@@ -906,7 +912,7 @@ fn to_ndc(position: (f32, f32), drawable_size: (f32, f32)) -> (f32, f32) {
     let x_scale = 2.0 / drawable_size.0;
     let y_scale = 2.0 / drawable_size.1;
     let x_bias = -1.0;
-    let y_bias = 1.0;
+    let y_bias = -1.0;
 
     let x = position.0 * x_scale + x_bias;
     let y = position.1 * y_scale + y_bias;
