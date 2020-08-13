@@ -118,7 +118,7 @@ fn main() {
 
     // let mut perf = PerfGraph::new();
 
-    canvas.start_capture();
+    // canvas.start_capture();
     let red_rect = {
         let render_with_canvas = true;
         canvas.save();
@@ -409,13 +409,13 @@ fn main() {
                 //     canvas.stop_capture();
                 //     first = false;
                 // }
-                if canvas.frame() == 8 {
+                // if canvas.frame() == 8 {
                     // use gpucanvas::renderer::MtlTexture
-                    canvas.stop_capture();
-                    std::process::exit(0);
+                    // canvas.stop_capture();
+                    // std::process::exit(0);
                     // let texture = canvas.get_image(blue_rect).unwrap();
                     // texture.save_to("/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas/blue_rect.png");
-                }
+                // }
                 // windowed_context.swap_buffers().unwrap();
             }
             Event::MainEventsCleared => {

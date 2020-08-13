@@ -287,6 +287,19 @@ impl Mtl {
     }
 }
 
+// struct Encoder<'a> {
+//     inner: &'a metal::RenderCommandEncoderRef
+// }
+
+// impl<'a> Encoder<'a> {
+//     pub fn new(mtl: &'a Mtl) -> Self {
+//         // let inner = new_render_command_encoder(color_texture, command_buffer, clear_color, stencil_texture, vertex_buffer, view_size_buffer)
+//         Self {
+//             inner
+//         }
+//     }
+// }
+
 impl Mtl {
     pub fn new(device: &metal::DeviceRef, layer: &metal::MetalLayerRef) -> Self {
         let debug = cfg!(debug_assertions);
@@ -473,6 +486,8 @@ impl Mtl {
             frame: 0,
         }
     }
+
+
 
     /// updaterenderpipelinstateforblend
     pub fn set_composite_operation(
@@ -1217,7 +1232,7 @@ impl Renderer for Mtl {
 
         let pixel_format = color_texture.pixel_format();
 
-        let encoder = new_render_command_encoder(
+        let mut encoder = new_render_command_encoder(
             &color_texture,
             &command_buffer,
             clear_color,
@@ -1291,7 +1306,37 @@ impl Renderer for Mtl {
                 }
                 CommandType::SetRenderTarget(target) => {
                     //counters.set_render_target += 1;
+                    // println!("---------switching from {:?} to {:?}", self.render_target, target);
                     self.set_target(images, target);
+                    // encoder.end_encoding();
+
+                    if let Some(drawable) = drawable.as_ref() {
+                        command_buffer.present_drawable(&drawable);
+                    }
+
+                    let color_texture1 = match self.render_target {
+                        RenderTarget::Screen => {
+                            // println!("render target: screen");
+                            let d = self.layer.next_drawable().unwrap().to_owned();
+                            let tex = d.texture().to_owned();
+                            drawable = Some(d);
+                            tex
+                        }
+                        RenderTarget::Image(id) => {
+                            println!("render target: image: {:?}", id);
+                            images.get(id).unwrap().tex().to_owned()
+                        }
+                    };
+                    encoder = new_render_command_encoder(
+                        &color_texture1,
+                        &command_buffer,
+                        clear_color,
+                        &self.stencil_texture,
+                        &self.vertex_buffer,
+                        &self.view_size_buffer,
+                        // &self.uniform_buffer,
+                        // self.clear_buffer_on_flush,
+                    );
                 }
             }
         }
