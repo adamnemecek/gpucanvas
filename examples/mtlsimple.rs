@@ -120,6 +120,7 @@ fn main() {
 
     canvas.start_capture();
     let red_rect = {
+        let render_with_canvas = true;
         canvas.save();
         canvas.reset();
 
@@ -129,7 +130,8 @@ fn main() {
             .create_image_empty(width, height, gpucanvas::PixelFormat::Rgba8, ImageFlags::empty())
             .unwrap();
 
-        if false {
+        if render_with_canvas {
+            println!("red_image start");
             canvas.set_label(red_rect, "red_rect");
 
             println!("red_rect_Id {:?}, size: {:?}", red_rect, canvas.image_size(red_rect));
@@ -143,10 +145,9 @@ fn main() {
 
             canvas.flush();
             canvas.restore();
-
-            canvas.set_render_target(gpucanvas::RenderTarget::Screen);
-        }
-        else {
+            println!("red_image end");
+        // canvas.set_render_target(gpucanvas::RenderTarget::Screen);
+        } else {
             let texture = canvas.get_image(red_rect).unwrap();
             use rgb::RGBA8;
 
@@ -157,16 +158,16 @@ fn main() {
                     b: 255,
                     a: 255
                 };
-                (width* height) as usize
+                (width * height) as usize
             ];
             let reg = metal::MTLRegion::new_2d(0, 0, width as _, height as _);
-            texture.tex().replace_region(reg, 0, data.as_ptr() as _, (4 * width) as u64);
+            texture
+                .tex()
+                .replace_region(reg, 0, data.as_ptr() as _, (4 * width) as u64);
         }
-
 
         red_rect
     };
-    let mut frame = 0;
 
     events_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
@@ -233,6 +234,8 @@ fn main() {
                 _ => (),
             },
             Event::RedrawRequested(_) => {
+                println!("frame: {}", canvas.frame());
+                canvas.set_render_target(gpucanvas::RenderTarget::Screen);
                 // let now = Instant::now();
                 // let dt = (now - prevt).as_secs_f32();
                 // prevt = now;
@@ -406,10 +409,10 @@ fn main() {
                 //     canvas.stop_capture();
                 //     first = false;
                 // }
-                frame += 1;
-                if frame == 2 {
+                if canvas.frame() == 8 {
                     // use gpucanvas::renderer::MtlTexture
                     canvas.stop_capture();
+                    std::process::exit(0);
                     // let texture = canvas.get_image(blue_rect).unwrap();
                     // texture.save_to("/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas/blue_rect.png");
                 }

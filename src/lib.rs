@@ -217,6 +217,7 @@ pub struct Canvas<T: Renderer> {
     device_px_ratio: f32,
     tess_tol: f32,
     dist_tol: f32,
+    frame: usize,
 }
 
 impl<T> Canvas<T>
@@ -238,6 +239,7 @@ where
             device_px_ratio: 1.0,
             tess_tol: 0.25,
             dist_tol: 0.01,
+            frame: 0,
         };
 
         canvas.save();
@@ -291,6 +293,7 @@ where
         self.renderer.render(&self.images, &self.verts, &self.commands);
         self.commands.clear();
         self.verts.clear();
+        self.frame += 1;
     }
 
     pub fn screenshot(&mut self) -> Result<ImgVec<RGBA8>, ErrorKind> {
@@ -1112,8 +1115,12 @@ impl<T: Renderer> Canvas<T> {
         self.renderer.stop_capture()
     }
 
-    pub fn atlas_id(&self) -> Option<ImageId> {
+    pub fn text_atlas_id(&self) -> Option<ImageId> {
         self.text_context.atlas_id()
+    }
+
+    pub fn frame(&self) -> usize {
+        self.frame
     }
 }
 

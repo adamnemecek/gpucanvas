@@ -782,31 +782,32 @@ impl Mtl {
         image_tex: Option<ImageId>,
         alpha_tex: Option<ImageId>,
     ) {
-        encoder.set_fragment_value(0, &paint);
-        println!("set_uniforms {:?}", image_tex);
+        println!("-------");
+        println!("start: set_uniforms {:?}", image_tex);
+        println!("uniforms render_target {:?}", self.render_target);
         let tex = if let Some(id) = image_tex {
-            // println!("found texture");
             if self.render_target == RenderTarget::Image(id) {
+                println!("render_target == image({:?}), setting pseudotexture", id);
                 &self.pseudo_texture
-            }
-            else {
+            } else {
+                println!("render_target != image, setting id {:?}", id);
                 images.get(id).unwrap()
             }
         } else {
-            // println!("pseudo texture");
+            println!("image_tex == None, setting pseudo texture");
             &self.pseudo_texture
         };
 
         encoder.set_fragment_texture(0, Some(&tex.tex()));
         encoder.set_fragment_sampler_state(0, Some(&tex.sampler()));
+        encoder.set_fragment_value(0, &paint);
 
         let mut alpha = false;
         let alpha_tex = if let Some(id) = alpha_tex {
             alpha = true;
             if self.render_target == RenderTarget::Image(id) {
                 &self.pseudo_texture
-            }
-            else {
+            } else {
                 images.get(id).unwrap()
             }
         } else {
@@ -819,7 +820,7 @@ impl Mtl {
 
         encoder.set_fragment_texture(1, Some(&alpha_tex.tex()));
         encoder.set_fragment_sampler_state(1, Some(&alpha_tex.sampler()));
-
+        println!("end: set_uniforms {:?}", image_tex);
         // if alpha {
         // encoder.pop_debug_group();
         // }
@@ -896,6 +897,11 @@ impl Mtl {
     }
 
     pub fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
+        // if self.render_target == target {
+        //     return;
+        // }
+        println!("setting target from {:?} to {:?}", self.render_target, target);
+
         self.render_target = target;
         let size = match target {
             RenderTarget::Screen => self.layer.drawable_size().into(),
@@ -1210,7 +1216,6 @@ impl Renderer for Mtl {
         self.stencil_texture.resize(size);
 
         let pixel_format = color_texture.pixel_format();
-
 
         let encoder = new_render_command_encoder(
             &color_texture,
