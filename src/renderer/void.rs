@@ -3,7 +3,7 @@
 use imgref::ImgVec;
 use rgb::RGBA8;
 
-use crate::{ErrorKind, ImageInfo, ImageSource, ImageStore};
+use crate::{ErrorKind, ImageId, ImageInfo, ImageSource, ImageStore};
 
 use super::{Command, Renderer, Vertex};
 
@@ -24,6 +24,12 @@ impl Renderer for Void {
     fn start_capture(&self) {}
 
     fn stop_capture(&self) {}
+
+    fn label(&self, images: &ImageStore<Self::Image>, id: ImageId) -> &str {
+        "labels not supported for void backend"
+    }
+
+    fn set_label(&self, images: &ImageStore<Self::Image>, id: ImageId, label: &str) {}
 
     fn update_image(
         &mut self,

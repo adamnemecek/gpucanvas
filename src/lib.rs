@@ -1116,3 +1116,13 @@ impl<T: Renderer> Canvas<T> {
         self.text_context.atlas_id()
     }
 }
+
+impl<T: Renderer> Canvas<T> {
+    pub fn label(&self, id: ImageId) -> &str {
+        self.renderer.label(&self.images, id)
+    }
+
+    pub fn set_label(&self, id: ImageId, label: &str) {
+        self.renderer.set_label(&self.images, id, label)
+    }
+}

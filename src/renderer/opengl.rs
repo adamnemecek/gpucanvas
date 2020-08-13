@@ -403,6 +403,12 @@ impl Renderer for OpenGl {
 
     fn stop_capture(&self) {}
 
+    fn label(&self, images: &ImageStore<Self::Image>, id: ImageId) -> &str {
+        "labels are not supported on opengl"
+    }
+
+    fn set_label(&self, images: &ImageStore<Self::Image>, id: ImageId, label: &str) {}
+
     fn render(&mut self, images: &ImageStore<GlTexture>, verts: &[Vertex], commands: &[Command]) {
         self.main_program.bind();
 

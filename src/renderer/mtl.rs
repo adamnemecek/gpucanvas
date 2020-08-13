@@ -352,6 +352,7 @@ impl Mtl {
         let pseudo_texture = MtlTexture::new_pseudo_texture(device, &command_queue).unwrap();
         pseudo_texture.set_label("pseudo_texture");
         let stencil_texture = StencilTexture::new(&device, drawable_size.into());
+        stencil_texture.set_label("stencil_texture");
 
         // Initializes default blend states.
         let blend_func = Blend {
@@ -1062,6 +1063,14 @@ impl Renderer for Mtl {
     fn stop_capture(&self) {
         let shared = metal::CaptureManager::shared();
         shared.stop_capture();
+    }
+
+    fn label(&self, images: &ImageStore<Self::Image>, id: ImageId) -> &str {
+        todo!()
+    }
+
+    fn set_label(&self, images: &ImageStore<Self::Image>, id: ImageId, label: &str) {
+        todo!()
     }
 
     // called flush in ollix and nvg

@@ -100,6 +100,9 @@ pub trait Renderer {
 
     fn start_capture(&self);
     fn stop_capture(&self);
+
+    fn label(&self, images: &ImageStore<Self::Image>, id: ImageId) -> &str;
+    fn set_label(&self, images: &ImageStore<Self::Image>, id: ImageId, label: &str);
 }
 
 /// Vertex struct for specifying triangle geometry

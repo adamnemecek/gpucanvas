@@ -120,13 +120,16 @@ fn main() {
 
     canvas.start_capture();
     let blue_rect = {
+        canvas.save();
+        canvas.reset();
+
         let width = 100;
         let height = 100;
         let blue_rect = canvas
             .create_image_empty(width, height, gpucanvas::PixelFormat::Rgba8, ImageFlags::empty())
             .unwrap();
-        canvas.save();
-        canvas.reset();
+
+        canvas.set_label(blue_rect, "blue_rect");
 
         println!("blue_rect_Id {:?}, size: {:?}", blue_rect, canvas.image_size(blue_rect));
 
