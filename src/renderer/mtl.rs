@@ -834,14 +834,17 @@ impl Mtl {
 
         let rect = Rect {
             x: x as _,
-            y: y as _,
+            // todo: this is a huge hack around the fact that i'm not sure
+            // how to properly flip the y coordinate
+            // it doesn't matter for single color rectangles
+            y: (view_size.h as u32 - y - height) as _,
             w: width as _,
             h: height as _,
         };
         // println!("rect {:?}", rect);
         let ndc_rect = rect.as_ndc((view_size.w, view_size.h));
-        println!("ndc {:?}", rect);
-        println!("ndc_rect: {:?}", ndc_rect);
+        // println!("ndc {:?}", rect);
+        // println!("ndc_rect: {:?}", ndc_rect);
 
         // let ndc_rect = Rect {
         //     x: -1.0,
@@ -931,12 +934,7 @@ impl Rect {
         let y = ndc_src.1;
         let w = ndc_dst.0 - ndc_src.0;
         let h = ndc_dst.1 - ndc_src.1;
-        Self {
-            x,
-            y,
-            w,
-            h
-        }
+        Self { x, y, w, h }
     }
     pub fn as_ndc(&self, screen_size: (f32, f32)) -> Self {
         let src = (self.x, self.y);
@@ -949,12 +947,7 @@ impl Rect {
         let y = ndc_src.1;
         let w = self.w / screen_size.0 * 2.0;
         let h = self.h / screen_size.1 * 2.0;
-        Self {
-            x,
-            y,
-            w,
-            h
-        }
+        Self { x, y, w, h }
     }
 }
 
