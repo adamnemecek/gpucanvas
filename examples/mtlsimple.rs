@@ -129,21 +129,41 @@ fn main() {
             .create_image_empty(width, height, gpucanvas::PixelFormat::Rgba8, ImageFlags::empty())
             .unwrap();
 
-        canvas.set_label(red_rect, "red_rect");
+        if false {
+            canvas.set_label(red_rect, "red_rect");
 
-        println!("red_rect_Id {:?}, size: {:?}", red_rect, canvas.image_size(red_rect));
+            println!("red_rect_Id {:?}, size: {:?}", red_rect, canvas.image_size(red_rect));
 
-        // let image_id = canvas.text_context.textures[0].image_id;
-        canvas.set_render_target(gpucanvas::RenderTarget::Image(red_rect));
-        let mut path = Path::new();
-        path.rect(20.0, 20.0, 80.0, 80.0);
+            // let image_id = canvas.text_context.textures[0].image_id;
+            canvas.set_render_target(gpucanvas::RenderTarget::Image(red_rect));
+            let mut path = Path::new();
+            path.rect(20.0, 20.0, 80.0, 80.0);
 
-        canvas.fill_path(&mut path, Paint::color(Color::red()));
+            canvas.fill_path(&mut path, Paint::color(Color::red()));
 
-        canvas.flush();
-        canvas.restore();
+            canvas.flush();
+            canvas.restore();
 
-        canvas.set_render_target(gpucanvas::RenderTarget::Screen);
+            canvas.set_render_target(gpucanvas::RenderTarget::Screen);
+        }
+        else {
+            let texture = canvas.get_image(red_rect).unwrap();
+            use rgb::RGBA8;
+
+            let data = vec![
+                RGBA8 {
+                    r: 0,
+                    g: 100,
+                    b: 255,
+                    a: 255
+                };
+                (width* height) as usize
+            ];
+            let reg = metal::MTLRegion::new_2d(0, 0, width as _, height as _);
+            texture.tex().replace_region(reg, 0, data.as_ptr() as _, (4 * width) as u64);
+        }
+
+
         red_rect
     };
     let mut frame = 0;

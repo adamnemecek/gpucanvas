@@ -786,7 +786,12 @@ impl Mtl {
         println!("set_uniforms {:?}", image_tex);
         let tex = if let Some(id) = image_tex {
             // println!("found texture");
-            images.get(id).unwrap()
+            if self.render_target == RenderTarget::Image(id) {
+                &self.pseudo_texture
+            }
+            else {
+                images.get(id).unwrap()
+            }
         } else {
             // println!("pseudo texture");
             &self.pseudo_texture
@@ -798,7 +803,12 @@ impl Mtl {
         let mut alpha = false;
         let alpha_tex = if let Some(id) = alpha_tex {
             alpha = true;
-            images.get(id).unwrap()
+            if self.render_target == RenderTarget::Image(id) {
+                &self.pseudo_texture
+            }
+            else {
+                images.get(id).unwrap()
+            }
         } else {
             &self.pseudo_texture
         };
