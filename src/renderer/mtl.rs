@@ -349,7 +349,8 @@ impl Mtl {
         };
 
         // pseudosampler sescriptor
-        let pseudo_texture = MtlTexture::pseudo_texture(device, &command_queue).unwrap();
+        let pseudo_texture = MtlTexture::new_pseudo_texture(device, &command_queue).unwrap();
+        pseudo_texture.set_label("pseudo_texture");
         let stencil_texture = StencilTexture::new(&device, drawable_size.into());
 
         // Initializes default blend states.
@@ -781,12 +782,12 @@ impl Mtl {
         alpha_tex: Option<ImageId>,
     ) {
         encoder.set_fragment_value(0, &paint);
-
+        println!("set_uniforms {:?}", image_tex);
         let tex = if let Some(id) = image_tex {
-            //// println!("found texture");
+            println!("found texture");
             images.get(id).unwrap()
         } else {
-            //// println!("pseudo texture");
+            println!("pseudo texture");
             &self.pseudo_texture
         };
 

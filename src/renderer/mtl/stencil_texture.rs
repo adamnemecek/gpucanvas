@@ -49,6 +49,13 @@ impl StencilTexture {
         self.tex = self.device.new_texture(&desc);
     }
 
+    pub fn label(&self) -> &str {
+        self.tex.label()
+    }
+
+    pub fn set_label(&self, label: &str) {
+        self.tex.set_label(label)
+    }
     // pub fn clear(&mut self) {
     //     self.size = Size::default();
     // }

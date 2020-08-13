@@ -100,7 +100,7 @@ fn main() {
         .collect();
 
     let mut first = true;
-    let capture = true;
+    let capture = false;
 
     //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
 
@@ -118,28 +118,32 @@ fn main() {
 
     // let mut perf = PerfGraph::new();
 
-    // let blue_rect = {
-    //     let width = 100;
-    //     let height = 100;
-    //     let blue_rect = canvas
-    //         .create_image_empty(width, height, gpucanvas::PixelFormat::Rgba8, ImageFlags::empty())
-    //         .unwrap();
-    //     canvas.save();
-    //     canvas.reset();
+    canvas.start_capture();
+    let blue_rect = {
+        let width = 100;
+        let height = 100;
+        let blue_rect = canvas
+            .create_image_empty(width, height, gpucanvas::PixelFormat::Rgba8, ImageFlags::empty())
+            .unwrap();
+        canvas.save();
+        canvas.reset();
 
-    //     // let image_id = canvas.text_context.textures[0].image_id;
-    //     canvas.set_render_target(gpucanvas::RenderTarget::Image(blue_rect));
-    //     let mut path = Path::new();
-    //     path.rect(0.0, 0.0, 100.0, 100.0);
+        println!("blue_rect_Id {:?}, size: {:?}", blue_rect, canvas.image_size(blue_rect));
 
-    //     canvas.fill_path(&mut path, Paint::color(Color::blue()));
+        // let image_id = canvas.text_context.textures[0].image_id;
+        canvas.set_render_target(gpucanvas::RenderTarget::Image(blue_rect));
+        let mut path = Path::new();
+        path.rect(0.0, 0.0, 100.0, 100.0);
 
-    //     canvas.flush();
-    //     canvas.restore();
+        canvas.fill_path(&mut path, Paint::color(Color::blue()));
 
-    //     canvas.set_render_target(gpucanvas::RenderTarget::Screen);
-    //     blue_rect
-    // };
+        canvas.flush();
+        canvas.restore();
+
+        canvas.set_render_target(gpucanvas::RenderTarget::Screen);
+        blue_rect
+    };
+    canvas.stop_capture();
 
     events_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
@@ -350,8 +354,8 @@ fn main() {
                 // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                 // draw_image(&mut canvas, images[0], 5.0, 300.0);
                 // draw_text(&mut canvas, &fonts, "title", 600.0, 200.0, 100.0, 100.0);
-                // draw_image(&mut canvas, blue_rect, 100.0, 100.0);
-                draw_clear_rect2(&mut canvas, 20, 20, 200, 150);
+                draw_image(&mut canvas, blue_rect, 100.0, 100.0);
+                // draw_clear_rect2(&mut canvas, 20, 20, 200, 150);
 
                 // draw_rounded_rect(&mut canvas,300.0, 100.0, 40.0, 40.0, 5.0, 1.0);
                 // render_clear_rect(&mut );

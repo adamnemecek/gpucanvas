@@ -24,13 +24,12 @@ pub struct MtlTexture {
 }
 
 impl MtlTexture {
-    pub fn pseudo_texture(
+    pub fn new_pseudo_texture(
         device: &metal::DeviceRef,
         command_queue: &metal::CommandQueueRef,
     ) -> Result<Self, ErrorKind> {
-        let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
+        let info = ImageInfo::new(ImageFlags::empty(), 2, 2, PixelFormat::Gray8);
 
-        println!("image_info: {:?}", info);
         Self::new(device, command_queue, info)
     }
 
@@ -197,6 +196,14 @@ impl MtlTexture {
 
     pub fn info(&self) -> ImageInfo {
         self.info
+    }
+
+    pub fn label(&self) -> &str {
+        self.tex.label()
+    }
+
+    pub fn set_label(&self, label: &str) {
+        self.tex.set_label(label)
     }
 }
 
