@@ -119,34 +119,34 @@ fn main() {
     // let mut perf = PerfGraph::new();
 
     canvas.start_capture();
-    let blue_rect = {
+    let red_rect = {
         canvas.save();
         canvas.reset();
 
         let width = 100;
         let height = 100;
-        let blue_rect = canvas
+        let red_rect = canvas
             .create_image_empty(width, height, gpucanvas::PixelFormat::Rgba8, ImageFlags::empty())
             .unwrap();
 
-        canvas.set_label(blue_rect, "blue_rect");
+        canvas.set_label(red_rect, "red_rect");
 
-        println!("blue_rect_Id {:?}, size: {:?}", blue_rect, canvas.image_size(blue_rect));
+        println!("red_rect_Id {:?}, size: {:?}", red_rect, canvas.image_size(red_rect));
 
         // let image_id = canvas.text_context.textures[0].image_id;
-        canvas.set_render_target(gpucanvas::RenderTarget::Image(blue_rect));
+        canvas.set_render_target(gpucanvas::RenderTarget::Image(red_rect));
         let mut path = Path::new();
-        path.rect(0.0, 0.0, 100.0, 100.0);
+        path.rect(20.0, 20.0, 80.0, 80.0);
 
-        canvas.fill_path(&mut path, Paint::color(Color::blue()));
+        canvas.fill_path(&mut path, Paint::color(Color::red()));
 
         canvas.flush();
         canvas.restore();
 
         canvas.set_render_target(gpucanvas::RenderTarget::Screen);
-        blue_rect
+        red_rect
     };
-    canvas.stop_capture();
+    let mut frame = 0;
 
     events_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
@@ -223,9 +223,9 @@ fn main() {
                 // // let size = windowed_context.window().inner_size();
                 // // let size = renderer.size();
 
-                if first && capture {
-                    canvas.start_capture();
-                }
+                // if first && capture {
+                //     canvas.start_capture();
+                // }
 
                 let size = layer.drawable_size();
                 // // let size = Size::new(size.width, size.height);
@@ -357,7 +357,7 @@ fn main() {
                 // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                 // draw_image(&mut canvas, images[0], 5.0, 300.0);
                 // draw_text(&mut canvas, &fonts, "title", 600.0, 200.0, 100.0, 100.0);
-                draw_image(&mut canvas, blue_rect, 100.0, 100.0);
+                draw_image(&mut canvas, red_rect, 100.0, 100.0);
                 // draw_clear_rect2(&mut canvas, 20, 20, 200, 150);
 
                 // draw_rounded_rect(&mut canvas,300.0, 100.0, 40.0, 40.0, 5.0, 1.0);
@@ -378,9 +378,16 @@ fn main() {
                 // canvas.restore();
 
                 canvas.flush();
-                if first && capture {
+                // if first && capture {
+                //     canvas.stop_capture();
+                //     first = false;
+                // }
+                frame += 1;
+                if frame == 2 {
+                    // use gpucanvas::renderer::MtlTexture
                     canvas.stop_capture();
-                    first = false;
+                    // let texture = canvas.get_image(blue_rect).unwrap();
+                    // texture.save_to("/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas/blue_rect.png");
                 }
                 // windowed_context.swap_buffers().unwrap();
             }

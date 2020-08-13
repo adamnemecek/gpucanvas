@@ -785,10 +785,10 @@ impl Mtl {
         encoder.set_fragment_value(0, &paint);
         println!("set_uniforms {:?}", image_tex);
         let tex = if let Some(id) = image_tex {
-            println!("found texture");
+            // println!("found texture");
             images.get(id).unwrap()
         } else {
-            println!("pseudo texture");
+            // println!("pseudo texture");
             &self.pseudo_texture
         };
 
@@ -894,6 +894,7 @@ impl Mtl {
                 texture.info().size()
             }
         };
+
         *self.view_size_buffer = size;
     }
 
@@ -1180,12 +1181,16 @@ impl Renderer for Mtl {
 
         let color_texture = match self.render_target {
             RenderTarget::Screen => {
+                println!("render target: screen");
                 let d = self.layer.next_drawable().unwrap().to_owned();
                 let tex = d.texture().to_owned();
                 drawable = Some(d);
                 tex
             }
-            RenderTarget::Image(id) => images.get(id).unwrap().tex().to_owned(),
+            RenderTarget::Image(id) => {
+                println!("render target: image: {:?}", id);
+                images.get(id).unwrap().tex().to_owned()
+            }
         };
 
         // this is needed for screenshotting
@@ -1195,6 +1200,7 @@ impl Renderer for Mtl {
         self.stencil_texture.resize(size);
 
         let pixel_format = color_texture.pixel_format();
+
 
         let encoder = new_render_command_encoder(
             &color_texture,
@@ -1206,6 +1212,15 @@ impl Renderer for Mtl {
             // &self.uniform_buffer,
             // self.clear_buffer_on_flush,
         );
+
+        match self.render_target {
+            RenderTarget::Screen => {
+                encoder.push_debug_group("rendering to screen");
+            }
+            RenderTarget::Image(id) => {
+                encoder.push_debug_group(&format!("rendering to image: {:?}", id));
+            }
+        }
         // self.stencil_texture.resize();
         // self.clear_buffer_on_flush = false;
 
@@ -1265,6 +1280,7 @@ impl Renderer for Mtl {
                 }
             }
         }
+        encoder.pop_debug_group();
 
         encoder.end_encoding();
 

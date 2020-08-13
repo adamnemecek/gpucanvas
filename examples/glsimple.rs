@@ -87,26 +87,26 @@ fn main() {
 
     let mut perf = PerfGraph::new();
 
-    let blue_rect = {
+    let red_rect = {
         let width = 100;
         let height = 100;
-        let blue_rect = canvas
+        let red_rect = canvas
             .create_image_empty(width, height, gpucanvas::PixelFormat::Rgba8, ImageFlags::empty())
             .unwrap();
         canvas.save();
         canvas.reset();
 
         // let image_id = canvas.text_context.textures[0].image_id;
-        canvas.set_render_target(gpucanvas::RenderTarget::Image(blue_rect));
+        canvas.set_render_target(gpucanvas::RenderTarget::Image(red_rect));
         let mut path = Path::new();
         path.rect(0.0, 0.0, 100.0, 100.0);
 
-        canvas.fill_path(&mut path, Paint::color(Color::blue()));
-
+        canvas.fill_path(&mut path, Paint::color(Color::red()));
+        canvas.flush();
         canvas.restore();
 
         canvas.set_render_target(gpucanvas::RenderTarget::Screen);
-        blue_rect
+        red_rect
     };
 
     el.run(move |event, _, control_flow| {
@@ -304,7 +304,7 @@ fn main() {
                 // draw_colorwheel(&mut canvas, 200.0, 200.0, 200.0, 200.0, 5.0);
                 // draw_image(&mut canvas, images[0], 300.0, 300.0);
                 draw_text(&mut canvas, &fonts, "title", 400.0, 200.0, 100.0, 100.0);
-                // draw_image(&mut canvas, blue_rect, 100.0, 100.0);
+                draw_image(&mut canvas, red_rect, 100.0, 100.0);
                 // if true {
                 //     let paint = Paint::image(image_id, size.width as f32, 15.0, 1920.0, 1080.0, 0.0, 1.0);
                 //     let mut path = Path::new();

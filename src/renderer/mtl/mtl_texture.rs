@@ -194,6 +194,11 @@ impl MtlTexture {
         // }
     }
 
+    pub fn save_to(&self, path: &str) {
+        use super::MtlTextureExt;
+        self.tex.save_to(path)
+    }
+    
     pub fn info(&self) -> ImageInfo {
         self.info
     }
