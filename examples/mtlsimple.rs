@@ -360,6 +360,10 @@ fn main() {
                 draw_image(&mut canvas, red_rect, 100.0, 100.0);
                 // draw_clear_rect2(&mut canvas, 20, 20, 200, 150);
 
+                let mut path = Path::new();
+                path.rect(20.0, 200.0, 80.0, 80.0);
+
+                canvas.fill_path(&mut path, Paint::color(Color::green()));
                 // draw_rounded_rect(&mut canvas,300.0, 100.0, 40.0, 40.0, 5.0, 1.0);
                 // render_clear_rect(&mut );
 
