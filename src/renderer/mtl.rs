@@ -920,10 +920,9 @@ fn to_ndc(position: (f32, f32), drawable_size: (f32, f32)) -> (f32, f32) {
 }
 
 impl Rect {
-    pub fn as_ndc(&self, screen_size: (f32, f32)) -> Self {
+    pub fn as_ndc_flipped(&self, screen_size: (f32, f32)) -> Self {
         let src = (self.x, self.y);
         let dst = (self.x + self.w, self.y + self.h);
-        // let size = (self.w, self.h);
 
         let ndc_src = to_ndc(src, screen_size);
         let ndc_dst = to_ndc(dst, screen_size);
@@ -932,6 +931,24 @@ impl Rect {
         let y = ndc_src.1;
         let w = ndc_dst.0 - ndc_src.0;
         let h = ndc_dst.1 - ndc_src.1;
+        Self {
+            x,
+            y,
+            w,
+            h
+        }
+    }
+    pub fn as_ndc(&self, screen_size: (f32, f32)) -> Self {
+        let src = (self.x, self.y);
+        // let dst = (self.x + self.w, self.y + self.h);
+
+        let ndc_src = to_ndc(src, screen_size);
+        // let ndc_dst = to_ndc(dst, screen_size);
+
+        let x = ndc_src.0;
+        let y = ndc_src.1;
+        let w = self.w / screen_size.0 * 2.0;
+        let h = self.h / screen_size.1 * 2.0;
         Self {
             x,
             y,
