@@ -803,12 +803,11 @@ fn find_texture_or_alloc<T: Renderer>(
             .add_rect(width, height)
             .ok_or(ErrorKind::FontSizeTooLargeForAtlas)?;
         let flags = 
-        // if T::flip_y() {
-            // ImageFlags::FLIP_Y
-        // } else {
+        if T::flip_y() {
+            ImageFlags::FLIP_Y
+        } else {
             ImageFlags::empty()
-        // }
-        ;
+        };
         let info = ImageInfo::new(flags, atlas.size().0, atlas.size().1, PixelFormat::Gray8);
         let image_id = images.alloc(renderer, info)?;
 

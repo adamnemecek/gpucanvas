@@ -1018,6 +1018,7 @@ where
         render_mode: RenderMode,
     ) -> Result<TextMetrics, ErrorKind> {
         let mut transform = self.state().transform;
+        // println!("transform {:?}", transform);
 
         // if T::flip_y() {
         //     transform.flip_y();
@@ -1046,12 +1047,17 @@ where
                     let (p4, p5) = transform.transform_point(quad.x1 * invscale, quad.y1 * invscale);
                     let (p6, p7) = transform.transform_point(quad.x0 * invscale, quad.y1 * invscale);
 
-                    verts.push(Vertex::new(p0, p1, quad.s0, quad.t0));
-                    verts.push(Vertex::new(p4, p5, quad.s1, quad.t1));
-                    verts.push(Vertex::new(p2, p3, quad.s1, quad.t0));
-                    verts.push(Vertex::new(p0, p1, quad.s0, quad.t0));
-                    verts.push(Vertex::new(p6, p7, quad.s0, quad.t1));
-                    verts.push(Vertex::new(p4, p5, quad.s1, quad.t1));
+                    let data = [
+                        Vertex::new(p0, p1, quad.s0, quad.t0),
+                        Vertex::new(p4, p5, quad.s1, quad.t1),
+                        Vertex::new(p2, p3, quad.s1, quad.t0),
+                        Vertex::new(p0, p1, quad.s0, quad.t0),
+                        Vertex::new(p6, p7, quad.s0, quad.t1),
+                        Vertex::new(p4, p5, quad.s1, quad.t1),
+                    ];
+
+                    verts.extend_from_slice(&data);
+
                 }
 
                 paint.set_alpha_mask(Some(cmd.image_id));
