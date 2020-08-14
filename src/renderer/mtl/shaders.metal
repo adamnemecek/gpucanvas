@@ -465,7 +465,10 @@ vertex ColorInOut clear_rect_vertex(
     ColorInOut out;
     float4 pos = float4(rect_vert_cw(clear_rect->rect, vid), 0, 1);
     auto col = clear_rect->color;
-
+    // float4x4 tform = float4x4(1,0,0,0,
+    //                           0,-1,0,0,
+    //                           0,0,1,0,
+    //                           0,0,0,1);
     out.position = pos;
     out.color = float4(col.r, col.g, col.b, col.a);
     return out;

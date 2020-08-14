@@ -99,8 +99,8 @@ fn main() {
         })
         .collect();
 
-    let mut first = true;
-    let capture = false;
+    // let mut first = true;
+    let capture = true;
 
     //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
 
@@ -118,7 +118,11 @@ fn main() {
 
     // let mut perf = PerfGraph::new();
 
-    // canvas.start_capture();
+    if capture {
+        println!("start capture");
+        canvas.start_capture();
+    }
+
     let red_rect = {
         let render_with_canvas = true;
         canvas.save();
@@ -383,10 +387,12 @@ fn main() {
                 draw_image(&mut canvas, red_rect, 100.0, 100.0);
                 // draw_clear_rect2(&mut canvas, 20, 20, 200, 150);
 
-                let mut path = Path::new();
-                path.rect(20.0, 200.0, 80.0, 80.0);
+                if false {
+                    let mut path = Path::new();
+                    path.rect(20.0, 200.0, 80.0, 80.0);
 
-                canvas.fill_path(&mut path, Paint::color(Color::green()));
+                    canvas.fill_path(&mut path, Paint::color(Color::green()));
+                }
                 // draw_rounded_rect(&mut canvas,300.0, 100.0, 40.0, 40.0, 5.0, 1.0);
                 // render_clear_rect(&mut );
 
@@ -405,10 +411,11 @@ fn main() {
                 // canvas.restore();
 
                 canvas.flush();
-                // if first && capture {
-                //     canvas.stop_capture();
-                //     first = false;
-                // }
+                if canvas.frame() == 3 {
+                    println!("stop capture");
+                    canvas.stop_capture();
+                    // first = false;
+                }
                 // if canvas.frame() == 8 {
                 // use gpucanvas::renderer::MtlTexture
                 // canvas.stop_capture();
@@ -442,7 +449,7 @@ fn draw_image<T: Renderer>(canvas: &mut Canvas<T>, image: ImageId, x: f32, y: f3
 fn draw_text<T: Renderer>(canvas: &mut Canvas<T>, fonts: &Fonts, title: &str, x: f32, y: f32, w: f32, h: f32) {
     canvas.save();
     let mut text_paint = Paint::color(Color::rgba(200, 200, 200, 255));
-    text_paint.set_font_size(20.0);
+    text_paint.set_font_size(40.0);
     text_paint.set_font(&[fonts.regular]);
     text_paint.set_text_align(Align::Left);
     text_paint.set_text_baseline(Baseline::Middle);

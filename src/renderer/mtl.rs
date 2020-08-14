@@ -493,7 +493,7 @@ impl Mtl {
         blend_func: CompositeOperationState,
         pixel_format: metal::MTLPixelFormat,
     ) {
-        //// println!("set_composite operation {:?}", pixel_format);
+        // println!("set_composite operation {:?}", pixel_format);
         let blend_func: Blend = blend_func.into();
 
         if self.pipeline_state.is_some()
@@ -799,13 +799,13 @@ impl Mtl {
         // println!("start: set_uniforms {:?}", image_tex);
         // println!("uniforms render_target {:?}", self.render_target);
         let tex = if let Some(id) = image_tex {
-            if self.render_target == RenderTarget::Image(id) {
+            // if self.render_target == RenderTarget::Image(id) {
                 // println!("render_target == image({:?}), setting pseudotexture", id);
-                &self.pseudo_texture
-            } else {
+                // &self.pseudo_texture
+            // } else {
                 // println!("render_target != image, setting id {:?}", id);
                 images.get(id).unwrap()
-            }
+            // }
         } else {
             // println!("image_tex == None, setting pseudo texture");
             &self.pseudo_texture
@@ -818,11 +818,11 @@ impl Mtl {
         let mut alpha = false;
         let alpha_tex = if let Some(id) = alpha_tex {
             alpha = true;
-            if self.render_target == RenderTarget::Image(id) {
-                &self.pseudo_texture
-            } else {
+            // if self.render_target == RenderTarget::Image(id) {
+            //     &self.pseudo_texture
+            // } else {
                 images.get(id).unwrap()
-            }
+            // }
         } else {
             &self.pseudo_texture
         };
@@ -1008,7 +1008,7 @@ fn should_render() -> bool {
 }
 
 fn new_render_command_encoder<'a>(
-    color_texture: &metal::TextureRef,
+    target_texture: &metal::TextureRef,
     command_buffer: &'a metal::CommandBufferRef,
     clear_color: Color,
     stencil_texture: &StencilTexture,
@@ -1034,7 +1034,7 @@ fn new_render_command_encoder<'a>(
         color_attachment.set_clear_color(clear_color.into());
         color_attachment.set_load_action(load_action);
         color_attachment.set_store_action(metal::MTLStoreAction::Store);
-        color_attachment.set_texture(Some(&color_texture));
+        color_attachment.set_texture(Some(&target_texture));
         // added
 
         let stencil_attachment = desc.stencil_attachment().unwrap();
@@ -1208,16 +1208,16 @@ impl Renderer for Mtl {
         command_buffer.add_completed_handler(&block);
         let mut drawable: Option<metal::MetalDrawable> = None;
 
-        let color_texture = match self.render_target {
+        let mut target_texture = match self.render_target {
             RenderTarget::Screen => {
-                println!("render target: screen");
+                // println!("render target: screen");
                 let d = self.layer.next_drawable().unwrap().to_owned();
                 let tex = d.texture().to_owned();
                 drawable = Some(d);
                 tex
             }
             RenderTarget::Image(id) => {
-                println!("render target: image: {:?}", id);
+                // println!("render target: image: {:?}", id);
                 images.get(id).unwrap().tex().to_owned()
             }
         };
@@ -1225,13 +1225,13 @@ impl Renderer for Mtl {
         // this is needed for screenshotting
         // self.last_rendered_texture = Some(color_texture.to_owned());
 
-        let size = Size::new(color_texture.width() as _, color_texture.height() as _);
+        let size = Size::new(target_texture.width() as _, target_texture.height() as _);
         self.stencil_texture.resize(size);
 
-        let pixel_format = color_texture.pixel_format();
+        
 
         let mut encoder = new_render_command_encoder(
-            &color_texture,
+            &target_texture,
             &command_buffer,
             clear_color,
             &self.stencil_texture,
@@ -1240,15 +1240,16 @@ impl Renderer for Mtl {
             // &self.uniform_buffer,
             // self.clear_buffer_on_flush,
         );
+        let mut pixel_format = target_texture.pixel_format();
 
-        match self.render_target {
-            RenderTarget::Screen => {
-                encoder.push_debug_group("rendering to screen");
-            }
-            RenderTarget::Image(id) => {
-                encoder.push_debug_group(&format!("rendering to image: {:?}", id));
-            }
-        }
+        // match self.render_target {
+        //     RenderTarget::Screen => {
+        //         encoder.push_debug_group("rendering to screen");
+        //     }
+        //     RenderTarget::Image(id) => {
+        //         encoder.push_debug_group(&format!("rendering to image: {:?}", id));
+        //     }
+        // }
         // self.stencil_texture.resize();
         // self.clear_buffer_on_flush = false;
 
@@ -1263,8 +1264,10 @@ impl Renderer for Mtl {
         //         CommandType::SetRenderTarget { .. } => "set_render_target",
         //     }
         // }
-
+            // println!("loop start");
+        let mut target_set = 0;
         for cmd in commands {
+
             // println!("command_type: {:?}", dump_command_type(cmd));
             self.set_composite_operation(cmd.composite_operation, pixel_format);
 
@@ -1304,9 +1307,10 @@ impl Renderer for Mtl {
                 }
                 CommandType::SetRenderTarget(target) => {
                     if self.render_target == target {
-                        println!("skipping target setting");
+                        // println!("skipping target setting");
                         continue;
                     }
+                    target_set += 1;
                     //counters.set_render_target += 1;
                     // println!("---------switching from {:?} to {:?}", self.render_target, target);
                     self.set_target(images, target);
@@ -1316,7 +1320,7 @@ impl Renderer for Mtl {
                     //     command_buffer.present_drawable(&drawable);
                     // }
 
-                    let color_texture1 = match self.render_target {
+                    target_texture = match self.render_target {
                         RenderTarget::Screen => {
                             // println!("render target: screen");
                             let d = self.layer.next_drawable().unwrap().to_owned();
@@ -1325,12 +1329,14 @@ impl Renderer for Mtl {
                             tex
                         }
                         RenderTarget::Image(id) => {
-                            println!("render target: image: {:?}", id);
+                            // println!("render target: image: {:?}", id);
                             images.get(id).unwrap().tex().to_owned()
                         }
                     };
+                    pixel_format = target_texture.pixel_format();
+                    
                     encoder = new_render_command_encoder(
-                        &color_texture1,
+                        &target_texture,
                         &command_buffer,
                         clear_color,
                         &self.stencil_texture,
@@ -1342,26 +1348,32 @@ impl Renderer for Mtl {
                 }
             }
         }
-        encoder.pop_debug_group();
+        // println!("loop end");
+        // encoder.pop_debug_group();
 
         encoder.end_encoding();
 
+        // println!("pre present");
         if let Some(drawable) = drawable {
             command_buffer.present_drawable(&drawable);
         }
 
+        // println!("target set {}", target_set);
+        // println!("pre blit");
         // Makes mnvgReadPixels-like functions (e.g. screenshot) work as expected on Mac.
         #[cfg(target_os = "macos")]
         {
             if self.render_target == RenderTarget::Screen {
                 let blit = command_buffer.new_blit_command_encoder();
-                blit.synchronize_resource(&color_texture);
+                blit.synchronize_resource(&target_texture);
                 blit.end_encoding();
             }
         }
 
+        // println!("post blit");
         command_buffer.commit();
 
+        // println!("post commit");
         // if self.frame == 1 {
         //     color_texture.save_to("/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas/out.png");
         // }
