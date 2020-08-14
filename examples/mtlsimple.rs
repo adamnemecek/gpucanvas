@@ -384,8 +384,8 @@ fn main() {
                 // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                 // draw_image(&mut canvas, images[0], 5.0, 300.0);
                 draw_text(&mut canvas, &fonts, "title", 600.0, 200.0, 100.0, 100.0);
-                draw_image(&mut canvas, red_rect, 100.0, 100.0);
-                // draw_clear_rect2(&mut canvas, 20, 20, 200, 150);
+                // draw_image(&mut canvas, red_rect, 100.0, 100.0);
+                draw_clear_rect2(&mut canvas, 20, 20, 200, 150);
 
                 // if true {
                 //     let mut path = Path::new();

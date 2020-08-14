@@ -208,7 +208,7 @@ impl MtlTexture {
     }
 
     pub fn set_label(&self, label: &str) {
-        self.tex.set_label(label)
+        self.tex.set_label(label);
     }
 }
 
