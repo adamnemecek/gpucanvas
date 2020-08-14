@@ -87,6 +87,10 @@ impl Color {
         Self::rgbaf(1.0, 1.0, 1.0, 1.0)
     }
 
+    pub fn clear() -> Self {
+        Self::rgbaf(0.0, 0.0, 0.0, 0.0)
+    }
+
     /// Returns a black color
     pub fn black() -> Self {
         Self::rgbaf(0.0, 0.0, 0.0, 1.0)

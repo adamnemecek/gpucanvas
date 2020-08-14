@@ -225,14 +225,14 @@ fragment float4 fragmentShaderAA(
     }
 
     if (uniforms.hasMask == 1.0) {
-        float2 ftcoord = float2(in.ftcoord.x, -in.ftcoord.y);
+        float2 ftcoord = float2(in.ftcoord.x, in.ftcoord.y);
         float alpha = alpha_texture.sample(alpha_samplr, ftcoord).r;
 
     //     // result /= strokeAlpha;
     //     result /= 0.02;
-        // result = float4(result.xyz, alpha);
+        result = float4(result.xyz, alpha);
 
-        return float4(0.5, 0.5, 0.5, 0.3);
+        // return float4(0.5, 0.5, 0.5, 0.3);
     //     //  float r = alpha_texture.sample(alpha_samplr, in.ftcoord).x;
     //     //  float4 smpl = vec4(1.0, 1.0, 1.0, smpl);
     //     //  result = vec4(result.xyz, 1.0) * smpl;
