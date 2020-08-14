@@ -868,11 +868,12 @@ impl Mtl {
             w: width as _,
             h: height as _,
         };
-        // println!("rect {:?}", rect);
         let ndc_rect = rect.as_ndc((view_size.w, view_size.h));
-        // println!("ndc {:?}", rect);
-        // println!("ndc_rect: {:?}", ndc_rect);
 
+        // let ndc_rect1 = Rect {
+        //     2.0 * vert.pos.x / viewSize.x - 1.0,
+        //     1.0 - 2.0 * vert.pos.y / viewSize.y,
+        // }
         // let ndc_rect = Rect {
         //     x: -1.0,
         //     y: -1.0,
