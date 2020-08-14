@@ -29,7 +29,6 @@ impl MtlTexture {
         command_queue: &metal::CommandQueueRef,
     ) -> Result<Self, ErrorKind> {
         let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
-
         Self::new(device, command_queue, info)
     }
 
@@ -137,6 +136,18 @@ impl MtlTexture {
     pub fn replace_region(&self, region: metal::MTLRegion, data: &[u8], stride: usize) {
         self.tex
             .replace_region(region, 0, data.as_ptr() as *const _, stride as u64)
+    }
+
+    pub fn set_clear_color(&self, color: rgb::RGBA8) {
+        let w = self.tex().width();
+        let h = self.tex().height();
+        let region = metal::MTLRegion::new_2d(0, 0, w, h);
+
+        let bytes = vec![
+            color;
+            (w * h) as _
+        ];
+        self.replace_region(region, bytes.as_bytes(), (4 * w) as _);
     }
 
     pub fn update(&mut self, src: ImageSource, x: usize, y: usize) -> Result<(), ErrorKind> {

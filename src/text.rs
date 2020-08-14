@@ -770,14 +770,16 @@ fn render_glyph<T: Renderer>(
 
     canvas.restore();
 
-    Ok(RenderedGlyph {
+    let g = RenderedGlyph {
         width,
         height,
         atlas_x: dst_x as u32,
         atlas_y: dst_y as u32,
         texture_index: dst_index,
-        padding: padding,
-    })
+        padding,
+    };
+    println!("shaped_glyph: {:#?}, rendered_glyph: {:#?}", glyph.c, g);
+    Ok(g)
 }
 
 fn find_texture_or_alloc<T: Renderer>(

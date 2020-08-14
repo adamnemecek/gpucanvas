@@ -1399,7 +1399,9 @@ impl Renderer for Mtl {
     }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
-        Self::Image::new(&self.device, &self.command_queue, info)
+        let mut  img = Self::Image::new(&self.device, &self.command_queue, info);
+        img.as_mut().unwrap().set_clear_color(rgb::RGBA8{ r: 255, g: 255, b: 255, a: 255});
+        img
     }
 
     fn update_image(
