@@ -856,7 +856,7 @@ impl Mtl {
     ) {
         // #[cfg(debug_assertions)]
         encoder.push_debug_group("clear_rect");
-        let view_size = *self.view_size_buffer;
+        // let view_size = *self.view_size_buffer;
 
         // let rect = Rect {
         //     x: x as _,
@@ -878,12 +878,12 @@ impl Mtl {
         //     h: -(height as f32) / view_size.h,
         // };
         // println!("clear_rect {:?}", ndc_rect1);
-        // let ndc_rect = Rect {
-        //     x: -1.0,
-        //     y: -1.0,
-        //     w: 2.0,
-        //     h: 2.0,
-        // };
+        let ndc_rect = Rect {
+            x: -1.0,
+            y: -1.0,
+            w: 2.0,
+            h: 2.0,
+        };
         let clear_rect = ClearRect { rect: ndc_rect, color };
 
         encoder.set_render_pipeline_state(&self.clear_rect_pipeline_state.as_ref().unwrap());
