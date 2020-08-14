@@ -645,7 +645,7 @@ pub(crate) fn render_atlas<T: Renderer>(
     canvas.set_render_target(initial_render_target);
 
     // debug draw
-    if false {
+    if true {
         canvas.save();
         canvas.reset();
 
@@ -771,8 +771,8 @@ fn render_glyph<T: Renderer>(
     canvas.restore();
 
     Ok(RenderedGlyph {
-        width: width,
-        height: height,
+        width,
+        height,
         atlas_x: dst_x as u32,
         atlas_y: dst_y as u32,
         texture_index: dst_index,

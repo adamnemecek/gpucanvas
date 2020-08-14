@@ -228,6 +228,9 @@ fragment float4 fragmentShaderAA(
         float2 ftcoord = float2(in.ftcoord.x, in.ftcoord.y);
         float alpha = alpha_texture.sample(alpha_samplr, ftcoord).r;
 
+        // if (alpha < uniforms.strokeThr) {
+        //     discard_fragment();
+        // }
     //     // result /= strokeAlpha;
     //     result /= 0.02;
         result = float4(result.xyz, alpha);
@@ -246,9 +249,7 @@ fragment float4 fragmentShaderAA(
     //     // result *= smpl;
     //     // return float4(1.0);
 
-    //     // if (smpl.a < 1.1) {
-    //     //     discard_fragment();
-    //     // }
+    
     //     // else {
     //         // return float4(result.xyz, smpl.a);
     //     // }

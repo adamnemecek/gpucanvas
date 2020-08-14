@@ -1017,7 +1017,11 @@ where
         mut paint: Paint,
         render_mode: RenderMode,
     ) -> Result<TextMetrics, ErrorKind> {
-        let transform = self.state().transform;
+        let mut transform = self.state().transform;
+
+        // if T::flip_y() {
+        //     transform.flip_y();
+        // }
         let scale = self.font_scale() * self.device_px_ratio;
         let invscale = 1.0 / scale;
 

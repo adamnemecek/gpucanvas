@@ -800,12 +800,12 @@ impl Mtl {
         // println!("uniforms render_target {:?}", self.render_target);
         let tex = if let Some(id) = image_tex {
             // if self.render_target == RenderTarget::Image(id) {
-                // println!("render_target == image({:?}), setting pseudotexture", id);
-                // &self.pseudo_texture
+            // println!("render_target == image({:?}), setting pseudotexture", id);
+            // &self.pseudo_texture
             // } else {
-                // println!("render_target != image, setting id {:?}", id);
-                images.get(id).unwrap()
-            // }
+            // println!("render_target != image, setting id {:?}", id);
+            images.get(id).unwrap()
+        // }
         } else {
             // println!("image_tex == None, setting pseudo texture");
             &self.pseudo_texture
@@ -821,8 +821,8 @@ impl Mtl {
             // if self.render_target == RenderTarget::Image(id) {
             //     &self.pseudo_texture
             // } else {
-                images.get(id).unwrap()
-            // }
+            images.get(id).unwrap()
+        // }
         } else {
             &self.pseudo_texture
         };
@@ -1234,8 +1234,6 @@ impl Renderer for Mtl {
         let size = Size::new(target_texture.width() as _, target_texture.height() as _);
         self.stencil_texture.resize(size);
 
-        
-
         let mut encoder = new_render_command_encoder(
             &target_texture,
             &command_buffer,
@@ -1270,10 +1268,9 @@ impl Renderer for Mtl {
         //         CommandType::SetRenderTarget { .. } => "set_render_target",
         //     }
         // }
-            // println!("loop start");
+        // println!("loop start");
         let mut target_set = 0;
         for cmd in commands {
-
             // println!("command_type: {:?}", dump_command_type(cmd));
             self.set_composite_operation(cmd.composite_operation, pixel_format);
 
@@ -1340,7 +1337,7 @@ impl Renderer for Mtl {
                         }
                     };
                     pixel_format = target_texture.pixel_format();
-                    
+
                     encoder = new_render_command_encoder(
                         &target_texture,
                         &command_buffer,

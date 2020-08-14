@@ -96,6 +96,14 @@ impl Transform2D {
         self[5] = 0.0;
     }
 
+    pub fn flip_x(&mut self) {
+        self[0] *= -1.0;
+    }
+
+    pub fn flip_y(&mut self) {
+        self[3] *= -1.0;
+    }
+
     pub fn rotate(&mut self, a: f32) {
         let cs = a.cos();
         let sn = a.sin();
