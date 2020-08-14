@@ -98,6 +98,8 @@ pub trait Renderer {
 
     fn screenshot(&mut self, images: &ImageStore<Self::Image>) -> Result<ImgVec<RGBA8>, ErrorKind>;
 
+    fn flip_y() -> bool;
+
     fn start_capture(&self);
     fn stop_capture(&self);
 

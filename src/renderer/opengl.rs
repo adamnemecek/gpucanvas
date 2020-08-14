@@ -523,6 +523,11 @@ impl Renderer for OpenGl {
         image.delete();
     }
 
+    fn flip_y() -> bool {
+        false
+    }
+
+
     fn screenshot(&mut self, _images: &ImageStore<Self::Image>) -> Result<ImgVec<RGBA8>, ErrorKind> {
         //let mut image = image::RgbaImage::new(self.view[0] as u32, self.view[1] as u32);
         let w = self.view[0] as usize;

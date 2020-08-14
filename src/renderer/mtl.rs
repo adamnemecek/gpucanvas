@@ -1418,6 +1418,10 @@ impl Renderer for Mtl {
     //     todo!();
     // }
 
+    fn flip_y() -> bool {
+        true
+    }
+
     fn screenshot(&mut self, images: &ImageStore<Self::Image>) -> Result<ImgVec<RGBA8>, ErrorKind> {
         println!("screenshot: {:?}", self.render_target);
 
