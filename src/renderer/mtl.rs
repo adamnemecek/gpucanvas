@@ -858,29 +858,32 @@ impl Mtl {
         encoder.push_debug_group("clear_rect");
         let view_size = *self.view_size_buffer;
 
-        let rect = Rect {
-            x: x as _,
-            // todo: this is a huge hack around the fact that i'm not sure
-            // how to properly flip the y coordinate
-            // it doesn't matter for single color rectangles
-            y: (view_size.h as u32 - y - height) as _,
-            // y: y as _,
-            w: width as _,
-            h: height as _,
-        };
-        let ndc_rect = rect.as_ndc((view_size.w, view_size.h));
+        // let rect = Rect {
+        //     x: x as _,
+        //     // todo: this is a huge hack around the fact that i'm not sure
+        //     // how to properly flip the y coordinate
+        //     // it doesn't matter for single color rectangles
+        //     y: (view_size.h as u32 - y - height) as _,
+        //     // y: y as _,
+        //     w: width as _,
+        //     h: height as _,
+        // };
+        // let ndc_rect = rect.as_ndc((view_size.w, view_size.h));
 
-        // let ndc_rect1 = Rect {
-        //     2.0 * vert.pos.x / viewSize.x - 1.0,
-        //     1.0 - 2.0 * vert.pos.y / viewSize.y,
-        // }
+
+        let ndc_rect1 = Rect {
+            x: 2.0 * (x as f32) / view_size.w - 1.0,
+            y: 1.0 - 2.0 * (y as f32) / view_size.h,
+            w: (width as f32) / view_size.w,
+            h: (height as f32) / view_size.h,
+        };
         // let ndc_rect = Rect {
         //     x: -1.0,
         //     y: -1.0,
         //     w: 1.0,
         //     h: 1.0,
         // };
-        let clear_rect = ClearRect { rect: ndc_rect, color };
+        let clear_rect = ClearRect { rect: ndc_rect1, color };
 
         encoder.set_render_pipeline_state(&self.clear_rect_pipeline_state.as_ref().unwrap());
         encoder.set_vertex_value(0, &clear_rect);
