@@ -28,7 +28,7 @@ impl MtlTexture {
         device: &metal::DeviceRef,
         command_queue: &metal::CommandQueueRef,
     ) -> Result<Self, ErrorKind> {
-        let info = ImageInfo::new(ImageFlags::empty(), 2, 2, PixelFormat::Gray8);
+        let info = ImageInfo::new(ImageFlags::empty(), 1, 1, PixelFormat::Gray8);
 
         Self::new(device, command_queue, info)
     }
