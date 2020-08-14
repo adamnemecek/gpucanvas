@@ -870,40 +870,41 @@ impl Mtl {
         // };
         // let ndc_rect = rect.as_ndc((view_size.w, view_size.h));
 
-
-        let ndc_rect1 = Rect {
-            x: 2.0 * (x as f32) / view_size.w - 1.0,
-            y: 1.0 - 2.0 * (y as f32) / view_size.h,
-            w: (width as f32) / view_size.w,
-            h: (height as f32) / view_size.h,
-        };
+        // let ndc_rect1 = Rect {
+        //     x: 2.0 * (x as f32) / view_size.w - 1.0,
+        //     // y: (1.0 - 2.0 * (y as f32) / view_size.h),
+        //     y: 2.0 * (y as f32) / view_size.h - 1.0,
+        //     w: (width as f32) / view_size.w,
+        //     h: -(height as f32) / view_size.h,
+        // };
+        // println!("clear_rect {:?}", ndc_rect1);
         // let ndc_rect = Rect {
         //     x: -1.0,
         //     y: -1.0,
-        //     w: 1.0,
-        //     h: 1.0,
+        //     w: 2.0,
+        //     h: 2.0,
         // };
-        let clear_rect = ClearRect { rect: ndc_rect1, color };
+        let clear_rect = ClearRect { rect: ndc_rect, color };
 
         encoder.set_render_pipeline_state(&self.clear_rect_pipeline_state.as_ref().unwrap());
         encoder.set_vertex_value(0, &clear_rect);
-        // encoder.set_scissor_rect(metal::MTLScissorRect {
-        //     x: x as _,
-        //     y: y as _,
-        //     width: width as _,
-        //     height: height as _,
-        // });
+        encoder.set_scissor_rect(metal::MTLScissorRect {
+            x: x as _,
+            y: y as _,
+            width: width as _,
+            height: height as _,
+        });
 
         encoder.draw_primitives_instanced(metal::MTLPrimitiveType::TriangleStrip, 0, 4, 1);
 
         // reset state
-        // let size = *self.view_size_buffer;
-        // encoder.set_scissor_rect(metal::MTLScissorRect {
-        //     x: 0,
-        //     y: 0,
-        //     width: size.w as _,
-        //     height: size.h as _,
-        // });
+        let size = *self.view_size_buffer;
+        encoder.set_scissor_rect(metal::MTLScissorRect {
+            x: 0,
+            y: 0,
+            width: size.w as _,
+            height: size.h as _,
+        });
 
         // reset buffers for the other commands
         encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
