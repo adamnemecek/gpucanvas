@@ -15,9 +15,9 @@ impl RPS {
         device: &metal::DeviceRef,
         blend_func: Blend,
         pipeline_pixel_format: metal::MTLPixelFormat,
+        vertex_descriptor: &metal::VertexDescriptorRef,
         vert_func: &metal::FunctionRef,
         frag_func: &metal::FunctionRef,
-        vertex_descriptor: &metal::VertexDescriptorRef,
         clear_rect_vert_func: &metal::FunctionRef,
         clear_rect_frag_func: &metal::FunctionRef,
     ) -> Self {
@@ -84,10 +84,20 @@ impl Hash for RPS {
 
 pub struct RPSCache {
     pub device: metal::Device,
+    vertex_descriptor: metal::VertexDescriptor,
+    vert_func: metal::Function,
+    frag_func: metal::Function,
+    clear_rect_vert_func: metal::Function,
+    clear_rect_frag_func: metal::Function,
+
 }
 
 impl RPSCache {
     pub fn new(device: &metal::DeviceRef) -> Self {
+        todo!()
+    }
+
+    pub fn get(&mut self, pipeline_pixel_format: metal::MTLPixelFormat, blend_func: Blend) -> RPS {
         todo!()
     }
 }
