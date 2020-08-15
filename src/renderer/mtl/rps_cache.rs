@@ -145,7 +145,14 @@ impl RPSCache {
             desc
         };
 
-        todo!()
+        Self {
+            device: device.to_owned(),
+            vertex_descriptor: vertex_descriptor.to_owned(),
+            vert_func,
+            frag_func,
+            clear_rect_vert_func,
+            clear_rect_frag_func,
+        }
     }
 
     pub fn get(&mut self, pipeline_pixel_format: metal::MTLPixelFormat, blend_func: Blend) -> RPS {
