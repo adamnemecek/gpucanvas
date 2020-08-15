@@ -650,7 +650,7 @@ pub(crate) fn render_atlas<T: Renderer>(
 
     // adam
     // debug draw
-    if false {
+    if true {
         canvas.save();
         canvas.reset();
 
@@ -712,17 +712,18 @@ fn render_glyph<T: Renderer>(
         (path, scale)
     };
 
-    // adam
-    // for opengl this will be zero
-    // however for metal, we need to subtract the difference between the
-    // target and the texture size
-    let gap = if T::flip_uv() {
-        canvas.view_size().h - TEXTURE_SIZE as f32
+    // Necessary for APIs where texture coordinates (uv) are flipped
+    // compared with OpenGL (essentially all, webgpu, metal, directx).
+    // Otherwise, there would be a gap above the rendered glyphs.
+
+    let (gap, x_factor) = if T::flip_uv() {
+        let size = canvas.view_size();
+        (size.h - TEXTURE_SIZE as f32, size.h / (TEXTURE_SIZE as f32))
     } else {
-        0.0
+        (0.0, 1.0)
     };
 
-    // println!("gap: {:?}", gap);
+    println!("gap: {:?}, x_factor: {:?}", gap, x_factor);
     assert!(gap >= 0.0);
     let x = dst_x as f32 - glyph.bearing_x + (line_width / 2.0) + padding as f32;
     let y = TEXTURE_SIZE as f32 - dst_y as f32 - glyph.bearing_y - (line_width / 2.0) - padding as f32 + gap;
@@ -788,8 +789,10 @@ fn render_glyph<T: Renderer>(
     canvas.restore();
 
     let g = RenderedGlyph {
+        // width: ((width as f32) * x_factor) as u32,
         width,
         height,
+        // atlas_x: (x_factor * dst_x as f32) as u32,
         atlas_x: dst_x as u32,
         atlas_y: dst_y as u32,
         texture_index: dst_index,
