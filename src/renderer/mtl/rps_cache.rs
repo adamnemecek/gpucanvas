@@ -1,5 +1,6 @@
-use super::Blend;
+
 use std::hash::{Hash, Hasher};
+use super::{VertexOffsets, Vertex, Blend};
 
 pub struct RPS {
     // pub device: metal::Device,
@@ -93,7 +94,57 @@ pub struct RPSCache {
 }
 
 impl RPSCache {
-    pub fn new(device: &metal::DeviceRef) -> Self {
+    pub fn new(
+        device: &metal::DeviceRef,
+        antialias: bool,
+    ) -> Self {
+        let root_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        let library_path = root_path.join("src/renderer/mtl/shaders.metallib");
+        let library = device.new_library_with_file(library_path).expect("library not found");
+
+
+        let vert_func = library
+            .get_function("vertexShader", None)
+            .expect("vert shader not found");
+
+        let frag_func: metal::Function = if antialias {
+            library
+                .get_function("fragmentShaderAA", None)
+                .expect("frag shader not found")
+        } else {
+            library
+                .get_function("fragmentShader", None)
+                .expect("frag shader not found")
+        };
+
+        let clear_rect_vert_func = library
+            .get_function("clear_rect_vertex", None)
+            .expect("clear_rect_vertex shader not found");
+
+        let clear_rect_frag_func = library
+            .get_function("clear_rect_fragment", None)
+            .expect("clear_rect_fragment shader not found");
+
+        let vertex_descriptor = {
+            let desc = metal::VertexDescriptor::new();
+            let offsets = VertexOffsets::new();
+
+            let attrs = desc.attributes().object_at(0).unwrap();
+            attrs.set_format(metal::MTLVertexFormat::Float2);
+            attrs.set_buffer_index(0);
+            attrs.set_offset(offsets.x as u64);
+
+            let attrs = desc.attributes().object_at(1).unwrap();
+            attrs.set_format(metal::MTLVertexFormat::Float2);
+            attrs.set_buffer_index(0);
+            attrs.set_offset(offsets.u as u64);
+
+            let layout = desc.layouts().object_at(0).unwrap();
+            layout.set_stride(std::mem::size_of::<Vertex>() as u64);
+            layout.set_step_function(metal::MTLVertexStepFunction::PerVertex);
+            desc
+        };
+
         todo!()
     }
 
