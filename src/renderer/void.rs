@@ -61,6 +61,10 @@ impl Renderer for Void {
         false
     }
 
+    fn flip_uv() -> bool {
+        false
+    }
+
     fn screenshot(&mut self, _images: &ImageStore<Self::Image>) -> Result<ImgVec<RGBA8>, ErrorKind> {
         Ok(ImgVec::new(Vec::new(), 0, 0))
     }

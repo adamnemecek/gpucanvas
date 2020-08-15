@@ -995,7 +995,15 @@ impl Renderer for Mtl {
     type Image = MtlTexture;
 
     fn view_size(&self) -> Size {
-        todo!()
+        *self.view_size_buffer
+        // match self.render_target {
+        //     RenderTarget::Screen => {
+        //         self.layer.drawable_size().into()
+        //     }
+        //     RenderTarget::Image(id) => {
+        //         todo!()
+        //     }
+        // }
     }
 
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
@@ -1355,6 +1363,10 @@ impl Renderer for Mtl {
     // }
 
     fn flip_y() -> bool {
+        true
+    }
+
+    fn flip_uv() -> bool {
         true
     }
 

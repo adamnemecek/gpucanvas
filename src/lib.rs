@@ -1141,4 +1141,8 @@ impl<T: Renderer> Canvas<T> {
     pub fn set_label(&self, id: ImageId, label: &str) {
         self.renderer.set_label(&self.images, id, label)
     }
+
+    pub fn view_size(&self) -> Size {
+        self.renderer.view_size()
+    }
 }

@@ -716,9 +716,10 @@ fn render_glyph<T: Renderer>(
     // for opengl this will be zero
     // however for metal, we need to subtract the difference between the
     // target and the texture size
-    // let diff = canvas.current_render_target
+    let gap = canvas.view_size().h - TEXTURE_SIZE as f32;
+    println!("gap: {:?}", gap);
     let x = dst_x as f32 - glyph.bearing_x + (line_width / 2.0) + padding as f32;
-    let y = TEXTURE_SIZE as f32 - dst_y as f32 - glyph.bearing_y - (line_width / 2.0) - padding as f32;
+    let y = TEXTURE_SIZE as f32 - dst_y as f32 - glyph.bearing_y - (line_width / 2.0) - padding as f32 + gap;
 
     canvas.translate(x, y);
 
