@@ -5,17 +5,23 @@ use super::{VertexOffsets, Vertex, Blend};
 pub struct RPS {
     // pub device: metal::Device,
     pub blend_func: Blend,
+    pub pixel_format: metal::MTLPixelFormat,
     pub pipeline_state: metal::RenderPipelineState,
     pub stencil_only_pipeline_state: metal::RenderPipelineState,
-    pub pipeline_pixel_format: metal::MTLPixelFormat,
     pub clear_rect_pipeline_state: metal::RenderPipelineState,
+}
+
+impl PartialEq for RPS {
+    fn eq(&self, other: &Self) -> bool {
+        self.blend_func == other.blend_func && self.pixel_format == other.pixel_format
+    }
 }
 
 impl RPS {
     fn new(
         device: &metal::DeviceRef,
         blend_func: Blend,
-        pipeline_pixel_format: metal::MTLPixelFormat,
+        pixel_format: metal::MTLPixelFormat,
         vertex_descriptor: &metal::VertexDescriptorRef,
         vert_func: &metal::FunctionRef,
         frag_func: &metal::FunctionRef,
@@ -24,7 +30,7 @@ impl RPS {
     ) -> Self {
         let desc = metal::RenderPipelineDescriptor::new();
         let color_attachment_desc = desc.color_attachments().object_at(0).unwrap();
-        color_attachment_desc.set_pixel_format(pipeline_pixel_format);
+        color_attachment_desc.set_pixel_format(pixel_format);
 
         // println!("blend: {:?}", blend_func);
         desc.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
@@ -51,7 +57,7 @@ impl RPS {
         let clear_rect_pipeline_state = {
             let desc2 = metal::RenderPipelineDescriptor::new();
             let color_attachment_desc2 = desc2.color_attachments().object_at(0).unwrap();
-            color_attachment_desc2.set_pixel_format(pipeline_pixel_format);
+            color_attachment_desc2.set_pixel_format(pixel_format);
             // color_attachent_desc.set_pixel_format(metal::MTLPixelFormat::BGRA8Unorm);;
             desc2.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
             desc2.set_fragment_function(Some(&clear_rect_frag_func));
@@ -70,7 +76,7 @@ impl RPS {
         Self {
             pipeline_state,
             blend_func,
-            pipeline_pixel_format,
+            pixel_format,
             clear_rect_pipeline_state,
             stencil_only_pipeline_state,
         }
