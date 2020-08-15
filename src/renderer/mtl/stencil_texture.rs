@@ -43,10 +43,13 @@ impl StencilTexture {
     }
 
     pub fn resize(&mut self, size: Size) {
-        if self.size.contains(&size) {
+        // todo fix adam
+        // if self.size.contains(&size) {
+        //     return;
+        // }
+        if self.size == size {
             return;
         }
-
         let desc = create_stencil_texture_descriptor(size);
 
         self.size = size;

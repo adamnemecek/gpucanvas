@@ -628,6 +628,7 @@ pub(crate) fn render_atlas<T: Renderer>(
 
             let mut q = Quad::default();
 
+            // adam
             q.x0 = glyph.x - half_line_width - GLYPH_PADDING as f32;
             q.y0 = glyph.y - half_line_width - GLYPH_PADDING as f32;
             q.x1 = q.x0 + rendered.width as f32;

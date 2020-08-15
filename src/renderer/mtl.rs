@@ -188,6 +188,8 @@ impl Mtl {
             layer.set_opaque(false);
         }
 
+        let size: Size = layer.drawable_size().into();
+
         // let root_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         // let library_path = root_path.join("src/renderer/mtl/shaders.metallib");
         // let library = device.new_library_with_file(library_path).expect("library not found");
@@ -332,7 +334,7 @@ impl Mtl {
             // blend_func,
             // render_encoder: None,
             // todo check what is this initialized to
-            view_size_buffer: GPUVar::with_value(&device, Size::default()),
+            view_size_buffer: GPUVar::with_value(&device, size),
             command_queue,
             // frag_func,
             // vert_func,
@@ -1140,11 +1142,11 @@ impl Renderer for Mtl {
         // self.last_rendered_texture = Some(color_texture.to_owned());
 
         let size = Size::new(target_texture.width() as _, target_texture.height() as _);
-        println!("target_texture size: {:?}", size);
-        println!("pre stencil texture size: {:?}", self.stencil_texture.size());
+        // println!("target_texture size: {:?}", size);
+        // println!("pre stencil texture size: {:?}", self.stencil_texture.size());
         self.stencil_texture.resize(size);
-        println!("pre stencil texture size: {:?}", self.stencil_texture.size());
-
+        // println!("pre stencil texture size: {:?}", self.stencil_texture.size());
+        assert_eq!(size, *self.view_size_buffer);
         let mut encoder = new_render_command_encoder(
             &target_texture,
             &command_buffer,

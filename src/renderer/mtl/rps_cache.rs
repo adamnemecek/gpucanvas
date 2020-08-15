@@ -17,6 +17,14 @@ pub struct RPS {
     pub clear_rect_pipeline_state: metal::RenderPipelineState,
 }
 
+impl std::fmt::Debug for RPS {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        fmt.debug_tuple("RPS")
+           .field(&self.blend_func)
+           .field(&self.pixel_format)
+           .finish()
+    }
+}
 impl PartialEq for RPS {
     fn eq(&self, other: &Self) -> bool {
         self.blend_func == other.blend_func && self.pixel_format == other.pixel_format
@@ -38,11 +46,14 @@ impl RPS {
         let color_attachment_desc = desc.color_attachments().object_at(0).unwrap();
         color_attachment_desc.set_pixel_format(pixel_format);
 
-        // println!("blend: {:?}", blend_func);
         desc.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
         desc.set_vertex_function(Some(vert_func));
         desc.set_fragment_function(Some(frag_func));
         desc.set_vertex_descriptor(Some(vertex_descriptor));
+        desc.set_label(&format!(
+            "rps: blend_func: {:?}, pixel_format: {:?}",
+            blend_func, pixel_format
+        ));
 
         color_attachment_desc.set_blending_enabled(true);
         color_attachment_desc.set_source_rgb_blend_factor(blend_func.src_rgb);
@@ -50,29 +61,29 @@ impl RPS {
         color_attachment_desc.set_destination_rgb_blend_factor(blend_func.dst_rgb);
         color_attachment_desc.set_destination_alpha_blend_factor(blend_func.dst_alpha);
 
-        // self.blend_func = blend_func;
         let pipeline_state = device.new_render_pipeline_state(&desc).unwrap();
-        pipeline_state.set_label(&format!(
-            "blend_func: {:?}, pixel_format: {:?}",
-            blend_func, pixel_format
-        ));
-        // pipeline_state.set_label("pipeline_state");
 
         desc.set_fragment_function(None);
+        desc.set_label(&format!(
+            "stencil_only rps: blend_func: {:?}, pixel_format: {:?}",
+            blend_func, pixel_format
+        ));
         color_attachment_desc.set_write_mask(metal::MTLColorWriteMask::empty());
         let stencil_only_pipeline_state = device.new_render_pipeline_state(&desc).unwrap();
-        // stencil_only_pipeline_state.set_label("stencil_only_pipeline_state");
 
         // the rest of this function is not in metalnvg
         let clear_rect_pipeline_state = {
             let desc2 = metal::RenderPipelineDescriptor::new();
             let color_attachment_desc2 = desc2.color_attachments().object_at(0).unwrap();
             color_attachment_desc2.set_pixel_format(pixel_format);
-            // color_attachent_desc.set_pixel_format(metal::MTLPixelFormat::BGRA8Unorm);;
             desc2.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
             desc2.set_fragment_function(Some(&clear_rect_frag_func));
             desc2.set_vertex_function(Some(&clear_rect_vert_func));
 
+            desc2.set_label(&format!(
+                "clear_rect rps: blend_func: {:?}, pixel_format: {:?}",
+                blend_func, pixel_format
+            ));
             color_attachment_desc2.set_blending_enabled(true);
             color_attachment_desc2.set_source_rgb_blend_factor(blend_func.src_rgb);
             color_attachment_desc2.set_source_alpha_blend_factor(blend_func.src_alpha);
