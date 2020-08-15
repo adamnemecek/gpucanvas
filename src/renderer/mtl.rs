@@ -1152,6 +1152,9 @@ impl Renderer for Mtl {
             // &self.uniform_buffer,
             // self.clear_buffer_on_flush,
         );
+
+        encoder.push_debug_group(&format!("frame: {:?}", self.frame));
+
         let mut pixel_format = target_texture.pixel_format();
         encoder.push_debug_group(&format!("target: {:?}", self.render_target));
         // match self.render_target {
@@ -1264,6 +1267,9 @@ impl Renderer for Mtl {
             }
         }
         // println!("loop end");
+        // pop the target debug group
+        encoder.pop_debug_group();
+        // pop the frame debug group
         encoder.pop_debug_group();
 
         encoder.end_encoding();
