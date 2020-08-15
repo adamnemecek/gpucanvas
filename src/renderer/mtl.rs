@@ -1244,7 +1244,7 @@ impl Renderer for Mtl {
             // self.clear_buffer_on_flush,
         );
         let mut pixel_format = target_texture.pixel_format();
-
+        encoder.push_debug_group(&format!("target: {:?}", self.render_target));
         // match self.render_target {
         //     RenderTarget::Screen => {
         //         encoder.push_debug_group("rendering to screen");
@@ -1312,6 +1312,8 @@ impl Renderer for Mtl {
                         // println!("skipping target setting");
                         continue;
                     }
+                    encoder.pop_debug_group();
+                    encoder.push_debug_group(&format!("target: {:?}", target));
                     target_set += 1;
                     //counters.set_render_target += 1;
                     // println!("---------switching from {:?} to {:?}", self.render_target, target);
@@ -1351,7 +1353,7 @@ impl Renderer for Mtl {
             }
         }
         // println!("loop end");
-        // encoder.pop_debug_group();
+        encoder.pop_debug_group();
 
         encoder.end_encoding();
 
