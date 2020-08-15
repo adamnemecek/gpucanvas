@@ -3,7 +3,7 @@
 use imgref::ImgVec;
 use rgb::RGBA8;
 
-use crate::{ErrorKind, ImageId, ImageInfo, ImageSource, ImageStore};
+use crate::{ErrorKind, ImageId, ImageInfo, ImageSource, ImageStore, Size};
 
 use super::{Command, Renderer, Vertex};
 
@@ -12,6 +12,10 @@ pub struct Void;
 
 impl Renderer for Void {
     type Image = VoidImage;
+
+    fn view_size(&self) -> Size {
+        todo!("not implemented");
+    }
 
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {}
 

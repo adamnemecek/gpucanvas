@@ -3,7 +3,7 @@
 use imgref::ImgVec;
 use rgb::RGBA8;
 
-use crate::{Color, CompositeOperationState, ErrorKind, FillRule, ImageId, ImageInfo, ImageSource, ImageStore};
+use crate::{Color, CompositeOperationState, ErrorKind, FillRule, ImageId, ImageInfo, ImageSource, ImageStore, Size};
 
 mod opengl;
 pub use opengl::OpenGl;
@@ -105,6 +105,8 @@ pub trait Renderer {
 
     fn label(&self, images: &ImageStore<Self::Image>, id: ImageId) -> String;
     fn set_label(&self, images: &ImageStore<Self::Image>, id: ImageId, label: &str);
+
+    fn view_size(&self) -> Size;
 }
 
 /// Vertex struct for specifying triangle geometry

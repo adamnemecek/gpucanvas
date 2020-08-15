@@ -145,7 +145,7 @@ fn main() {
             let mut path = Path::new();
             path.rect(20.0, 20.0, 80.0, 80.0);
 
-            canvas.fill_path(&mut path, Paint::color(Color::red()));
+            canvas.fill_path(&mut path, Paint::color(Color::green()));
 
             canvas.flush();
             canvas.restore();
@@ -383,7 +383,7 @@ fn main() {
                 // draw_rect(&mut canvas, 200.0, 200.0, 40.0, 40.0);
                 // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                 // draw_image(&mut canvas, images[0], 5.0, 300.0);
-                draw_text(&mut canvas, &fonts, "t", 600.0, 200.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "title", 600.0, 200.0, 100.0, 100.0);
                 // draw_image(&mut canvas, red_rect, 100.0, 100.0);
                 // draw_clear_rect2(&mut canvas, 0, 0, 200, 150);
 

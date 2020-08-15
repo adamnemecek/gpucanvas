@@ -188,8 +188,6 @@ impl Mtl {
             layer.set_opaque(false);
         }
 
-        let size: Size = layer.drawable_size().into();
-
         // let root_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         // let library_path = root_path.join("src/renderer/mtl/shaders.metallib");
         // let library = device.new_library_with_file(library_path).expect("library not found");
@@ -221,6 +219,7 @@ impl Mtl {
         // let clear_buffer_on_flush = false;
 
         let drawable_size = layer.drawable_size();
+        let size: Size = drawable_size.into();
 
         // let vertex_descriptor = {
         //     let desc = metal::VertexDescriptor::new();
@@ -995,6 +994,10 @@ fn new_render_command_encoder<'a>(
 impl Renderer for Mtl {
     type Image = MtlTexture;
 
+    fn view_size(&self) -> Size {
+        todo!()
+    }
+
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
         let size = Size::new(width as f32, height as f32);
         // self.screen_view = [width as _, height as _];
@@ -1146,7 +1149,7 @@ impl Renderer for Mtl {
         // println!("pre stencil texture size: {:?}", self.stencil_texture.size());
         self.stencil_texture.resize(size);
         // println!("pre stencil texture size: {:?}", self.stencil_texture.size());
-        assert_eq!(size, *self.view_size_buffer);
+        // assert_eq!(size, *self.view_size_buffer);
         let mut encoder = new_render_command_encoder(
             &target_texture,
             &command_buffer,

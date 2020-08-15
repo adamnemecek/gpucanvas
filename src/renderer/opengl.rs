@@ -8,7 +8,7 @@ use rgb::RGBA8;
 
 use crate::{
     renderer::{ImageId, Vertex},
-    BlendFactor, Color, CompositeOperationState, ErrorKind, FillRule, ImageInfo, ImageSource, ImageStore,
+    BlendFactor, Color, CompositeOperationState, ErrorKind, FillRule, ImageInfo, ImageSource, ImageStore, Size,
 };
 
 use super::{Command, CommandType, Params, RenderTarget, Renderer};
@@ -387,6 +387,10 @@ impl OpenGl {
 
 impl Renderer for OpenGl {
     type Image = GlTexture;
+
+    fn view_size(&self) -> Size {
+        todo!()
+    }
 
     fn set_size(&mut self, width: u32, height: u32, _dpi: f32) {
         self.view[0] = width as f32;

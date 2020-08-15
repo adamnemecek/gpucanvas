@@ -20,9 +20,9 @@ pub struct RPS {
 impl std::fmt::Debug for RPS {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_tuple("RPS")
-           .field(&self.blend_func)
-           .field(&self.pixel_format)
-           .finish()
+            .field(&self.blend_func)
+            .field(&self.pixel_format)
+            .finish()
     }
 }
 impl PartialEq for RPS {
