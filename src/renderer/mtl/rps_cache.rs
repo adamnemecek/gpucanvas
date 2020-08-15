@@ -1,6 +1,16 @@
-
+use super::{Blend, Vertex, VertexOffsets};
 use std::hash::{Hash, Hasher};
-use super::{VertexOffsets, Vertex, Blend};
+
+pub struct RPSKey {
+    pub blend_func: Blend,
+    pub pixel_format: metal::MTLPixelFormat,
+}
+
+impl PartialEq for RPSKey {
+    fn eq(&self, other: &Self) -> bool {
+        self.blend_func == other.blend_func && self.pixel_format == other.pixel_format
+    }
+}
 
 pub struct RPS {
     // pub device: metal::Device,
@@ -96,18 +106,13 @@ pub struct RPSCache {
     frag_func: metal::Function,
     clear_rect_vert_func: metal::Function,
     clear_rect_frag_func: metal::Function,
-
 }
 
 impl RPSCache {
-    pub fn new(
-        device: &metal::DeviceRef,
-        antialias: bool,
-    ) -> Self {
+    pub fn new(device: &metal::DeviceRef, antialias: bool) -> Self {
         let root_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         let library_path = root_path.join("src/renderer/mtl/shaders.metallib");
         let library = device.new_library_with_file(library_path).expect("library not found");
-
 
         let vert_func = library
             .get_function("vertexShader", None)
