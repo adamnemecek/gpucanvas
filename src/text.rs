@@ -649,7 +649,7 @@ pub(crate) fn render_atlas<T: Renderer>(
 
     // adam
     // debug draw
-    if false {
+    if true {
         canvas.save();
         canvas.reset();
 
@@ -783,7 +783,7 @@ fn render_glyph<T: Renderer>(
         padding,
     };
     //adam
-    // println!("shaped_glyph: {:#?}, rendered_glyph: {:#?}", glyph.c, g);
+    println!("shaped_glyph: {:#?}, rendered_glyph: {:#?}", glyph.c, g);
     Ok(g)
 }
 
@@ -809,11 +809,12 @@ fn find_texture_or_alloc<T: Renderer>(
         let loc = atlas
             .add_rect(width, height)
             .ok_or(ErrorKind::FontSizeTooLargeForAtlas)?;
-        let flags = if T::flip_y() {
-            ImageFlags::FLIP_Y
-        } else {
-            ImageFlags::empty()
-        };
+        // let flags = if T::flip_y() {
+        //     ImageFlags::FLIP_Y
+        // } else {
+        //     ImageFlags::empty()
+        // };
+        let flags = ImageFlags::empty();
         let info = ImageInfo::new(flags, atlas.size().0, atlas.size().1, PixelFormat::Gray8);
         let image_id = images.alloc(renderer, info)?;
 

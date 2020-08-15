@@ -16,7 +16,7 @@ mod mtl_texture;
 pub use mtl_texture::MtlTexture;
 
 mod rps_cache;
-pub use rps_cache::{RPS, RPSCache};
+pub use rps_cache::{RPSCache, RPS};
 
 mod stencil_texture;
 use stencil_texture::StencilTexture;
@@ -377,8 +377,7 @@ impl Mtl {
         // println!("set_composite operation {:?}", pixel_format);
         let blend_func: Blend = blend_func.into();
         if let Some(current_rps) = self.current_rps.as_ref() {
-            if current_rps.blend_func == blend_func && 
-                current_rps.pixel_format == pixel_format {
+            if current_rps.blend_func == blend_func && current_rps.pixel_format == pixel_format {
                 return;
             }
         }
@@ -455,7 +454,6 @@ impl Mtl {
         cmd: &Command,
         paint: Params,
     ) {
-
         let rps = self.current_rps.as_ref().unwrap();
         let pipeline_state = &rps.pipeline_state;
 
@@ -534,7 +532,6 @@ impl Mtl {
         let rps = self.current_rps.as_ref().unwrap();
         let pipeline_state = &rps.pipeline_state;
         let stencil_only_pipeline_state = &rps.stencil_only_pipeline_state;
-
 
         encoder.set_cull_mode(metal::MTLCullMode::None);
         encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
@@ -1225,12 +1222,13 @@ impl Renderer for Mtl {
                         continue;
                     }
                     encoder.pop_debug_group();
-                    encoder.push_debug_group(&format!("target: {:?}", target));
+
                     target_set += 1;
                     //counters.set_render_target += 1;
                     // println!("---------switching from {:?} to {:?}", self.render_target, target);
-                    self.set_target(images, target);
+
                     encoder.end_encoding();
+                    self.set_target(images, target);
 
                     // if let Some(drawable) = drawable.as_ref() {
                     //     command_buffer.present_drawable(&drawable);
@@ -1261,6 +1259,7 @@ impl Renderer for Mtl {
                         // &self.uniform_buffer,
                         // self.clear_buffer_on_flush,
                     );
+                    encoder.push_debug_group(&format!("target: {:?}", target));
                 }
             }
         }

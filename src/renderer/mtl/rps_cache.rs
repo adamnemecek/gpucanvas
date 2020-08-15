@@ -89,7 +89,6 @@ impl RPS {
     }
 }
 
-
 pub struct RPSCache {
     pub device: metal::Device,
     vertex_descriptor: metal::VertexDescriptor,
@@ -161,7 +160,10 @@ impl RPSCache {
     }
 
     pub fn get(&mut self, blend_func: Blend, pixel_format: metal::MTLPixelFormat) -> RPS {
-        let key = RPSKey { blend_func, pixel_format };
+        let key = RPSKey {
+            blend_func,
+            pixel_format,
+        };
         if !self.inner.contains_key(&key) {
             let rps = RPS::new(
                 &self.device,
@@ -171,12 +173,11 @@ impl RPSCache {
                 &self.vert_func,
                 &self.frag_func,
                 &self.clear_rect_vert_func,
-                &self.clear_rect_frag_func
+                &self.clear_rect_frag_func,
             );
 
             self.inner.insert(key, rps);
         }
         self.inner.get(&key).unwrap().clone()
-
     }
 }
