@@ -52,6 +52,10 @@ impl RPS {
 
         // self.blend_func = blend_func;
         let pipeline_state = device.new_render_pipeline_state(&desc).unwrap();
+        pipeline_state.set_label(&format!(
+            "blend_func: {:?}, pixel_format: {:?}",
+            blend_func, pixel_format
+        ));
         // pipeline_state.set_label("pipeline_state");
 
         desc.set_fragment_function(None);

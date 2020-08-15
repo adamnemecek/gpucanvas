@@ -34,6 +34,10 @@ impl StencilTexture {
         }
     }
 
+    pub fn size(&self) -> Size {
+        self.size
+    }
+
     pub fn tex(&self) -> &metal::TextureRef {
         &self.tex
     }

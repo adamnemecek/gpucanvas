@@ -22,7 +22,7 @@ mod stencil_texture;
 use stencil_texture::StencilTexture;
 
 mod mtl_ext;
-pub use mtl_ext::{generate_mipmaps, GPUVecExt, MtlTextureExt};
+pub use mtl_ext::{GPUVecExt, MtlTextureExt};
 
 #[repr(C)]
 #[derive(Copy, Clone, Default, Debug, PartialEq, PartialOrd)]
@@ -1140,7 +1140,10 @@ impl Renderer for Mtl {
         // self.last_rendered_texture = Some(color_texture.to_owned());
 
         let size = Size::new(target_texture.width() as _, target_texture.height() as _);
+        println!("target_texture size: {:?}", size);
+        println!("pre stencil texture size: {:?}", self.stencil_texture.size());
         self.stencil_texture.resize(size);
+        println!("pre stencil texture size: {:?}", self.stencil_texture.size());
 
         let mut encoder = new_render_command_encoder(
             &target_texture,

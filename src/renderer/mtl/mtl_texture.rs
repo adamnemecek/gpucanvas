@@ -1,3 +1,4 @@
+use super::MtlTextureExt;
 use crate::{ErrorKind, ImageFlags, ImageInfo, ImageSource, PixelFormat};
 use image::{DynamicImage, GenericImageView};
 use rgb::ComponentBytes;
@@ -82,7 +83,7 @@ impl MtlTexture {
         let tex = device.new_texture(&desc);
 
         if generate_mipmaps {
-            super::generate_mipmaps(command_queue, &tex);
+            tex.generate_mipmaps(command_queue);
         }
 
         let sampler_desc = metal::SamplerDescriptor::new();
@@ -190,7 +191,8 @@ impl MtlTexture {
 
         let generate_mipmaps = self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS);
         if generate_mipmaps {
-            super::generate_mipmaps(&self.command_queue, &self.tex);
+            // super::generate_mipmaps(&self.command_queue, &self.tex);
+            self.tex.generate_mipmaps(&self.command_queue);
         }
 
         Ok(())
