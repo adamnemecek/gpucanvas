@@ -16,7 +16,7 @@ mod mtl_texture;
 pub use mtl_texture::MtlTexture;
 
 mod rps_cache;
-pub use rps_cache::RPSCache;
+pub use rps_cache::{RPS, RPSCache};
 
 mod stencil_texture;
 use stencil_texture::StencilTexture;
@@ -92,9 +92,9 @@ pub struct Mtl {
     clear_color: Color,
     view_size_buffer: GPUVar<Size>,
     // screen_view: [f32; 2],
-    vertex_descriptor: metal::VertexDescriptor,
+    // vertex_descriptor: metal::VertexDescriptor,
 
-    blend_func: Blend,
+    // blend_func: Blend,
     // clear_buffer_on_flush: bool,
     //
     // fill and stroke have a stencil, anti_alias_stencil and shape_stencil
@@ -107,13 +107,15 @@ pub struct Mtl {
     stroke_anti_alias_stencil_state: metal::DepthStencilState,
     stroke_clear_stencil_state: metal::DepthStencilState,
 
-    vert_func: metal::Function,
-    frag_func: metal::Function,
+    rps_cache: RPSCache,
+    current_rps: Option<RPS>,
+    // vert_func: metal::Function,
+    // frag_func: metal::Function,
 
-    pipeline_pixel_format: metal::MTLPixelFormat,
+    // pipeline_pixel_format: metal::MTLPixelFormat,
 
-    pipeline_state: Option<metal::RenderPipelineState>,
-    stencil_only_pipeline_state: Option<metal::RenderPipelineState>,
+    // pipeline_state: Option<metal::RenderPipelineState>,
+    // stencil_only_pipeline_state: Option<metal::RenderPipelineState>,
 
     // these are from mvgbuffer
     stencil_texture: StencilTexture,
@@ -127,9 +129,9 @@ pub struct Mtl {
     // pseudo_sampler:
 
     // clear_rect
-    clear_rect_vert_func: metal::Function,
-    clear_rect_frag_func: metal::Function,
-    clear_rect_pipeline_state: Option<metal::RenderPipelineState>,
+    // clear_rect_vert_func: metal::Function,
+    // clear_rect_frag_func: metal::Function,
+    // clear_rect_pipeline_state: Option<metal::RenderPipelineState>,
 
     // Needed for screenshoting,
     //
@@ -186,56 +188,57 @@ impl Mtl {
             layer.set_opaque(false);
         }
 
-        let root_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        let library_path = root_path.join("src/renderer/mtl/shaders.metallib");
-        let library = device.new_library_with_file(library_path).expect("library not found");
+        // let root_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+        // let library_path = root_path.join("src/renderer/mtl/shaders.metallib");
+        // let library = device.new_library_with_file(library_path).expect("library not found");
         let command_queue = device.new_command_queue();
+        let rps_cache = RPSCache::new(device, antialias);
 
-        let vert_func = library
-            .get_function("vertexShader", None)
-            .expect("vert shader not found");
+        // let vert_func = library
+        //     .get_function("vertexShader", None)
+        //     .expect("vert shader not found");
 
-        let frag_func: metal::Function = if antialias {
-            library
-                .get_function("fragmentShaderAA", None)
-                .expect("frag shader not found")
-        } else {
-            library
-                .get_function("fragmentShader", None)
-                .expect("frag shader not found")
-        };
+        // let frag_func: metal::Function = if antialias {
+        //     library
+        //         .get_function("fragmentShaderAA", None)
+        //         .expect("frag shader not found")
+        // } else {
+        //     library
+        //         .get_function("fragmentShader", None)
+        //         .expect("frag shader not found")
+        // };
 
-        let clear_rect_vert_func = library
-            .get_function("clear_rect_vertex", None)
-            .expect("clear_rect_vertex shader not found");
+        // let clear_rect_vert_func = library
+        //     .get_function("clear_rect_vertex", None)
+        //     .expect("clear_rect_vertex shader not found");
 
-        let clear_rect_frag_func = library
-            .get_function("clear_rect_fragment", None)
-            .expect("clear_rect_fragment shader not found");
+        // let clear_rect_frag_func = library
+        //     .get_function("clear_rect_fragment", None)
+        //     .expect("clear_rect_fragment shader not found");
 
         // let clear_buffer_on_flush = false;
 
         let drawable_size = layer.drawable_size();
 
-        let vertex_descriptor = {
-            let desc = metal::VertexDescriptor::new();
-            let offsets = VertexOffsets::new();
+        // let vertex_descriptor = {
+        //     let desc = metal::VertexDescriptor::new();
+        //     let offsets = VertexOffsets::new();
 
-            let attrs = desc.attributes().object_at(0).unwrap();
-            attrs.set_format(metal::MTLVertexFormat::Float2);
-            attrs.set_buffer_index(0);
-            attrs.set_offset(offsets.x as u64);
+        //     let attrs = desc.attributes().object_at(0).unwrap();
+        //     attrs.set_format(metal::MTLVertexFormat::Float2);
+        //     attrs.set_buffer_index(0);
+        //     attrs.set_offset(offsets.x as u64);
 
-            let attrs = desc.attributes().object_at(1).unwrap();
-            attrs.set_format(metal::MTLVertexFormat::Float2);
-            attrs.set_buffer_index(0);
-            attrs.set_offset(offsets.u as u64);
+        //     let attrs = desc.attributes().object_at(1).unwrap();
+        //     attrs.set_format(metal::MTLVertexFormat::Float2);
+        //     attrs.set_buffer_index(0);
+        //     attrs.set_offset(offsets.u as u64);
 
-            let layout = desc.layouts().object_at(0).unwrap();
-            layout.set_stride(std::mem::size_of::<Vertex>() as u64);
-            layout.set_step_function(metal::MTLVertexStepFunction::PerVertex);
-            desc
-        };
+        //     let layout = desc.layouts().object_at(0).unwrap();
+        //     layout.set_stride(std::mem::size_of::<Vertex>() as u64);
+        //     layout.set_step_function(metal::MTLVertexStepFunction::PerVertex);
+        //     desc
+        // };
 
         // pseudosampler sescriptor
         let pseudo_texture = MtlTexture::new_pseudo_texture(device, &command_queue).unwrap();
@@ -244,12 +247,12 @@ impl Mtl {
         stencil_texture.set_label("stencil_texture");
 
         // Initializes default blend states.
-        let blend_func = Blend {
-            src_rgb: metal::MTLBlendFactor::One,
-            dst_rgb: metal::MTLBlendFactor::OneMinusSourceAlpha,
-            src_alpha: metal::MTLBlendFactor::One,
-            dst_alpha: metal::MTLBlendFactor::OneMinusSourceAlpha,
-        };
+        // let blend_func = Blend {
+        //     src_rgb: metal::MTLBlendFactor::One,
+        //     dst_rgb: metal::MTLBlendFactor::OneMinusSourceAlpha,
+        //     src_alpha: metal::MTLBlendFactor::One,
+        //     dst_alpha: metal::MTLBlendFactor::OneMinusSourceAlpha,
+        // };
 
         // // Initializes stencil states.
         let stencil_descriptor = metal::DepthStencilDescriptor::new();
@@ -324,14 +327,16 @@ impl Mtl {
             layer: layer.to_owned(),
             debug,
             antialias,
-            blend_func,
+            rps_cache,
+            current_rps: None,
+            // blend_func,
             // render_encoder: None,
             // todo check what is this initialized to
             view_size_buffer: GPUVar::with_value(&device, Size::default()),
             command_queue,
-            frag_func,
-            vert_func,
-            pipeline_state: None,
+            // frag_func,
+            // vert_func,
+            // pipeline_state: None,
             // screen_view: [0.0, 0.0],
             // clear_buffer_on_flush,
             default_stencil_state,
@@ -343,21 +348,21 @@ impl Mtl {
             stroke_clear_stencil_state,
             frag_size: std::mem::size_of::<Params>(),
             index_size: 4, // MTLIndexTypeUInt32
-            stencil_only_pipeline_state: None,
+            // stencil_only_pipeline_state: None,
             stencil_texture,
             index_buffer: GPUVec::with_capacity(&device, 32),
             vertex_buffer: GPUVec::with_capacity(&device, 32),
             // uniform_buffer: GPUVec::with_capacity(&device, 2),
-            vertex_descriptor: vertex_descriptor.to_owned(),
-            pipeline_pixel_format: metal::MTLPixelFormat::Invalid,
+            // vertex_descriptor: vertex_descriptor.to_owned(),
+            // pipeline_pixel_format: metal::MTLPixelFormat::Invalid,
             render_target: RenderTarget::Screen,
             pseudo_texture,
             clear_color: Color::blue(),
             device: device.to_owned(),
 
-            clear_rect_vert_func,
-            clear_rect_frag_func,
-            clear_rect_pipeline_state: None,
+            // clear_rect_vert_func,
+            // clear_rect_frag_func,
+            // clear_rect_pipeline_state: None,
             // last_rendered_texture: None,
             frame: 0,
         }
@@ -371,67 +376,75 @@ impl Mtl {
     ) {
         // println!("set_composite operation {:?}", pixel_format);
         let blend_func: Blend = blend_func.into();
-
-        if self.pipeline_state.is_some()
-            && self.stencil_only_pipeline_state.is_some()
-            && self.pipeline_pixel_format == pixel_format
-            && self.blend_func == blend_func
-        {
-            // println!("skipping setting composite op");
-            return;
+        if let Some(current_rps) = self.current_rps.as_ref() {
+            if current_rps.blend_func == blend_func && 
+                current_rps.pixel_format == pixel_format {
+                return;
+            }
         }
-        println!("setting composite op for {:?} and {:?}", blend_func, pixel_format);
 
-        let desc = metal::RenderPipelineDescriptor::new();
-        let color_attachment_desc = desc.color_attachments().object_at(0).unwrap();
-        color_attachment_desc.set_pixel_format(pixel_format);
+        self.current_rps = Some(self.rps_cache.get(blend_func, pixel_format));
 
-        // println!("blend: {:?}", blend_func);
-        desc.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
-        desc.set_vertex_function(Some(&self.vert_func));
-        desc.set_fragment_function(Some(&self.frag_func));
-        desc.set_vertex_descriptor(Some(&self.vertex_descriptor));
+        // if self.pipeline_state.is_some()
+        //     && self.stencil_only_pipeline_state.is_some()
+        //     && self.pipeline_pixel_format == pixel_format
+        //     && self.blend_func == blend_func
+        // {
+        //     // println!("skipping setting composite op");
+        //     return;
+        // }
+        // println!("setting composite op for {:?} and {:?}", blend_func, pixel_format);
 
-        color_attachment_desc.set_blending_enabled(true);
-        color_attachment_desc.set_source_rgb_blend_factor(blend_func.src_rgb);
-        color_attachment_desc.set_source_alpha_blend_factor(blend_func.src_alpha);
-        color_attachment_desc.set_destination_rgb_blend_factor(blend_func.dst_rgb);
-        color_attachment_desc.set_destination_alpha_blend_factor(blend_func.dst_alpha);
+        // let desc = metal::RenderPipelineDescriptor::new();
+        // let color_attachment_desc = desc.color_attachments().object_at(0).unwrap();
+        // color_attachment_desc.set_pixel_format(pixel_format);
 
-        self.blend_func = blend_func;
-        let pipeline_state = self.device.new_render_pipeline_state(&desc).unwrap();
-        // pipeline_state.set_label("pipeline_state");
-        self.pipeline_state = Some(pipeline_state);
+        // // println!("blend: {:?}", blend_func);
+        // desc.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
+        // desc.set_vertex_function(Some(&self.vert_func));
+        // desc.set_fragment_function(Some(&self.frag_func));
+        // desc.set_vertex_descriptor(Some(&self.vertex_descriptor));
 
-        desc.set_fragment_function(None);
-        color_attachment_desc.set_write_mask(metal::MTLColorWriteMask::empty());
-        let stencil_only_pipeline_state = self.device.new_render_pipeline_state(&desc).unwrap();
-        // stencil_only_pipeline_state.set_label("stencil_only_pipeline_state");
-        self.stencil_only_pipeline_state = Some(stencil_only_pipeline_state);
+        // color_attachment_desc.set_blending_enabled(true);
+        // color_attachment_desc.set_source_rgb_blend_factor(blend_func.src_rgb);
+        // color_attachment_desc.set_source_alpha_blend_factor(blend_func.src_alpha);
+        // color_attachment_desc.set_destination_rgb_blend_factor(blend_func.dst_rgb);
+        // color_attachment_desc.set_destination_alpha_blend_factor(blend_func.dst_alpha);
 
-        self.pipeline_pixel_format = pixel_format;
+        // // self.blend_func = blend_func;
+        // // let pipeline_state = self.device.new_render_pipeline_state(&desc).unwrap();
+        // // pipeline_state.set_label("pipeline_state");
+        // self.pipeline_state = Some(pipeline_state);
 
-        // the rest of this function is not in metalnvg
-        let clear_rect_pipeline_state = {
-            let desc2 = metal::RenderPipelineDescriptor::new();
-            let color_attachment_desc2 = desc2.color_attachments().object_at(0).unwrap();
-            color_attachment_desc2.set_pixel_format(pixel_format);
-            // color_attachent_desc.set_pixel_format(metal::MTLPixelFormat::BGRA8Unorm);;
-            desc2.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
-            desc2.set_fragment_function(Some(&self.clear_rect_frag_func));
-            desc2.set_vertex_function(Some(&self.clear_rect_vert_func));
+        // desc.set_fragment_function(None);
+        // color_attachment_desc.set_write_mask(metal::MTLColorWriteMask::empty());
+        // let stencil_only_pipeline_state = self.device.new_render_pipeline_state(&desc).unwrap();
+        // // stencil_only_pipeline_state.set_label("stencil_only_pipeline_state");
+        // self.stencil_only_pipeline_state = Some(stencil_only_pipeline_state);
 
-            color_attachment_desc2.set_blending_enabled(true);
-            color_attachment_desc2.set_source_rgb_blend_factor(blend_func.src_rgb);
-            color_attachment_desc2.set_source_alpha_blend_factor(blend_func.src_alpha);
-            color_attachment_desc2.set_destination_rgb_blend_factor(blend_func.dst_rgb);
-            color_attachment_desc2.set_destination_alpha_blend_factor(blend_func.dst_alpha);
+        // self.pipeline_pixel_format = pixel_format;
 
-            self.device.new_render_pipeline_state(&desc2).unwrap()
-        };
+        // // the rest of this function is not in metalnvg
+        // let clear_rect_pipeline_state = {
+        //     let desc2 = metal::RenderPipelineDescriptor::new();
+        //     let color_attachment_desc2 = desc2.color_attachments().object_at(0).unwrap();
+        //     color_attachment_desc2.set_pixel_format(pixel_format);
+        //     // color_attachent_desc.set_pixel_format(metal::MTLPixelFormat::BGRA8Unorm);;
+        //     desc2.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
+        //     desc2.set_fragment_function(Some(&self.clear_rect_frag_func));
+        //     desc2.set_vertex_function(Some(&self.clear_rect_vert_func));
 
-        // clear_rect_pipeline_state.set_label("clear_rect_pipeline_state");
-        self.clear_rect_pipeline_state = Some(clear_rect_pipeline_state);
+        //     color_attachment_desc2.set_blending_enabled(true);
+        //     color_attachment_desc2.set_source_rgb_blend_factor(blend_func.src_rgb);
+        //     color_attachment_desc2.set_source_alpha_blend_factor(blend_func.src_alpha);
+        //     color_attachment_desc2.set_destination_rgb_blend_factor(blend_func.dst_rgb);
+        //     color_attachment_desc2.set_destination_alpha_blend_factor(blend_func.dst_alpha);
+
+        //     self.device.new_render_pipeline_state(&desc2).unwrap()
+        // };
+
+        // // clear_rect_pipeline_state.set_label("clear_rect_pipeline_state");
+        // self.clear_rect_pipeline_state = Some(clear_rect_pipeline_state);
     }
 
     /// done
@@ -442,10 +455,14 @@ impl Mtl {
         cmd: &Command,
         paint: Params,
     ) {
+
+        let rps = self.current_rps.as_ref().unwrap();
+        let pipeline_state = &rps.pipeline_state;
+
         #[cfg(debug_assertions)]
         encoder.push_debug_group("convex_fill");
 
-        encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
+        encoder.set_render_pipeline_state(&pipeline_state);
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
 
         //println!("convex_fill start");
@@ -514,9 +531,14 @@ impl Mtl {
         #[cfg(debug_assertions)]
         encoder.push_debug_group("concave_fill");
 
+        let rps = self.current_rps.as_ref().unwrap();
+        let pipeline_state = &rps.pipeline_state;
+        let stencil_only_pipeline_state = &rps.stencil_only_pipeline_state;
+
+
         encoder.set_cull_mode(metal::MTLCullMode::None);
         encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
-        encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state.as_ref().unwrap());
+        encoder.set_render_pipeline_state(stencil_only_pipeline_state);
 
         // todo metal nanovg doesn't have this but gpucanvas does
         self.set_uniforms(encoder, images, stencil_paint, None, None);
@@ -546,7 +568,7 @@ impl Mtl {
         }
         // Restores states.
         encoder.set_cull_mode(metal::MTLCullMode::Back);
-        encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
+        encoder.set_render_pipeline_state(pipeline_state);
 
         // Draws anti-aliased fragments.
         self.set_uniforms(encoder, images, fill_paint, cmd.image, cmd.alpha_mask);
@@ -607,10 +629,14 @@ impl Mtl {
         #[cfg(debug_assertions)]
         encoder.push_debug_group("stencil_stroke");
 
+        let rps = self.current_rps.as_ref().unwrap();
+        let pipeline_state = &rps.pipeline_state;
+        let stencil_only_pipeline_state = &rps.stencil_only_pipeline_state;
+
         // Fills the stroke base without overlap.
         self.set_uniforms(encoder, images, paint2, cmd.image, cmd.alpha_mask);
         encoder.set_depth_stencil_state(&self.stroke_shape_stencil_state);
-        encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
+        encoder.set_render_pipeline_state(pipeline_state);
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
@@ -631,7 +657,7 @@ impl Mtl {
 
         // Clears stencil buffer.
         encoder.set_depth_stencil_state(&self.stroke_clear_stencil_state);
-        encoder.set_render_pipeline_state(&self.stencil_only_pipeline_state.as_ref().unwrap());
+        encoder.set_render_pipeline_state(&stencil_only_pipeline_state);
 
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
@@ -655,8 +681,11 @@ impl Mtl {
         #[cfg(debug_assertions)]
         encoder.push_debug_group("triangles");
 
+        let rps = self.current_rps.as_ref().unwrap();
+        let pipeline_state = &rps.pipeline_state;
+
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
-        encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
+        encoder.set_render_pipeline_state(&pipeline_state);
         if let Some((start, count)) = cmd.triangles_verts {
             encoder.draw_primitives(metal::MTLPrimitiveType::Triangle, start as u64, count as u64);
         }
@@ -666,7 +695,7 @@ impl Mtl {
     }
 
     fn set_uniforms(
-        &mut self,
+        &self,
         encoder: &metal::RenderCommandEncoderRef,
         images: &ImageStore<MtlTexture>,
         paint: Params,
@@ -734,6 +763,11 @@ impl Mtl {
     ) {
         // #[cfg(debug_assertions)]
         encoder.push_debug_group("clear_rect");
+
+        let rps = self.current_rps.as_ref().unwrap();
+        let pipeline_state = &rps.pipeline_state;
+        let clear_rect_pipeline_state = &rps.clear_rect_pipeline_state;
+
         // let view_size = *self.view_size_buffer;
 
         // let rect = Rect {
@@ -764,7 +798,7 @@ impl Mtl {
         };
         let clear_rect = ClearRect { rect: ndc_rect, color };
 
-        encoder.set_render_pipeline_state(&self.clear_rect_pipeline_state.as_ref().unwrap());
+        encoder.set_render_pipeline_state(clear_rect_pipeline_state);
         encoder.set_vertex_value(0, &clear_rect);
         encoder.set_scissor_rect(metal::MTLScissorRect {
             x: x as _,
@@ -785,7 +819,7 @@ impl Mtl {
         });
 
         // reset buffers for the other commands
-        encoder.set_render_pipeline_state(&self.pipeline_state.as_ref().unwrap());
+        encoder.set_render_pipeline_state(&pipeline_state);
         encoder.set_vertex_buffer(0, Some(self.vertex_buffer.as_ref()), 0);
         encoder.set_vertex_buffer(1, Some(self.view_size_buffer.as_ref()), 0);
 

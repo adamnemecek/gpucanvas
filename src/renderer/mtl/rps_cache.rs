@@ -8,6 +8,7 @@ struct RPSKey {
     pub pixel_format: metal::MTLPixelFormat,
 }
 
+#[derive(Clone)]
 pub struct RPS {
     pub blend_func: Blend,
     pub pixel_format: metal::MTLPixelFormat,
@@ -159,8 +160,8 @@ impl RPSCache {
         }
     }
 
-    pub fn get(&mut self, pixel_format: metal::MTLPixelFormat, blend_func: Blend) -> &'_ RPS {
-        let key = RPSKey { pixel_format, blend_func };
+    pub fn get(&mut self, blend_func: Blend, pixel_format: metal::MTLPixelFormat) -> RPS {
+        let key = RPSKey { blend_func, pixel_format };
         if !self.inner.contains_key(&key) {
             let rps = RPS::new(
                 &self.device,
@@ -175,7 +176,7 @@ impl RPSCache {
 
             self.inner.insert(key, rps);
         }
-        self.inner.get(&key).unwrap()
+        self.inner.get(&key).unwrap().clone()
 
     }
 }
