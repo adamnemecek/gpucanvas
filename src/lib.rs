@@ -541,6 +541,18 @@ where
         self.state_mut().transform.premultiply(&t);
     }
 
+    pub fn flip_x(&mut self) {
+        let mut t = Transform2D::identity();
+        t.flip_x();
+        self.state_mut().transform.premultiply(&t);
+    }
+
+    pub fn flip_y(&mut self) {
+        let mut t = Transform2D::identity();
+        t.flip_y();
+        self.state_mut().transform.premultiply(&t);
+    }
+
     /// Rotates the current coordinate system. Angle is specified in radians.
     pub fn rotate(&mut self, angle: f32) {
         let mut t = Transform2D::identity();
