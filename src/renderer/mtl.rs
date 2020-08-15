@@ -142,7 +142,7 @@ struct ClearRect {
     color: Color,
 }
 
-#[derive(Copy, Clone, PartialEq, Eq, Debug)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug, Hash)]
 pub struct Blend {
     pub src_rgb: metal::MTLBlendFactor,
     pub dst_rgb: metal::MTLBlendFactor,

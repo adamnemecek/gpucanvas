@@ -1,19 +1,14 @@
 use super::{Blend, Vertex, VertexOffsets};
+use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 
+#[derive(Clone, Copy, PartialEq, Eq, Hash)]
 pub struct RPSKey {
     pub blend_func: Blend,
     pub pixel_format: metal::MTLPixelFormat,
 }
 
-impl PartialEq for RPSKey {
-    fn eq(&self, other: &Self) -> bool {
-        self.blend_func == other.blend_func && self.pixel_format == other.pixel_format
-    }
-}
-
 pub struct RPS {
-    // pub device: metal::Device,
     pub blend_func: Blend,
     pub pixel_format: metal::MTLPixelFormat,
     pub pipeline_state: metal::RenderPipelineState,
@@ -93,11 +88,6 @@ impl RPS {
     }
 }
 
-impl Hash for RPS {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        todo!()
-    }
-}
 
 pub struct RPSCache {
     pub device: metal::Device,
@@ -106,6 +96,8 @@ pub struct RPSCache {
     frag_func: metal::Function,
     clear_rect_vert_func: metal::Function,
     clear_rect_frag_func: metal::Function,
+
+    inner: HashMap<RPSKey, RPS>,
 }
 
 impl RPSCache {
@@ -163,10 +155,27 @@ impl RPSCache {
             frag_func,
             clear_rect_vert_func,
             clear_rect_frag_func,
+            inner: Default::default(),
         }
     }
 
-    pub fn get(&mut self, pipeline_pixel_format: metal::MTLPixelFormat, blend_func: Blend) -> RPS {
-        todo!()
+    pub fn get(&mut self, pixel_format: metal::MTLPixelFormat, blend_func: Blend) -> &'_ RPS {
+        let key = RPSKey { pixel_format, blend_func };
+        if !self.inner.contains_key(&key) {
+            let rps = RPS::new(
+                &self.device,
+                blend_func,
+                pixel_format,
+                &self.vertex_descriptor,
+                &self.vert_func,
+                &self.frag_func,
+                &self.clear_rect_vert_func,
+                &self.clear_rect_frag_func
+            );
+
+            self.inner.insert(key, rps);
+        }
+        self.inner.get(&key).unwrap()
+
     }
 }
