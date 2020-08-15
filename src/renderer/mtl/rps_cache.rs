@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash)]
-pub struct RPSKey {
+struct RPSKey {
     pub blend_func: Blend,
     pub pixel_format: metal::MTLPixelFormat,
 }

@@ -638,16 +638,18 @@ pub(crate) fn render_atlas<T: Renderer>(
             q.s1 = (rendered.atlas_x + rendered.width) as f32 * itw;
             q.t1 = (rendered.atlas_y + rendered.height) as f32 * ith;
 
-            println!("quad: {:?} = {:#?}", glyph.c, q);
+            // adam
+            // println!("quad: {:?} = {:#?}", glyph.c, q);
             cmd.quads.push(q);
         }
     }
-    println!("-------");
+    // println!("-------");
 
     canvas.set_render_target(initial_render_target);
 
+    // adam
     // debug draw
-    if true {
+    if false {
         canvas.save();
         canvas.reset();
 
@@ -780,7 +782,8 @@ fn render_glyph<T: Renderer>(
         texture_index: dst_index,
         padding,
     };
-    println!("shaped_glyph: {:#?}, rendered_glyph: {:#?}", glyph.c, g);
+    //adam
+    // println!("shaped_glyph: {:#?}, rendered_glyph: {:#?}", glyph.c, g);
     Ok(g)
 }
 
