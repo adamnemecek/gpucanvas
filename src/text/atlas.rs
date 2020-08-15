@@ -17,11 +17,7 @@ impl Atlas {
         Self {
             width,
             height,
-            nodes: vec![Node {
-                x: 0,
-                y: 0,
-                width,
-            }],
+            nodes: vec![Node { x: 0, y: 0, width }],
         }
     }
 

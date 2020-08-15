@@ -1057,7 +1057,6 @@ where
                     ];
 
                     verts.extend_from_slice(&data);
-
                 }
 
                 paint.set_alpha_mask(Some(cmd.image_id));

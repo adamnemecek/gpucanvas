@@ -143,10 +143,7 @@ impl MtlTexture {
         let h = self.tex().height();
         let region = metal::MTLRegion::new_2d(0, 0, w, h);
 
-        let bytes = vec![
-            color;
-            (w * h) as _
-        ];
+        let bytes = vec![color; (w * h) as _];
         self.replace_region(region, bytes.as_bytes(), (4 * w) as _);
     }
 

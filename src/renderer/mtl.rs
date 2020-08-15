@@ -920,7 +920,6 @@ impl Mtl {
         //     return;
         // }
         // println!("setting target from {:?} to {:?}", self.render_target, target);
-
         self.render_target = target;
         let size = match target {
             RenderTarget::Screen => self.layer.drawable_size().into(),
@@ -1399,8 +1398,13 @@ impl Renderer for Mtl {
     }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
-        let mut  img = Self::Image::new(&self.device, &self.command_queue, info);
-        img.as_mut().unwrap().set_clear_color(rgb::RGBA8{ r: 255, g: 255, b: 255, a: 255});
+        let mut img = Self::Image::new(&self.device, &self.command_queue, info);
+        img.as_mut().unwrap().set_clear_color(rgb::RGBA8 {
+            r: 255,
+            g: 255,
+            b: 255,
+            a: 255,
+        });
         img
     }
 
