@@ -15,6 +15,9 @@ use crate::{
 mod mtl_texture;
 pub use mtl_texture::MtlTexture;
 
+mod rps_cache;
+pub use rps_cache::*;
+
 mod stencil_texture;
 use stencil_texture::StencilTexture;
 
