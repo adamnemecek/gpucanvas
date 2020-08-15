@@ -650,7 +650,7 @@ pub(crate) fn render_atlas<T: Renderer>(
 
     // adam
     // debug draw
-    if true {
+    if false {
         canvas.save();
         canvas.reset();
 

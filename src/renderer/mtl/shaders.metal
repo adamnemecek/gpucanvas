@@ -228,9 +228,9 @@ fragment float4 fragmentShaderAA(
         float2 ftcoord = float2(in.ftcoord.x, 1.0 - in.ftcoord.y);
         float alpha = alpha_texture.sample(alpha_samplr, ftcoord).r;
 
-        // if (alpha < uniforms.strokeThr) {
-        //     discard_fragment();
-        // }
+        if (alpha < uniforms.strokeThr) {
+            discard_fragment();
+        }
     //     // result /= strokeAlpha;
     //     result /= 0.02;
         result = float4(result.xyz, alpha);
