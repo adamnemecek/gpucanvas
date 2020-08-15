@@ -225,7 +225,7 @@ fragment float4 fragmentShaderAA(
     }
 
     if (uniforms.hasMask == 1.0) {
-        float2 ftcoord = float2(in.ftcoord.x, in.ftcoord.y);
+        float2 ftcoord = float2(in.ftcoord.x, 1.0 - in.ftcoord.y);
         float alpha = alpha_texture.sample(alpha_samplr, ftcoord).r;
 
         // if (alpha < uniforms.strokeThr) {

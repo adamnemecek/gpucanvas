@@ -383,7 +383,7 @@ fn main() {
                 // draw_rect(&mut canvas, 200.0, 200.0, 40.0, 40.0);
                 // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                 // draw_image(&mut canvas, images[0], 5.0, 300.0);
-                draw_text(&mut canvas, &fonts, "title", 600.0, 200.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "title", 500.0, 200.0, 100.0, 100.0);
                 // draw_image(&mut canvas, red_rect, 100.0, 100.0);
                 // draw_clear_rect2(&mut canvas, 0, 0, 200, 150);
 
@@ -449,7 +449,7 @@ fn draw_image<T: Renderer>(canvas: &mut Canvas<T>, image: ImageId, x: f32, y: f3
 fn draw_text<T: Renderer>(canvas: &mut Canvas<T>, fonts: &Fonts, title: &str, x: f32, y: f32, w: f32, h: f32) {
     canvas.save();
     let mut text_paint = Paint::color(Color::rgba(200, 200, 200, 255));
-    text_paint.set_font_size(20.0);
+    text_paint.set_font_size(80.0);
     text_paint.set_font(&[fonts.regular]);
     text_paint.set_text_align(Align::Left);
     text_paint.set_text_baseline(Baseline::Middle);
