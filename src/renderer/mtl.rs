@@ -25,14 +25,14 @@ mod mtl_ext;
 pub use mtl_ext::{generate_mipmaps, GPUVecExt, MtlTextureExt};
 
 /// Cached render pipeline states
-#[allow(dead_code)]
-struct MtlCompositeOperationState {
-    blend_func: Blend,
-    pixel_format: metal::MTLPixelFormat,
-    pipeline_state: Option<metal::RenderPipelineState>,
-    stencil_only_pipeline_state: Option<metal::RenderPipelineState>,
-    clear_rect_pipeline_state: Option<metal::RenderPipelineState>,
-}
+// #[allow(dead_code)]
+// struct MtlCompositeOperationState {
+//     blend_func: Blend,
+//     pixel_format: metal::MTLPixelFormat,
+//     pipeline_state: Option<metal::RenderPipelineState>,
+//     stencil_only_pipeline_state: Option<metal::RenderPipelineState>,
+//     clear_rect_pipeline_state: Option<metal::RenderPipelineState>,
+// }
 
 // impl MtlCompositeOperationState {
 //     pub fn new( ) -> Self {
