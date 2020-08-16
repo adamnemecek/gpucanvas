@@ -731,6 +731,13 @@ fn render_glyph<T: Renderer>(
         (0.0, 1.0)
     };
 
+    // let (gap, x_factor) = if T::flip_uv() {
+    //     let size = canvas.view_size();
+    //     (size.h - TEXTURE_SIZE as f32, size.h / (TEXTURE_SIZE as f32))
+    // } else {
+    //     (0.0, 1.0)
+    // };
+
     // println!("gap: {:?}, x_factor: {:?}", gap, x_factor);
     assert!(gap >= 0.0);
     let x = dst_x as f32 - glyph.bearing_x + (line_width / 2.0) + padding as f32;
@@ -807,7 +814,7 @@ fn render_glyph<T: Renderer>(
         padding,
     };
     //adam
-    println!("shaped_glyph: {:#?}, rendered_glyph: {:#?}", glyph.c, g);
+    // println!("shaped_glyph: {:#?}, rendered_glyph: {:#?}", glyph.c, g);
     Ok(g)
 }
 

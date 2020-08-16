@@ -39,7 +39,13 @@ struct Fonts {
 
 fn main() {
     let events_loop = winit::event_loop::EventLoop::new();
-    let size = winit::dpi::LogicalSize::new(1000, 800);
+
+    let square = false;
+    let size = if square {
+        winit::dpi::LogicalSize::new(512, 512)
+    } else {
+        winit::dpi::LogicalSize::new(1000, 800)
+    };
 
     let window = winit::window::WindowBuilder::new()
         .with_inner_size(size)
@@ -383,7 +389,7 @@ fn main() {
                 // draw_rect(&mut canvas, 200.0, 200.0, 40.0, 40.0);
                 // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                 // draw_image(&mut canvas, images[0], 5.0, 300.0);
-                draw_text(&mut canvas, &fonts, "title", 200.0, 200.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "tea", 00.0, 200.0, 100.0, 100.0);
                 // draw_image(&mut canvas, red_rect, 100.0, 100.0);
                 // draw_clear_rect2(&mut canvas, 0, 0, 200, 150);
 
