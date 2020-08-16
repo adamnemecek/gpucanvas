@@ -557,8 +557,8 @@ dependencies = [
  "imgref 1.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "lru 0.5.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "memoffset 0.5.4 (registry+https://github.com/rust-lang/crates.io-index)",
- "metal 0.20.0 (git+https://github.com/gfx-rs/metal-rs/?rev=7f15e09)",
- "metalgear 0.1.0 (git+https://github.com/adamnemecek/metalgear?rev=d9cb689)",
+ "metal 0.20.0 (git+https://github.com/gfx-rs/metal-rs/?rev=c3e2973)",
+ "metalgear 0.1.0 (git+https://github.com/adamnemecek/metalgear?rev=a1ea707)",
  "objc 0.2.7 (registry+https://github.com/rust-lang/crates.io-index)",
  "owned_ttf_parser 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.7.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -785,7 +785,7 @@ dependencies = [
 [[package]]
 name = "metal"
 version = "0.20.0"
-source = "git+https://github.com/gfx-rs/metal-rs/?rev=7f15e09#7f15e09c9a5e8782335e0751735d04dad1d27f9c"
+source = "git+https://github.com/gfx-rs/metal-rs/?rev=c3e2973#c3e29735bf843449ce9585e0911b09e510480e95"
 dependencies = [
  "bitflags 1.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "block 0.1.6 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -798,10 +798,10 @@ dependencies = [
 [[package]]
 name = "metalgear"
 version = "0.1.0"
-source = "git+https://github.com/adamnemecek/metalgear?rev=d9cb689#d9cb689510e7e40b1cabd692cbb831f4e22f37c8"
+source = "git+https://github.com/adamnemecek/metalgear?rev=a1ea707#a1ea707070406518751c3edc8204fc59e3cdd752"
 dependencies = [
  "cocoa-foundation 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "metal 0.20.0 (git+https://github.com/gfx-rs/metal-rs/?rev=7f15e09)",
+ "metal 0.20.0 (git+https://github.com/gfx-rs/metal-rs/?rev=c3e2973)",
 ]
 
 [[package]]
@@ -1718,8 +1718,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum memmap 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)" = "6585fd95e7bb50d6cc31e20d4cf9afb4e2ba16c5846fc76793f11218da9c475b"
 "checksum memmap2 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)" = "d9b70ca2a6103ac8b665dc150b142ef0e4e89df640c9e6cf295d189c3caebe5a"
 "checksum memoffset 0.5.4 (registry+https://github.com/rust-lang/crates.io-index)" = "b4fc2c02a7e374099d4ee95a193111f72d2110197fe200272371758f6c3643d8"
-"checksum metal 0.20.0 (git+https://github.com/gfx-rs/metal-rs/?rev=7f15e09)" = "<none>"
-"checksum metalgear 0.1.0 (git+https://github.com/adamnemecek/metalgear?rev=d9cb689)" = "<none>"
+"checksum metal 0.20.0 (git+https://github.com/gfx-rs/metal-rs/?rev=c3e2973)" = "<none>"
+"checksum metalgear 0.1.0 (git+https://github.com/adamnemecek/metalgear?rev=a1ea707)" = "<none>"
 "checksum miniz_oxide 0.3.6 (registry+https://github.com/rust-lang/crates.io-index)" = "aa679ff6578b1cddee93d7e82e263b94a575e0bfced07284eb0c037c1d2416a5"
 "checksum mio 0.6.21 (registry+https://github.com/rust-lang/crates.io-index)" = "302dec22bcf6bae6dfb69c647187f4b4d0fb6f535521f7bc022430ce8e12008f"
 "checksum mio-extras 2.0.6 (registry+https://github.com/rust-lang/crates.io-index)" = "52403fe290012ce777c4626790c8951324a2b9e3316b3143779c72b029742f19"

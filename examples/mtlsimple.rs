@@ -40,7 +40,7 @@ struct Fonts {
 fn main() {
     let events_loop = winit::event_loop::EventLoop::new();
 
-    let square = false;
+    let square = true;
     let size = if square {
         winit::dpi::LogicalSize::new(512, 512)
     } else {
@@ -68,7 +68,7 @@ fn main() {
 
     let draw_size = window.inner_size();
     layer.set_drawable_size(CGSize::new(draw_size.width as f64, draw_size.height as f64));
-    layer.set_framebuffer_only(0);
+    layer.set_framebuffer_only(false);
 
     // let shader_code = include_bytes!("src/renderer/mtl/shaders.metal");
 

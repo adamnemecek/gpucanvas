@@ -1285,6 +1285,8 @@ impl Renderer for Mtl {
         encoder.pop_debug_group();
 
         encoder.end_encoding();
+        // it appears that having this print statement influences things
+        // println!("target_set: {:?}", target_set);
 
         // println!("pre present");
         if let Some(drawable) = drawable {

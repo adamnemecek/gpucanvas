@@ -87,6 +87,7 @@ impl MtlTexture {
         }
 
         let sampler_desc = metal::SamplerDescriptor::new();
+        let mut label = String::new();
 
         if nearest {
             sampler_desc.set_min_filter(metal::MTLSamplerMinMagFilter::Nearest);
@@ -94,25 +95,33 @@ impl MtlTexture {
             if generate_mipmaps {
                 sampler_desc.set_mip_filter(metal::MTLSamplerMipFilter::Nearest);
             }
+            label.push_str("nearest, ");
         } else {
             sampler_desc.set_min_filter(metal::MTLSamplerMinMagFilter::Linear);
             sampler_desc.set_mag_filter(metal::MTLSamplerMinMagFilter::Linear);
             if generate_mipmaps {
                 sampler_desc.set_mip_filter(metal::MTLSamplerMipFilter::Linear);
             }
+            label.push_str("linear, ");
         }
 
         if repeatx {
             sampler_desc.set_address_mode_s(metal::MTLSamplerAddressMode::Repeat);
+            label.push_str("repeat_x, ");
         } else {
             sampler_desc.set_address_mode_s(metal::MTLSamplerAddressMode::ClampToEdge);
+            label.push_str("clamp_x, ");
         }
 
         if repeaty {
             sampler_desc.set_address_mode_t(metal::MTLSamplerAddressMode::Repeat);
+            label.push_str("repeat_y, ");
         } else {
             sampler_desc.set_address_mode_t(metal::MTLSamplerAddressMode::ClampToEdge);
+            label.push_str("clamp_y, ");
         }
+
+        sampler_desc.set_label(&label);
 
         let sampler = device.new_sampler(&sampler_desc);
 
