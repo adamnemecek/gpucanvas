@@ -40,7 +40,7 @@ struct Fonts {
 fn main() {
     let events_loop = winit::event_loop::EventLoop::new();
 
-    let square = true;
+    let square = false;
     let size = if square {
         winit::dpi::LogicalSize::new(512, 512)
     } else {
@@ -90,6 +90,9 @@ fn main() {
             .add_font(root.join("examples/assets/entypo.ttf"))
             .expect("Cannot add font"),
     };
+
+    let dpi_factor = window.scale_factor().round();
+    println!("dpi_factor: {:?}", dpi_factor);
 
     let images: Vec<ImageId> = (1..=12)
         .map(|i| {
@@ -265,7 +268,7 @@ fn main() {
                 let width = size.width;
                 let height = size.height;
 
-                let dpi_factor: f32 = 1.0; //todo
+                // let dpi_factor: f32 = 1.0; //todo
 
                 // let t = start.elapsed().as_secs_f32();
 

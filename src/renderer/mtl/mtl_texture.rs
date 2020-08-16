@@ -71,6 +71,7 @@ impl MtlTexture {
             desc.set_mipmap_level_count(1);
         };
 
+
         desc.set_usage(
             metal::MTLTextureUsage::RenderTarget
                 | metal::MTLTextureUsage::ShaderWrite
@@ -126,11 +127,11 @@ impl MtlTexture {
         let sampler = device.new_sampler(&sampler_desc);
 
         Ok(Self {
+            device: device.to_owned(),
+            command_queue: command_queue.to_owned(),
             info,
             tex,
             sampler,
-            device: device.to_owned(),
-            command_queue: command_queue.to_owned(),
         })
     }
 

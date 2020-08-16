@@ -715,6 +715,7 @@ impl Mtl {
         encoder.set_fragment_texture(0, Some(&tex.tex()));
         encoder.set_fragment_sampler_state(0, Some(&tex.sampler()));
         encoder.set_fragment_value(0, &paint);
+        // encoder.set_
 
         let mut alpha = false;
         let alpha_tex = if let Some(id) = alpha_tex {
@@ -854,45 +855,45 @@ impl Mtl {
     // }
 }
 
-fn to_ndc(position: (f32, f32), drawable_size: (f32, f32)) -> (f32, f32) {
-    let x_scale = 2.0 / drawable_size.0;
-    let y_scale = 2.0 / drawable_size.1;
-    let x_bias = -1.0;
-    let y_bias = -1.0;
+// fn to_ndc(position: (f32, f32), drawable_size: (f32, f32)) -> (f32, f32) {
+//     let x_scale = 2.0 / drawable_size.0;
+//     let y_scale = 2.0 / drawable_size.1;
+//     let x_bias = -1.0;
+//     let y_bias = -1.0;
 
-    let x = position.0 * x_scale + x_bias;
-    let y = position.1 * y_scale + y_bias;
-    (x, y)
-}
+//     let x = position.0 * x_scale + x_bias;
+//     let y = position.1 * y_scale + y_bias;
+//     (x, y)
+// }
 
-impl Rect {
-    pub fn as_ndc_flipped(&self, screen_size: (f32, f32)) -> Self {
-        let src = (self.x, self.y);
-        let dst = (self.x + self.w, self.y + self.h);
+// impl Rect {
+//     pub fn as_ndc_flipped(&self, screen_size: (f32, f32)) -> Self {
+//         let src = (self.x, self.y);
+//         let dst = (self.x + self.w, self.y + self.h);
 
-        let ndc_src = to_ndc(src, screen_size);
-        let ndc_dst = to_ndc(dst, screen_size);
+//         let ndc_src = to_ndc(src, screen_size);
+//         let ndc_dst = to_ndc(dst, screen_size);
 
-        let x = ndc_src.0;
-        let y = ndc_src.1;
-        let w = ndc_dst.0 - ndc_src.0;
-        let h = ndc_dst.1 - ndc_src.1;
-        Self { x, y, w, h }
-    }
-    pub fn as_ndc(&self, screen_size: (f32, f32)) -> Self {
-        let src = (self.x, self.y);
-        // let dst = (self.x + self.w, self.y + self.h);
+//         let x = ndc_src.0;
+//         let y = ndc_src.1;
+//         let w = ndc_dst.0 - ndc_src.0;
+//         let h = ndc_dst.1 - ndc_src.1;
+//         Self { x, y, w, h }
+//     }
+//     pub fn as_ndc(&self, screen_size: (f32, f32)) -> Self {
+//         let src = (self.x, self.y);
+//         // let dst = (self.x + self.w, self.y + self.h);
 
-        let ndc_src = to_ndc(src, screen_size);
-        // let ndc_dst = to_ndc(dst, screen_size);
+//         let ndc_src = to_ndc(src, screen_size);
+//         // let ndc_dst = to_ndc(dst, screen_size);
 
-        let x = ndc_src.0;
-        let y = ndc_src.1;
-        let w = self.w / screen_size.0 * 2.0;
-        let h = self.h / screen_size.1 * 2.0;
-        Self { x, y, w, h }
-    }
-}
+//         let x = ndc_src.0;
+//         let y = ndc_src.1;
+//         let w = self.w / screen_size.0 * 2.0;
+//         let h = self.h / screen_size.1 * 2.0;
+//         Self { x, y, w, h }
+//     }
+// }
 
 impl From<Color> for metal::MTLClearColor {
     fn from(v: Color) -> Self {
