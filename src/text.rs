@@ -602,7 +602,15 @@ pub(crate) fn render_atlas<T: Renderer>(
         0.0
     };
 
+    // render_glyph sets target.
     let initial_render_target = canvas.current_render_target;
+
+    // let (gap, x_factor) = if T::flip_uv() {
+    //     let size = canvas.view_size();
+    //     (size.h - TEXTURE_SIZE as f32, size.h / (TEXTURE_SIZE as f32))
+    // } else {
+    //     (0.0, 1.0)
+    // };
 
     for glyph in &text_layout.glyphs {
         let id = RenderedGlyphId::new(glyph.codepoint, glyph.font_id, paint, mode);
@@ -650,7 +658,7 @@ pub(crate) fn render_atlas<T: Renderer>(
 
     // adam
     // debug draw
-    if true {
+    if false {
         canvas.save();
         canvas.reset();
 
@@ -723,7 +731,7 @@ fn render_glyph<T: Renderer>(
         (0.0, 1.0)
     };
 
-    println!("gap: {:?}, x_factor: {:?}", gap, x_factor);
+    // println!("gap: {:?}, x_factor: {:?}", gap, x_factor);
     assert!(gap >= 0.0);
     let x = dst_x as f32 - glyph.bearing_x + (line_width / 2.0) + padding as f32;
     let y = TEXTURE_SIZE as f32 - dst_y as f32 - glyph.bearing_y - (line_width / 2.0) - padding as f32 + gap;
@@ -799,7 +807,7 @@ fn render_glyph<T: Renderer>(
         padding,
     };
     //adam
-    // println!("shaped_glyph: {:#?}, rendered_glyph: {:#?}", glyph.c, g);
+    println!("shaped_glyph: {:#?}, rendered_glyph: {:#?}", glyph.c, g);
     Ok(g)
 }
 

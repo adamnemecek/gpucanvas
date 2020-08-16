@@ -165,19 +165,6 @@ impl Mtl {
     }
 }
 
-// struct Encoder<'a> {
-//     inner: &'a metal::RenderCommandEncoderRef
-// }
-
-// impl<'a> Encoder<'a> {
-//     pub fn new(mtl: &'a Mtl) -> Self {
-//         // let inner = new_render_command_encoder(color_texture, command_buffer, clear_color, stencil_texture, vertex_buffer, view_size_buffer)
-//         Self {
-//             inner
-//         }
-//     }
-// }
-
 impl Mtl {
     pub fn new(device: &metal::DeviceRef, layer: &metal::MetalLayerRef) -> Self {
         let debug = cfg!(debug_assertions);
@@ -571,6 +558,10 @@ impl Mtl {
         // Draws anti-aliased fragments.
         self.set_uniforms(encoder, images, fill_paint, cmd.image, cmd.alpha_mask);
         if self.antialias {
+            match cmd.fill_rule {
+                FillRule::NonZero => {} //gl::StencilFunc(gl::EQUAL, 0x0, 0xff),
+                FillRule::EvenOdd => {} // gl::StencilFunc(gl::EQUAL, 0x0, 0x1),
+            }
             encoder.set_depth_stencil_state(&self.fill_anti_alias_stencil_state);
 
             for drawable in &cmd.drawables {
@@ -582,6 +573,11 @@ impl Mtl {
         }
 
         // Draws fill.
+
+        match cmd.fill_rule {
+            FillRule::NonZero => {} //gl::StencilFunc(gl::NOTEQUAL, 0x0, 0xff),
+            FillRule::EvenOdd => {} // gl::StencilFunc(gl::NOTEQUAL, 0x0, 0x1),
+        }
         encoder.set_depth_stencil_state(&self.fill_stencil_state);
         if let Some((start, count)) = cmd.triangles_verts {
             //println!("concave_fill/triangles verts #{}: start: {}, count {}", 0, start, count);
@@ -759,7 +755,7 @@ impl Mtl {
         height: u32,
         color: Color,
     ) {
-        // #[cfg(debug_assertions)]
+        #[cfg(debug_assertions)]
         encoder.push_debug_group("clear_rect");
 
         let rps = self.current_rps.as_ref().unwrap();
@@ -821,7 +817,7 @@ impl Mtl {
         encoder.set_vertex_buffer(0, Some(self.vertex_buffer.as_ref()), 0);
         encoder.set_vertex_buffer(1, Some(self.view_size_buffer.as_ref()), 0);
 
-        // #[cfg(debug_assertions)]
+        #[cfg(debug_assertions)]
         encoder.pop_debug_group();
     }
 
