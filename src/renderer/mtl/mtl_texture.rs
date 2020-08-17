@@ -169,6 +169,7 @@ impl MtlTexture {
 
         let mut info = self.info;
         info.set_size(size);
+        // should i copy previous things over?
 
         *self = Self::new(&self.device, &self.command_queue, info).unwrap();
     }

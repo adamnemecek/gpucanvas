@@ -836,7 +836,10 @@ impl Mtl {
         // if self.render_target == target {
         //     return;
         // }
-        // println!("setting target from {:?} to {:?}", self.render_target, target);
+        // println!(
+        //     "frame: {:?}, setting target from {:?} to {:?}",
+        //     self.frame, self.render_target, target
+        // );
         self.render_target = target;
         let size = match target {
             RenderTarget::Screen => self.layer.drawable_size().into(),
@@ -965,7 +968,7 @@ fn new_render_command_encoder<'a>(
         stencil_attachment.set_store_action(metal::MTLStoreAction::DontCare);
         stencil_attachment.set_texture(Some(&stencil_texture.tex()));
 
-        let encoder = command_buffer.new_render_command_encoder(&desc);
+        let mut encoder = command_buffer.new_render_command_encoder(&desc);
 
         encoder.set_cull_mode(metal::MTLCullMode::Back);
         encoder.set_front_facing_winding(metal::MTLWinding::CounterClockwise);
@@ -1014,6 +1017,7 @@ impl Renderer for Mtl {
     }
 
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
+
         let size = Size::new(width as f32, height as f32);
         // self.screen_view = [width as _, height as _];
         *self.view_size_buffer = size;
@@ -1167,6 +1171,7 @@ impl Renderer for Mtl {
         // println!("pre stencil texture size: {:?}", self.stencil_texture.size());
         // assert_eq!(size, *self.view_size_buffer);
         let mut encoder = new_render_command_encoder(
+            // &self.temp_texture.tex,
             &target_texture,
             &command_buffer,
             clear_color,
@@ -1190,7 +1195,15 @@ impl Renderer for Mtl {
         //     }
         // }
         // self.stencil_texture.resize();
-        // self.clear_buffer_on_flush = false;
+        // self.clear_buffer_on_flush = false;p
+
+        // pub struct RenderContext {}
+
+        // let mut switches = vec![];
+
+        // for (i, cd) in commands.iter().enumerate() {
+
+        // }
 
         // fn dump_command_type(cmd: &Command) -> &str {
         //     match cmd.cmd_type {

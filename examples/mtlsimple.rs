@@ -44,7 +44,7 @@ fn main() {
     let size = if square {
         winit::dpi::LogicalSize::new(512, 512)
     } else {
-        winit::dpi::LogicalSize::new(1000, 800)
+        winit::dpi::LogicalSize::new(1000, 600)
     };
 
     let window = winit::window::WindowBuilder::new()
@@ -392,7 +392,7 @@ fn main() {
                 // draw_rect(&mut canvas, 200.0, 200.0, 40.0, 40.0);
                 // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                 // draw_image(&mut canvas, images[0], 5.0, 300.0);
-                draw_text(&mut canvas, &fonts, "tea", 00.0, 200.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "title",50.0, 200.0, 100.0, 100.0);
                 // draw_image(&mut canvas, red_rect, 100.0, 100.0);
                 // draw_clear_rect2(&mut canvas, 0, 0, 200, 150);
 

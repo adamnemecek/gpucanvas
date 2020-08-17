@@ -817,7 +817,7 @@ fn render_glyph<T: Renderer>(
         padding,
     };
     //adam
-    println!("shaped_glyph: {:#?}, rendered_glyph: {:#?}", glyph.c, g);
+    // println!("shaped_glyph: {:#?}, rendered_glyph: {:#?}", glyph.c, g);
     Ok(g)
 }
 
