@@ -389,7 +389,7 @@ impl Renderer for OpenGl {
     type Image = GlTexture;
 
     fn view_size(&self) -> Size {
-        todo!()
+        Size::new(self.view[0], self.view[1])
     }
 
     fn set_size(&mut self, width: u32, height: u32, _dpi: f32) {

@@ -629,6 +629,9 @@ pub(crate) fn render_atlas<T: Renderer>(
             let itw = 1.0 / size.0 as f32;
             let ith = 1.0 / size.1 as f32;
 
+            // let itw = (size.0 as f32/view_size.w) / size.0 as f32;
+            // let ith = (size.1 as f32/view_size.h) / size.1 as f32;
+
             let cmd = cmd_map.entry(rendered.texture_index).or_insert_with(|| DrawCmd {
                 image_id,
                 quads: Vec::new(),

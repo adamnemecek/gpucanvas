@@ -71,7 +71,6 @@ impl MtlTexture {
             desc.set_mipmap_level_count(1);
         };
 
-
         desc.set_usage(
             metal::MTLTextureUsage::RenderTarget
                 | metal::MTLTextureUsage::ShaderWrite

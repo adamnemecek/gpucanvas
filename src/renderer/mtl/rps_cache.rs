@@ -174,6 +174,10 @@ impl RPSCache {
         }
     }
 
+    pub fn len(&self) -> usize {
+        self.inner.len()
+    }
+
     pub fn get(&mut self, blend_func: Blend, pixel_format: metal::MTLPixelFormat) -> RPS {
         let key = RPSKey {
             blend_func,

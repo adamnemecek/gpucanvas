@@ -372,6 +372,7 @@ impl Mtl {
 
         self.current_rps = Some(self.rps_cache.get(blend_func, pixel_format));
 
+        // println!("rps_cache.len() == {}", self.rps_cache.len());
         // if self.pipeline_state.is_some()
         //     && self.stencil_only_pipeline_state.is_some()
         //     && self.pipeline_pixel_format == pixel_format
