@@ -833,21 +833,27 @@ impl Mtl {
     }
 
     pub fn set_target(&mut self, images: &ImageStore<MtlTexture>, target: RenderTarget) {
-        // if self.render_target == target {
-        //     return;
-        // }
-        // println!(
-        //     "frame: {:?}, setting target from {:?} to {:?}",
-        //     self.frame, self.render_target, target
-        // );
-        self.render_target = target;
+        if self.render_target == target {
+            assert!(false);
+            return;
+        }
+
+        let prev_size = *self.view_size_buffer;
+
         let size = match target {
             RenderTarget::Screen => self.layer.drawable_size().into(),
             RenderTarget::Image(id) => {
                 let texture = images.get(id).unwrap();
-                texture.info().size()
+                texture.size()
             }
         };
+
+        println!(
+            "frame: {:?}, setting target from {:?}({:?}) to {:?}({:?})",
+            self.frame, self.render_target, prev_size, target, size
+        );
+
+        self.render_target = target;
 
         *self.view_size_buffer = size;
     }
@@ -1017,7 +1023,6 @@ impl Renderer for Mtl {
     }
 
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
-
         let size = Size::new(width as f32, height as f32);
         // self.screen_view = [width as _, height as _];
         *self.view_size_buffer = size;
@@ -1274,20 +1279,26 @@ impl Renderer for Mtl {
                     //     command_buffer.present_drawable(&drawable);
                     // }
 
+                    let size;
                     target_texture = match self.render_target {
                         RenderTarget::Screen => {
                             // println!("render target: screen");
                             let d = self.layer.next_drawable().unwrap().to_owned();
                             let tex = d.texture().to_owned();
                             drawable = Some(d);
+                            size = self.layer.drawable_size().into();
                             tex
                         }
                         RenderTarget::Image(id) => {
                             // println!("render target: image: {:?}", id);
-                            images.get(id).unwrap().tex().to_owned()
+                            let tex = images.get(id).unwrap().tex().to_owned();
+                            size = tex.size();
+                            tex
                         }
                     };
                     pixel_format = target_texture.pixel_format();
+                    // println!("size0: {:?}, size1: {:?}", size, *self.view_size_buffer);
+                    assert!(size == *self.view_size_buffer);
 
                     encoder = new_render_command_encoder(
                         &target_texture,

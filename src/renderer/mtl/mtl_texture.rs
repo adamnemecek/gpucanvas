@@ -158,7 +158,10 @@ impl MtlTexture {
     }
 
     pub fn size(&self) -> Size {
-        Size::new(self.info.width() as _, self.info.height() as _)
+        let a = Size::new(self.info.width() as _, self.info.height() as _);
+        let b = self.tex().size();
+        assert!(a == b);
+        a
     }
 
     pub fn resize(&mut self, size: Size) {

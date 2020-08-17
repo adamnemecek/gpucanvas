@@ -1,3 +1,4 @@
+use crate::Size;
 use imgref::ImgVec;
 use metalgear::GPUVec;
 use rgb::ComponentBytes;
@@ -7,9 +8,14 @@ pub trait MtlTextureExt {
     fn save(&self) -> ImgVec<RGBA8>;
     fn save_to(&self, path: &str);
     fn generate_mipmaps(&self, command_queue: &metal::CommandQueueRef);
+    fn size(&self) -> Size;
 }
 
 impl MtlTextureExt for metal::TextureRef {
+    fn size(&self) -> Size {
+        Size::new(self.width() as _, self.height() as _)
+    }
+
     fn save(&self) -> ImgVec<RGBA8> {
         let w = self.width();
         let h = self.height();

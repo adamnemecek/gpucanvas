@@ -1071,7 +1071,6 @@ where
 
                     verts.extend_from_slice(&data);
                 }
-                // println!("----\nverts: {:?}", verts);
 
                 paint.set_alpha_mask(Some(cmd.image_id));
 
