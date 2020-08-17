@@ -728,8 +728,9 @@ fn render_glyph<T: Renderer>(
     // Otherwise, there would be a gap above the rendered glyphs.
 
     let (gap, x_factor) = if T::flip_uv() {
-        let size = canvas.view_size();
-        (size.h - TEXTURE_SIZE as f32, size.h / (TEXTURE_SIZE as f32))
+        // let size = canvas.view_size();
+        // (size.h - TEXTURE_SIZE as f32, size.h / (TEXTURE_SIZE as f32))
+        (0.0, 1.0)
     } else {
         (0.0, 1.0)
     };

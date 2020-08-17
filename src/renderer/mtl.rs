@@ -90,7 +90,8 @@ pub struct Mtl {
     index_size: usize,
     // int flags?
     clear_color: Color,
-    view_size_buffer: GPUVar<Size>,
+    // view_size_buffer: GPUVar<Size>,
+    view_size: Size,
     // screen_view: [f32; 2],
     // vertex_descriptor: metal::VertexDescriptor,
 
@@ -166,7 +167,8 @@ impl VertexOffsets {
 
 impl Mtl {
     pub fn size(&self) -> Size {
-        *self.view_size_buffer
+        // *self.view_size_buffer
+        self.view_size
     }
 }
 
@@ -329,7 +331,8 @@ impl Mtl {
             // blend_func,
             // render_encoder: None,
             // todo check what is this initialized to
-            view_size_buffer: GPUVar::with_value(&device, size),
+            // view_size_buffer: GPUVar::with_value(&device, size),
+            view_size: size,
             command_queue,
             // frag_func,
             // vert_func,
@@ -815,7 +818,8 @@ impl Mtl {
         encoder.draw_primitives_instanced(metal::MTLPrimitiveType::TriangleStrip, 0, 4, 1);
 
         // reset state
-        let size = *self.view_size_buffer;
+        // let size = *self.view_size_buffer;
+        let size = self.view_size;
         encoder.set_scissor_rect(metal::MTLScissorRect {
             x: 0,
             y: 0,
@@ -826,7 +830,8 @@ impl Mtl {
         // reset buffers for the other commands
         encoder.set_render_pipeline_state(&pipeline_state);
         encoder.set_vertex_buffer(0, Some(self.vertex_buffer.as_ref()), 0);
-        encoder.set_vertex_buffer(1, Some(self.view_size_buffer.as_ref()), 0);
+        // encoder.set_vertex_buffer(1, Some(self.view_size_buffer.as_ref()), 0);
+        encoder.set_vertex_value(1, &size);
 
         #[cfg(debug_assertions)]
         encoder.pop_debug_group();
@@ -838,7 +843,7 @@ impl Mtl {
             return;
         }
 
-        let prev_size = *self.view_size_buffer;
+        let prev_size = self.view_size;
 
         let size = match target {
             RenderTarget::Screen => self.layer.drawable_size().into(),
@@ -855,7 +860,7 @@ impl Mtl {
 
         self.render_target = target;
 
-        *self.view_size_buffer = size;
+        self.view_size = size;
     }
 
     // pub fn get_target(&self, images: &ImageStore<MtlTexture>) -> metal::TextureRef {
@@ -945,7 +950,8 @@ fn new_render_command_encoder<'a>(
     stencil_texture: &StencilTexture,
     // view_size: Size,
     vertex_buffer: &GPUVec<Vertex>,
-    view_size_buffer: &GPUVar<Size>,
+    // view_size_buffer: &GPUVar<Size>,
+    view_size: Size,
     // index_buffer: &IndexBuffer,
     // uniform_buffer: &GPUVec<Params>,
     // clear_buffer_on_flush: bool,
@@ -959,7 +965,7 @@ fn new_render_command_encoder<'a>(
         // };
         let desc = metal::RenderPassDescriptor::new();
 
-        let view_size = **view_size_buffer;
+        // let view_size = **view_size_buffer;
 
         let color_attachment = desc.color_attachments().object_at(0).unwrap();
         color_attachment.set_clear_color(clear_color.into());
@@ -990,7 +996,8 @@ fn new_render_command_encoder<'a>(
         });
 
         encoder.set_vertex_buffer(0, Some(vertex_buffer.as_ref()), 0);
-        encoder.set_vertex_buffer(1, Some(view_size_buffer.as_ref()), 0);
+        // encoder.set_vertex_buffer(1, Some(view_size_buffer.as_ref()), 0);
+        encoder.set_vertex_value(1, &view_size);
         // encoder.set_fragment_buffer(0, Some(uniform_buffer.as_ref()), 0);
 
         encoder
@@ -1011,7 +1018,8 @@ impl Renderer for Mtl {
     type Image = MtlTexture;
 
     fn view_size(&self) -> Size {
-        *self.view_size_buffer
+        // *self.view_size_buffer
+        self.view_size
         // match self.render_target {
         //     RenderTarget::Screen => {
         //         self.layer.drawable_size().into()
@@ -1025,7 +1033,8 @@ impl Renderer for Mtl {
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
         let size = Size::new(width as f32, height as f32);
         // self.screen_view = [width as _, height as _];
-        *self.view_size_buffer = size;
+        // *self.view_size_buffer = size;
+        self.view_size = size;
     }
 
     fn start_capture(&self) {
@@ -1182,7 +1191,8 @@ impl Renderer for Mtl {
             clear_color,
             &self.stencil_texture,
             &self.vertex_buffer,
-            &self.view_size_buffer,
+            // &self.view_size_buffer,
+            self.view_size
             // &self.uniform_buffer,
             // self.clear_buffer_on_flush,
         );
@@ -1298,7 +1308,8 @@ impl Renderer for Mtl {
                     };
                     pixel_format = target_texture.pixel_format();
                     // println!("size0: {:?}, size1: {:?}", size, *self.view_size_buffer);
-                    assert!(size == *self.view_size_buffer);
+                    // assert!(size == *self.view_size_buffer);
+                    assert!(size == self.view_size);
 
                     encoder = new_render_command_encoder(
                         &target_texture,
@@ -1306,7 +1317,8 @@ impl Renderer for Mtl {
                         clear_color,
                         &self.stencil_texture,
                         &self.vertex_buffer,
-                        &self.view_size_buffer,
+                        // &self.view_size_buffer,
+                        self.view_size,
                         // &self.uniform_buffer,
                         // self.clear_buffer_on_flush,
                     );
