@@ -121,9 +121,9 @@ fn main() {
     // let start = Instant::now();
     // let mut prevt = start;
 
-    // let mut mousex = 0.0;
-    // let mut mousey = 0.0;
-    // let mut dragging = false;
+    let mut mousex = 0.0;
+    let mut mousey = 0.0;
+    let mut dragging = false;
 
     // let mut perf = PerfGraph::new();
 
@@ -194,18 +194,18 @@ fn main() {
                 WindowEvent::CursorMoved {
                     device_id: _, position, ..
                 } => {
-                    // if dragging {
-                    //     let p0 = canvas.transform().inversed().transform_point(mousex, mousey);
-                    //     let p1 = canvas
-                    //         .transform()
-                    //         .inversed()
-                    //         .transform_point(position.x as f32, position.y as f32);
+                    if dragging {
+                        let p0 = canvas.transform().inversed().transform_point(mousex, mousey);
+                        let p1 = canvas
+                            .transform()
+                            .inversed()
+                            .transform_point(position.x as f32, position.y as f32);
 
-                    //     canvas.translate(p1.0 - p0.0, p1.1 - p0.1);
-                    // }
+                        canvas.translate(p1.0 - p0.0, p1.1 - p0.1);
+                    }
 
-                    // mousex = position.x as f32;
-                    // mousey = position.y as f32;
+                    mousex = position.x as f32;
+                    mousey = position.y as f32;
                 }
                 WindowEvent::MouseWheel {
                     device_id: _, delta, ..
@@ -218,14 +218,14 @@ fn main() {
                     // }
                     _ => (),
                 },
-                // WindowEvent::MouseInput {
-                //     button: MouseButton::Left,
-                //     state,
-                //     ..
-                // } => match state {
-                //     ElementState::Pressed => dragging = true,
-                //     ElementState::Released => dragging = false,
-                // },
+                WindowEvent::MouseInput {
+                    button: MouseButton::Left,
+                    state,
+                    ..
+                } => match state {
+                    ElementState::Pressed => dragging = true,
+                    ElementState::Released => dragging = false,
+                },
                 WindowEvent::KeyboardInput {
                     input:
                         KeyboardInput {
@@ -275,12 +275,12 @@ fn main() {
                 canvas.set_size(width as u32, height as u32, dpi_factor as f32);
                 canvas.clear_rect(0, 0, width as u32, height as u32, Color::rgbf(0.3, 0.3, 0.32));
 
-                // let height = height as f32;
-                // let width = width as f32;
+                let height = height as f32;
+                let width = width as f32;
 
-                // let pt = canvas.transform().inversed().transform_point(mousex, mousey);
-                // let mousex = pt.0;
-                // let mousey = pt.1;
+                let pt = canvas.transform().inversed().transform_point(mousex, mousey);
+                let mousex = pt.0;
+                let mousey = pt.1;
 
                 // draw_graph(&mut canvas, 0.0, height / 2.0, width, height / 2.0, t);
 
@@ -393,6 +393,7 @@ fn main() {
                 // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                 // draw_image(&mut canvas, images[0], 5.0, 300.0);
                 draw_text(&mut canvas, &fonts, "tea", 50.0, 200.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "tea2", 200.0, 200.0, 100.0, 100.0);
                 // draw_image(&mut canvas, red_rect, 100.0, 100.0);
                 // draw_clear_rect2(&mut canvas, 0, 0, 200, 150);
 
@@ -539,110 +540,108 @@ fn draw_roundrect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h
     canvas.fill_path(&mut path, paint);
 }
 
-// fn draw_paragraph<T: Renderer>(
-//     canvas: &mut Canvas<T>,
-//     font: FontId,
-//     x: f32,
-//     y: f32,
-//     width: f32,
-//     _height: f32,
-//     mx: f32,
-//     my: f32,
-// ) {
-//     let text = "This is longer chunk of text.\n\nWould have used lorem ipsum but she was busy jumping over the lazy dog with the fox and all the men who came to the aid of the party.🎉";
+fn draw_paragraph<T: Renderer>(
+    canvas: &mut Canvas<T>,
+    font: FontId,
+    x: f32,
+    y: f32,
+    width: f32,
+    _height: f32,
+    mx: f32,
+    my: f32,
+) {
+    let text = "This is longer chunk of text.\n\nWould have used lorem ipsum but she was busy jumping over the lazy dog with the fox and all the men who came to the aid of the party.🎉";
 
-//     canvas.save();
+    let mut paint = Paint::color(Color::rgba(255, 255, 255, 255));
+    paint.set_font_size(14.0);
+    paint.set_font(&[font]);
+    paint.set_text_align(Align::Left);
+    paint.set_text_baseline(Baseline::Top);
 
-//     let mut paint = Paint::color(Color::rgba(255, 255, 255, 255));
-//     paint.set_font_size(14.0);
-//     paint.set_font(&[font]);
-//     paint.set_text_align(Align::Left);
-//     paint.set_text_baseline(Baseline::Top);
+    let mut gutter_y = 0.0;
+    let mut gutter = 0;
+    let mut y = y;
+    let mut px;
+    let mut caret_x;
 
-//     let mut gutter_y = 0.0;
-//     let mut gutter = 0;
-//     let mut y = y;
-//     let mut px;
-//     let mut caret_x;
+    let lines = canvas.break_text_vec(width, text, paint).expect("Cannot break text");
 
-//     let lines = canvas.break_text_vec(width, text, paint).expect("Cannot break text");
+    for (line_num, line_range) in lines.into_iter().enumerate() {
+        if let Ok(res) = canvas.fill_text(x, y, &text[line_range], paint) {
+            let hit = mx > x && mx < (x + width) && my >= y && my < (y + res.height());
 
-//     for (line_num, line_range) in lines.into_iter().enumerate() {
-//         if let Ok(res) = canvas.fill_text(x, y, &text[line_range], paint) {
-//             let hit = mx > x && mx < (x + width) && my >= y && my < (y + res.height());
+            if hit {
+                caret_x = if mx < x + res.width() / 2.0 { x } else { x + res.width() };
+                px = x;
 
-//             if hit {
-//                 caret_x = if mx < x + res.width() / 2.0 { x } else { x + res.width() };
-//                 px = x;
+                for glyph in &res.glyphs {
+                    let x0 = glyph.x;
+                    let x1 = x0 + glyph.width;
+                    let gx = x0 * 0.3 + x1 * 0.7;
 
-//                 for glyph in &res.glyphs {
-//                     let x0 = glyph.x;
-//                     let x1 = x0 + glyph.width;
-//                     let gx = x0 * 0.3 + x1 * 0.7;
+                    if mx >= px && mx < gx {
+                        caret_x = glyph.x;
+                    }
 
-//                     if mx >= px && mx < gx {
-//                         caret_x = glyph.x;
-//                     }
+                    px = gx;
+                }
 
-//                     px = gx;
-//                 }
+                let mut path = Path::new();
+                path.rect(caret_x, y, 1.0, res.height());
+                canvas.fill_path(&mut path, Paint::color(Color::rgba(255, 192, 0, 255)));
 
-//                 let mut path = Path::new();
-//                 path.rect(caret_x, y, 1.0, res.height());
-//                 canvas.fill_path(&mut path, Paint::color(Color::rgba(255, 192, 0, 255)));
+                gutter = line_num + 1;
 
-//                 gutter = line_num + 1;
+                gutter_y = y + 14.0 / 2.0;
+            }
 
-//                 gutter_y = y + 14.0 / 2.0;
-//             }
+            y += res.height();
+        }
+    }
 
-//             y += res.height();
-//         }
-//     }
+    if gutter > 0 {
+        let mut paint = Paint::color(Color::rgba(255, 192, 0, 255));
+        paint.set_font_size(12.0);
+        paint.set_font(&[font]);
+        paint.set_text_align(Align::Right);
+        paint.set_text_baseline(Baseline::Middle);
 
-//     if gutter > 0 {
-//         let mut paint = Paint::color(Color::rgba(255, 192, 0, 255));
-//         paint.set_font_size(12.0);
-//         paint.set_font(&[font]);
-//         paint.set_text_align(Align::Right);
-//         paint.set_text_baseline(Baseline::Middle);
+        let text = format!("{}", gutter);
 
-//         let text = format!("{}", gutter);
+        if let Ok(res) = canvas.measure_text(x - 10.0, gutter_y, &text, paint) {
+            let mut path = Path::new();
+            path.rounded_rect(
+                res.x - 4.0,
+                res.y - 2.0,
+                res.width() + 8.0,
+                res.height() + 4.0,
+                (res.height() + 4.0) / 2.0 - 1.0,
+            );
+            canvas.fill_path(&mut path, paint);
 
-//         if let Ok(res) = canvas.measure_text(x - 10.0, gutter_y, &text, paint) {
-//             let mut path = Path::new();
-//             path.rounded_rect(
-//                 res.x - 4.0,
-//                 res.y - 2.0,
-//                 res.width() + 8.0,
-//                 res.height() + 4.0,
-//                 (res.height() + 4.0) / 2.0 - 1.0,
-//             );
-//             canvas.fill_path(&mut path, paint);
+            paint.set_color(Color::rgba(32, 32, 32, 255));
+            let _ = canvas.fill_text(x - 10.0, gutter_y, &text, paint);
+        }
+    }
 
-//             paint.set_color(Color::rgba(32, 32, 32, 255));
-//             let _ = canvas.fill_text(x - 10.0, gutter_y, &text, paint);
-//         }
-//     }
+    // let mut start = 0;
 
-//     // let mut start = 0;
+    // while start < text.len() {
+    //     let substr = &text[start..];
 
-//     // while start < text.len() {
-//     //     let substr = &text[start..];
+    //     if let Ok(index) = canvas.break_text(width, substr, paint) {
+    //         if let Ok(res) = canvas.fill_text(x, y, &substr[0..index], paint) {
+    //             y += res.height;
+    //         }
 
-//     //     if let Ok(index) = canvas.break_text(width, substr, paint) {
-//     //         if let Ok(res) = canvas.fill_text(x, y, &substr[0..index], paint) {
-//     //             y += res.height;
-//     //         }
+    //         start += &substr[0..index].len();
+    //     } else {
+    //         break;
+    //     }
+    // }
 
-//     //         start += &substr[0..index].len();
-//     //     } else {
-//     //         break;
-//     //     }
-//     // }
-
-//     canvas.restore();
-// }
+    canvas.restore();
+}
 
 // fn draw_eyes<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, mx: f32, my: f32, t: f32) {
 //     let ex = w * 0.23;

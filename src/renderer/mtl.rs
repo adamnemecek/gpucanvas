@@ -853,10 +853,10 @@ impl Mtl {
             }
         };
 
-        println!(
-            "frame: {:?}, setting target from {:?}({:?}) to {:?}({:?})",
-            self.frame, self.render_target, prev_size, target, size
-        );
+        // println!(
+        //     "frame: {:?}, setting target from {:?}({:?}) to {:?}({:?})",
+        //     self.frame, self.render_target, prev_size, target, size
+        // );
 
         self.render_target = target;
 
@@ -959,9 +959,9 @@ fn new_render_command_encoder<'a>(
     if true {
         let load_action =
         // if clear_buffer_on_flush {
-            // metal::MTLLoadAction::Clear;
+            metal::MTLLoadAction::Load;
         // } else {
-            metal::MTLLoadAction::Clear;
+            // metal::MTLLoadAction::Clear;
         // };
         let desc = metal::RenderPassDescriptor::new();
 
