@@ -151,6 +151,11 @@ impl ImageInfo {
         Size::new(w, h)
     }
 
+    pub fn set_size(&mut self, size: Size) {
+        self.width = size.w as _;
+        self.height = size.h as _;
+    }
+
     pub fn format(&self) -> PixelFormat {
         self.format
     }

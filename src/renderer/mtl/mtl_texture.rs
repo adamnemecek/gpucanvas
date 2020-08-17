@@ -1,5 +1,5 @@
 use super::MtlTextureExt;
-use crate::{ErrorKind, ImageFlags, ImageInfo, ImageSource, PixelFormat};
+use crate::{ErrorKind, ImageFlags, ImageInfo, ImageSource, PixelFormat, Size};
 use image::{DynamicImage, GenericImageView};
 use rgb::ComponentBytes;
 
@@ -155,6 +155,22 @@ impl MtlTexture {
 
         let bytes = vec![color; (w * h) as _];
         self.replace_region(region, bytes.as_bytes(), (4 * w) as _);
+    }
+
+    pub fn size(&self) -> Size {
+        Size::new(self.info.width() as _, self.info.height() as _)
+    }
+
+    pub fn resize(&mut self, size: Size) {
+        // todo fix adam
+        if self.size().contains(&size) {
+            return;
+        }
+
+        let mut info = self.info;
+        info.set_size(size);
+
+        *self = Self::new(&self.device, &self.command_queue, info).unwrap();
     }
 
     pub fn update(&mut self, src: ImageSource, x: usize, y: usize) -> Result<(), ErrorKind> {

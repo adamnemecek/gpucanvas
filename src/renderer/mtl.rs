@@ -130,7 +130,7 @@ pub struct Mtl {
     // we render into this texture and blit with into the target texture
     // as opposed to the target texture directly in order to avoid creating
     // multiple encoders
-    // temp_texture: MtlTexture,
+    temp_texture: MtlTexture,
     // pseudo_sampler:
 
     // clear_rect
@@ -316,11 +316,11 @@ impl Mtl {
 
         let stroke_clear_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
 
-        // let image_info = ImageInfo::new(ImageFlags::empty(), size.w as _, size.h as _, crate::PixelFormat::Rgba8);
-        // let temp_texture = MtlTexture::new(device, &command_queue, image_info).unwrap();
+        let image_info = ImageInfo::new(ImageFlags::empty(), size.w as _, size.h as _, crate::PixelFormat::Rgba8);
+        let temp_texture = MtlTexture::new(device, &command_queue, image_info).unwrap();
 
         Self {
-            // temp_texture,
+            temp_texture,
             layer: layer.to_owned(),
             debug,
             antialias,
@@ -1163,6 +1163,7 @@ impl Renderer for Mtl {
         // println!("target_texture size: {:?}", size);
         // println!("pre stencil texture size: {:?}", self.stencil_texture.size());
         self.stencil_texture.resize(size);
+        // self.temp_texture.resize(size);
         // println!("pre stencil texture size: {:?}", self.stencil_texture.size());
         // assert_eq!(size, *self.view_size_buffer);
         let mut encoder = new_render_command_encoder(
