@@ -251,6 +251,13 @@ where
         &mut self.renderer
     }
 
+    pub fn size(&self) -> Size {
+        Size {
+            w: self.width as _,
+            h: self.height as _,
+        }
+    }
+
     pub fn set_size(&mut self, width: u32, height: u32, dpi: f32) {
         self.width = width;
         self.height = height;
@@ -1159,3 +1166,10 @@ impl<T: Renderer> Canvas<T> {
         self.renderer.view_size()
     }
 }
+
+// impl Canvas<crate::renderer::Mtl> {
+//     pub fn current_texture(&self) -> &metal::TextureRef {
+//         self.set_render_target(target)
+//         todo!()
+//     }
+// }
