@@ -173,7 +173,11 @@ impl Mtl {
 }
 
 impl Mtl {
-    pub fn new(device: &metal::DeviceRef, layer: &metal::MetalLayerRef) -> Self {
+    pub fn new(
+        device: &metal::DeviceRef,
+        command_queue: &metal::CommandQueueRef,
+        layer: &metal::MetalLayerRef,
+    ) -> Self {
         let debug = cfg!(debug_assertions);
         let antialias = true;
 
@@ -185,7 +189,8 @@ impl Mtl {
         // let root_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         // let library_path = root_path.join("src/renderer/mtl/shaders.metallib");
         // let library = device.new_library_with_file(library_path).expect("library not found");
-        let command_queue = device.new_command_queue();
+        // let command_queue = device.new_command_queue();
+        let command_queue = command_queue.to_owned();
         let rps_cache = RPSCache::new(device, antialias);
 
         // let vert_func = library
@@ -961,7 +966,7 @@ fn new_render_command_encoder<'a>(
         // if clear_buffer_on_flush {
             metal::MTLLoadAction::Load;
         // } else {
-            // metal::MTLLoadAction::Clear;
+        // metal::MTLLoadAction::Clear;
         // };
         let desc = metal::RenderPassDescriptor::new();
 

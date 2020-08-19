@@ -75,7 +75,8 @@ fn main() {
     // let library = device.new_library_with_source(
     //     shader_code,
     // );
-    let renderer = Mtl::new(&device, &layer);
+    let command_queue = device.new_command_queue();
+    let renderer = Mtl::new(&device, &command_queue, &layer);
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
     let root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));

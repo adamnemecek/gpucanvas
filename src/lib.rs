@@ -1081,7 +1081,6 @@ where
                         Vertex::new(p4, p5, quad.s1, quad.t1),
                     ];
 
-
                     verts.extend_from_slice(&data);
                 }
 
