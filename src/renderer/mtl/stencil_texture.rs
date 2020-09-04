@@ -53,9 +53,7 @@ impl StencilTexture {
             return;
         }
         println!("resizing stencil from {:?} to {:?}", self.size, size);
-        // if self.size == size {
-        //     return;
-        // }
+
         let desc = create_stencil_texture_descriptor(size);
 
         self.size = size;
