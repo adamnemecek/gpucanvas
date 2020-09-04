@@ -396,6 +396,10 @@ where
         }
     }
 
+    pub fn render_target(&self) -> RenderTarget {
+        self.current_render_target
+    }
+
     /// Sets a new render target. All drawing operations after this call will happen on the provided render target
     pub fn set_render_target(&mut self, target: RenderTarget) {
         if self.current_render_target != target {

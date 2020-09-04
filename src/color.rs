@@ -104,6 +104,10 @@ impl Color {
         Self::rgbaf(0.0, 1.0, 0.0, 1.0)
     }
 
+    pub fn yellow() -> Self {
+        Self::rgbaf(0.0, 0.0, 1.0, 1.0)
+    }
+
     pub fn blue() -> Self {
         Self::rgbaf(0.1, 0.2, 0.7, 1.0)
     }
