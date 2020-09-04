@@ -1,6 +1,6 @@
 use crate::Size;
 
-pub fn create_stencil_texture_descriptor(size: Size) -> metal::TextureDescriptor {
+fn create_stencil_texture_descriptor(size: Size) -> metal::TextureDescriptor {
     let desc = metal::TextureDescriptor::new();
     desc.set_texture_type(metal::MTLTextureType::D2);
     desc.set_pixel_format(metal::MTLPixelFormat::Stencil8);
@@ -21,16 +21,21 @@ pub struct StencilTexture {
     device: metal::Device,
     tex: metal::Texture,
     size: Size,
+    gen: u32,
 }
 
 impl StencilTexture {
     pub fn new(device: &metal::DeviceRef, size: Size) -> Self {
         let desc = create_stencil_texture_descriptor(size);
         let tex = device.new_texture(&desc);
+        let gen = 0;
+
+        tex.set_label(&format!("gen: {:?}", gen));
         Self {
             device: device.to_owned(),
             tex,
             size,
+            gen,
         }
     }
 
@@ -47,13 +52,19 @@ impl StencilTexture {
         if self.size.contains(&size) {
             return;
         }
+        println!("resizing stencil from {:?} to {:?}", self.size, size);
         // if self.size == size {
         //     return;
         // }
         let desc = create_stencil_texture_descriptor(size);
 
         self.size = size;
+        self.gen += 1;
+
+        self.tex.set_purgeable_state(metal::MTLPurgeableState::Empty);
         self.tex = self.device.new_texture(&desc);
+
+        self.tex.set_label(&format!("stencil texture gen: {:?}", self.gen));
     }
 
     pub fn label(&self) -> &str {

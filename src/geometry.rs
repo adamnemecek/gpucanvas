@@ -239,7 +239,7 @@ impl Size {
     }
 
     pub fn contains(&self, other: &Self) -> bool {
-        self.w > other.w && self.h > other.h
+        self.w >= other.w && self.h >= other.h
     }
 
     pub fn zero() -> Self {
