@@ -79,6 +79,7 @@ impl Command {
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 pub enum RenderTarget {
+    None,
     Screen,
     Image(ImageId),
 }

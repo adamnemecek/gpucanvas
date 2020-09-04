@@ -856,6 +856,9 @@ impl Mtl {
                 let texture = images.get(id).unwrap();
                 texture.size()
             }
+            RenderTarget::None => {
+                unimplemented!("rendertarget cannot be none")
+            }
         };
 
         // println!(
@@ -1177,6 +1180,9 @@ impl Renderer for Mtl {
                 // println!("render target: image: {:?}", id);
                 images.get(id).unwrap().tex().to_owned()
             }
+            RenderTarget::None => {
+                unimplemented!("rendertarget cannot be none")
+            }
         };
 
         // this is needed for screenshotting
@@ -1310,6 +1316,9 @@ impl Renderer for Mtl {
                             size = tex.size();
                             tex
                         }
+                        RenderTarget::None => {
+                            unimplemented!("rendertarget cannot be none")
+                        }
                     };
                     pixel_format = target_texture.pixel_format();
                     // println!("size0: {:?}, size1: {:?}", size, *self.view_size_buffer);
@@ -1427,6 +1436,7 @@ impl Renderer for Mtl {
         let texture = match self.render_target {
             RenderTarget::Screen => self.layer.next_drawable().map(|x| x.texture()),
             RenderTarget::Image(id) => images.get(id).map(|x| x.tex()),
+            RenderTarget::None => unimplemented!("rendertarget cannot be none")
         }
         .unwrap();
         // let texture = self.last_rendered_texture.as_ref().unwrap();
