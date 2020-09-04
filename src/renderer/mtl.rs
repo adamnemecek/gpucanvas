@@ -848,7 +848,7 @@ impl Mtl {
             return;
         }
 
-        let prev_size = self.view_size;
+        // let prev_size = self.view_size;
 
         let size = match target {
             RenderTarget::Screen => self.layer.drawable_size().into(),
@@ -1071,6 +1071,7 @@ impl Renderer for Mtl {
         //// println!("index_buffer.byte_len {}", self.index_buffer.byte_len());
         //// println!("index_buffer.byte_capacity {}", self.index_buffer.byte_capacity());
         if !should_render() {
+            // println!("dropping frame with target ");
             return;
         }
         lock();
