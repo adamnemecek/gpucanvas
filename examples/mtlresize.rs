@@ -110,7 +110,7 @@ fn main() {
         .collect();
 
     // let mut first = true;
-    let capture = true;
+    let capture = false;
 
     //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
 
@@ -183,6 +183,23 @@ fn main() {
         red_rect
     };
 
+    pub struct Rect {
+        pub x: f32,
+        pub y: f32,
+        pub w: f32,
+        pub h: f32,
+    }
+
+    impl Rect {
+        pub fn draw(&self, canvas: &mut Canvas<Mtl>) {
+            let mut path = Path::new();
+            path.rect(self.x, self.y, self.w, self.h);
+            canvas.stroke_path(&mut path, Paint::color(Color::hex("abcabc")));
+        }
+    }
+
+    let mut r = Rect { x: 10.0 , y: 10.0, w: 30.0, h: 40.0 };
+
     events_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
 
@@ -190,6 +207,8 @@ fn main() {
             // Event::LoopDestroyed => return,
             Event::WindowEvent { event, .. } => match event {
                 WindowEvent::Resized(physical_size) => {
+                    r.w += 2.0;
+                    r.h += 2.0;
                     layer.set_drawable_size(CGSize::new(size.width as f64, size.height as f64));
                 }
                 WindowEvent::CursorMoved {
@@ -282,6 +301,8 @@ fn main() {
                 let pt = canvas.transform().inversed().transform_point(mousex, mousey);
                 let mousex = pt.0;
                 let mousey = pt.1;
+
+                r.draw(&mut canvas);
 
                 // draw_graph(&mut canvas, 0.0, height / 2.0, width, height / 2.0, t);
 
@@ -422,11 +443,11 @@ fn main() {
                 // canvas.restore();
 
                 canvas.flush();
-                if canvas.frame() == 3 {
-                    println!("stop capture");
-                    canvas.stop_capture();
-                    // first = false;
-                }
+                // if canvas.frame() == 3 {
+                //     println!("stop capture");
+                //     canvas.stop_capture();
+                //     // first = false;
+                // }
                 // if canvas.frame() == 8 {
                 // use gpucanvas::renderer::MtlTexture
                 // canvas.stop_capture();

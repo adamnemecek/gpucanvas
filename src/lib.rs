@@ -458,7 +458,10 @@ where
         flags: ImageFlags,
     ) -> Result<(), ErrorKind> {
         let info = ImageInfo::new(flags, width, height, format);
-        self.images.realloc(&mut self.renderer, id, info)
+        let label = self.label(id);
+        let res = self.images.realloc(&mut self.renderer, id, info);
+        self.set_label(id, &label);
+        res
     }
 
     /// Decode an image from file
