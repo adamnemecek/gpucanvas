@@ -955,7 +955,7 @@ fn new_render_command_encoder<'a>(
     target_texture: &metal::TextureRef,
     command_buffer: &'a metal::CommandBufferRef,
     clear_color: Color,
-    stencil_texture: &StencilTexture,
+    stencil_texture: &mut StencilTexture,
     // view_size: Size,
     vertex_buffer: &GPUVec<Vertex>,
     // view_size_buffer: &GPUVar<Size>,
@@ -973,6 +973,7 @@ fn new_render_command_encoder<'a>(
         // };
         let desc = metal::RenderPassDescriptor::new();
 
+        stencil_texture.resize(view_size);
         // let view_size = **view_size_buffer;
 
         let color_attachment = desc.color_attachments().object_at(0).unwrap();
@@ -1192,7 +1193,7 @@ impl Renderer for Mtl {
         let size = Size::new(target_texture.width() as _, target_texture.height() as _);
         // println!("target_texture size: {:?}", size);
         // println!("pre stencil texture size: {:?}", self.stencil_texture.size());
-        self.stencil_texture.resize(size);
+
         // self.temp_texture.resize(size);
         // println!("pre stencil texture size: {:?}", self.stencil_texture.size());
         // assert_eq!(size, *self.view_size_buffer);
@@ -1201,7 +1202,7 @@ impl Renderer for Mtl {
             &target_texture,
             &command_buffer,
             clear_color,
-            &self.stencil_texture,
+            &mut self.stencil_texture,
             &self.vertex_buffer,
             // &self.view_size_buffer,
             self.view_size
@@ -1330,7 +1331,7 @@ impl Renderer for Mtl {
                         &target_texture,
                         &command_buffer,
                         clear_color,
-                        &self.stencil_texture,
+                        &mut self.stencil_texture,
                         &self.vertex_buffer,
                         // &self.view_size_buffer,
                         self.view_size,

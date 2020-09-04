@@ -246,6 +246,13 @@ impl Size {
     pub fn zero() -> Self {
         Self { w: 0.0, h: 0.0 }
     }
+
+    pub fn max(&self, other: &Self) -> Self {
+        Self {
+            w: self.w.max(other.w),
+            h: self.h.max(other.h),
+        }
+    }
 }
 
 impl std::ops::Mul<f32> for Size {
