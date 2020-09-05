@@ -27,9 +27,8 @@ pub use mtl_ext::{GPUVecExt, MtlTextureExt};
 mod buffers_cache;
 pub use buffers_cache::*;
 
-
 lazy_static! {
-    static ref BUFFER_CACHE: BuffersCache = BuffersCache::new(3);
+    static ref BUFFER_CACHE: BuffersCache = BuffersCache::new(&metal::Device::system_default().unwrap(), 3);
     // static ref NUMBER: u32 = times_two(21);
 }
 
