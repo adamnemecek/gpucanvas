@@ -27,10 +27,10 @@ pub use mtl_ext::{GPUVecExt, MtlTextureExt};
 mod buffers_cache;
 pub use buffers_cache::*;
 
-lazy_static! {
-    static ref BUFFER_CACHE: BuffersCache = BuffersCache::new(&metal::Device::system_default().unwrap(), 3);
-    // static ref NUMBER: u32 = times_two(21);
-}
+// lazy_static! {
+//     static ref BUFFER_CACHE: BuffersCache = BuffersCache::new(&metal::Device::system_default().unwrap(), 3);
+//     // static ref NUMBER: u32 = times_two(21);
+// }
 
 #[repr(C)]
 #[derive(Copy, Clone, Default, Debug, PartialEq, PartialOrd)]
@@ -135,6 +135,7 @@ pub struct Mtl {
 
     // todo
     pseudo_texture: MtlTexture,
+    // buffers_cache: MtlBuffersCache,
 
     // // we render into this texture and blit with into the target texture
     // // as opposed to the target texture directly in order to avoid creating
@@ -337,6 +338,7 @@ impl Mtl {
         Self {
             // temp_texture,
             layer: layer.to_owned(),
+            // buffers_cache: MtlBuffersCache::new(&device, 3),
             debug,
             antialias,
             rps_cache,
@@ -1116,6 +1118,9 @@ impl Renderer for Mtl {
         // the reserve should allocate enough
         let vertex_buffer_hash = self.vertex_buffer.ptr_hash();
         let index_buffer_hash = self.index_buffer.ptr_hash();
+
+        // let e = BUFFER_CACHE.acquire();
+        // let e = self.buffers_cache.acquire();
 
         // let mut stroke_vert_offset = max_verts - lens.stroke_count;
 

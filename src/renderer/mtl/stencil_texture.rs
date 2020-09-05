@@ -20,7 +20,7 @@ fn create_stencil_texture_descriptor(size: Size) -> metal::TextureDescriptor {
 pub struct StencilTexture {
     device: metal::Device,
     tex: metal::Texture,
-    size: Size,
+    // size: Size,
     gen: u32,
 }
 
@@ -34,33 +34,36 @@ impl StencilTexture {
         Self {
             device: device.to_owned(),
             tex,
-            size,
+            // size,
             gen,
         }
-    }
-
-    pub fn size(&self) -> Size {
-        self.size
     }
 
     pub fn tex(&self) -> &metal::TextureRef {
         &self.tex
     }
 
+    pub fn size(&self) -> Size {
+        Size {
+            w: self.tex.width() as _,
+            h: self.tex.height() as _,
+        }
+    }
+
     pub fn resize(&mut self, size: Size) {
         // todo fix adam
-        if self.size.contains(&size) {
+        if self.size().contains(&size) {
             return;
         }
-        println!("resizing stencil from {:?} to {:?}", self.size, size);
+        println!("resizing stencil from {:?} to {:?}", self.size(), size);
 
-        // use a `max` as opposed to the size because let's say we want to stencil two rectangles
+        // use `max` as opposed to the size because let's say we want to stencil two rectangles
         // one vertical, one horizontal. if we just use the new size, we will be allocating
         // and releasing a lot. the max accomodates both of them.
-        let size = size.max(&self.size);
+        let size = size.max(&self.size());
         let desc = create_stencil_texture_descriptor(size);
 
-        self.size = size;
+        // self.size = size;
         self.gen += 1;
 
         self.tex.set_purgeable_state(metal::MTLPurgeableState::Empty);
@@ -76,7 +79,17 @@ impl StencilTexture {
     pub fn set_label(&self, label: &str) {
         self.tex.set_label(label)
     }
+
     // pub fn clear(&mut self) {
     //     self.size = Size::default();
     // }
+
+    pub fn to_owned(&self) -> Self {
+        Self {
+            tex: self.tex.to_owned(),
+            device: self.device.to_owned(),
+            // size: self.size,
+            gen: self.gen,
+        }
+    }
 }

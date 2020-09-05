@@ -6,32 +6,32 @@ pub struct BufferIndex {
     inner: usize,
 }
 
-pub struct Buffers {
+pub struct MtlBuffers {
     pub stencil_texture: StencilTexture,
-    pub index_buffer: GPUVec<u32>,
     pub vertex_buffer: GPUVec<Vertex>,
+    pub index_buffer: GPUVec<u32>,
 }
 
-impl Buffers {
+impl MtlBuffers {
     pub fn new(device: &metal::DeviceRef, size: crate::Size) -> Self {
-        // Self {
-        //     stencil_texture: StencilTexture::new(device, size),
-
-        // }
-        todo!()
+        Self {
+            stencil_texture: StencilTexture::new(device, size),
+            vertex_buffer: GPUVec::with_capacity(device, 32),
+            index_buffer: GPUVec::with_capacity(device, 32),
+        }
     }
 }
 
-struct BufferCacheEntry {
+struct MtlBufferCacheEntry {
     busy: bool,
-    buffers: Buffers,
+    buffers: MtlBuffers,
 }
-pub struct BuffersCache {
+pub struct MtlBuffersCache {
     device: metal::Device,
-    inner: Vec<BufferCacheEntry>,
+    inner: Vec<MtlBufferCacheEntry>,
 }
 
-impl BuffersCache {
+impl MtlBuffersCache {
     pub fn new(device: &metal::DeviceRef, count: usize) -> Self {
         todo!()
         // Self {
@@ -40,7 +40,7 @@ impl BuffersCache {
     }
 
     // finds an empty
-    pub fn acquire(&mut self) -> (BufferIndex, Buffers) {
+    pub fn acquire(&mut self) -> (BufferIndex, MtlBuffers) {
         let fst = self.inner.iter().enumerate().find(|(i, x)| !x.busy);
         todo!()
     }
@@ -51,5 +51,5 @@ impl BuffersCache {
     }
 }
 
-unsafe impl Send for BuffersCache {}
-unsafe impl Sync for BuffersCache {}
+unsafe impl Send for MtlBuffersCache {}
+unsafe impl Sync for MtlBuffersCache {}
