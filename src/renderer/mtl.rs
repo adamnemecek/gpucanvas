@@ -24,6 +24,15 @@ use stencil_texture::StencilTexture;
 mod mtl_ext;
 pub use mtl_ext::{GPUVecExt, MtlTextureExt};
 
+mod buffers_cache;
+pub use buffers_cache::*;
+
+
+lazy_static! {
+    static ref BUFFER_CACHE: BuffersCache = BuffersCache::new(3);
+    // static ref NUMBER: u32 = times_two(21);
+}
+
 #[repr(C)]
 #[derive(Copy, Clone, Default, Debug, PartialEq, PartialOrd)]
 struct ClearRect {
@@ -128,10 +137,10 @@ pub struct Mtl {
     // todo
     pseudo_texture: MtlTexture,
 
-    // we render into this texture and blit with into the target texture
-    // as opposed to the target texture directly in order to avoid creating
-    // multiple encoders
-    temp_texture: MtlTexture,
+    // // we render into this texture and blit with into the target texture
+    // // as opposed to the target texture directly in order to avoid creating
+    // // multiple encoders
+    // temp_texture: MtlTexture,
     // pseudo_sampler:
 
     // clear_rect
@@ -324,10 +333,10 @@ impl Mtl {
         let stroke_clear_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
 
         let image_info = ImageInfo::new(ImageFlags::empty(), size.w as _, size.h as _, crate::PixelFormat::Rgba8);
-        let temp_texture = MtlTexture::new(device, &command_queue, image_info).unwrap();
+        // let temp_texture = MtlTexture::new(device, &command_queue, image_info).unwrap();
 
         Self {
-            temp_texture,
+            // temp_texture,
             layer: layer.to_owned(),
             debug,
             antialias,
@@ -856,9 +865,7 @@ impl Mtl {
                 let texture = images.get(id).unwrap();
                 texture.size()
             }
-            RenderTarget::None => {
-                unimplemented!("rendertarget cannot be none")
-            }
+            RenderTarget::None => unimplemented!("rendertarget cannot be none"),
         };
 
         // println!(
@@ -1182,9 +1189,7 @@ impl Renderer for Mtl {
                 // println!("render target: image: {:?}", id);
                 images.get(id).unwrap().tex().to_owned()
             }
-            RenderTarget::None => {
-                unimplemented!("rendertarget cannot be none")
-            }
+            RenderTarget::None => unimplemented!("rendertarget cannot be none"),
         };
 
         // this is needed for screenshotting
@@ -1318,9 +1323,7 @@ impl Renderer for Mtl {
                             size = tex.size();
                             tex
                         }
-                        RenderTarget::None => {
-                            unimplemented!("rendertarget cannot be none")
-                        }
+                        RenderTarget::None => unimplemented!("rendertarget cannot be none"),
                     };
                     pixel_format = target_texture.pixel_format();
                     // println!("size0: {:?}, size1: {:?}", size, *self.view_size_buffer);
@@ -1438,7 +1441,7 @@ impl Renderer for Mtl {
         let texture = match self.render_target {
             RenderTarget::Screen => self.layer.next_drawable().map(|x| x.texture()),
             RenderTarget::Image(id) => images.get(id).map(|x| x.tex()),
-            RenderTarget::None => unimplemented!("rendertarget cannot be none")
+            RenderTarget::None => unimplemented!("rendertarget cannot be none"),
         }
         .unwrap();
         // let texture = self.last_rendered_texture.as_ref().unwrap();

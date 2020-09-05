@@ -59,6 +59,11 @@ extern crate static_assertions;
 #[macro_use]
 extern crate memoffset;
 
+#[macro_use]
+extern crate lazy_static;
+
+
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 pub enum FillRule {

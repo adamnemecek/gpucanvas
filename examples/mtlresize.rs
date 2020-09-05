@@ -198,7 +198,12 @@ fn main() {
         }
     }
 
-    let mut r = Rect { x: 10.0 , y: 10.0, w: 30.0, h: 40.0 };
+    let mut r = Rect {
+        x: 10.0,
+        y: 10.0,
+        w: 30.0,
+        h: 40.0,
+    };
 
     events_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;

@@ -381,9 +381,7 @@ impl OpenGl {
                     }
                 }
             }
-            RenderTarget::None => {
-                unimplemented!("rendertarget cannot be none")
-            }
+            RenderTarget::None => unimplemented!("rendertarget cannot be none"),
         }
     }
 }
