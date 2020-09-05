@@ -54,7 +54,7 @@ impl StencilTexture {
         }
         println!("resizing stencil from {:?} to {:?}", self.size, size);
 
-        // use a max as opposed to the size because let's say we want to stencil two rectangles
+        // use a `max` as opposed to the size because let's say we want to stencil two rectangles
         // one vertical, one horizontal. if we just use the new size, we will be allocating
         // and releasing a lot. the max accomodates both of them.
         let size = size.max(&self.size);
