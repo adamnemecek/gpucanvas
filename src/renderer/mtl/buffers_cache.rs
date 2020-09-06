@@ -50,13 +50,17 @@ struct MtlBufferCacheEntry {
 pub struct MtlBuffersCache {
     device: metal::Device,
     inner: Vec<MtlBufferCacheEntry>,
-    // semaphore
+    semaphore: sema::Semaphore,
 }
 
 static mut FREED: Vec<BufferIndex> = Vec::new();
 
 impl MtlBuffersCache {
     pub fn new(device: &metal::DeviceRef, count: usize) -> Self {
+        let semaphore = sema::Semaphore::new(count as _);
+        // Self {
+        // devic
+        // }
         todo!()
         // Self {
         //  device: device.to_owned()
@@ -67,6 +71,7 @@ impl MtlBuffersCache {
     pub fn acquire(&mut self, queue: &metal::CommandQueueRef) -> (BufferIndex, MtlBuffers, metal::CommandBuffer) {
         // select a buffer similarly as mtlnvg__renderViewport
         // wait on semaphore
+        let _ = self.semaphore.wait();
         unsafe {
             for e in FREED.iter() {
                 self.inner[e.inner].busy = false;
@@ -76,6 +81,7 @@ impl MtlBuffersCache {
         let command_buffer = queue.new_command_buffer();
         let (idx, buffers) = self.inner.iter().enumerate().find(|(i, x)| !x.busy).unwrap();
         let index = BufferIndex { inner: idx };
+        // let ptr = &self.semaphore.as_pointer();
         let block = block::ConcreteBlock::new(move |buffer: &metal::CommandBufferRef| {
             //     // println!("{}", buffer.label());
             // self.vertex_buffer.clear();
@@ -83,6 +89,7 @@ impl MtlBuffersCache {
             unsafe {
                 FREED.push(index);
             }
+
             // unlock();
         })
         .copy();

@@ -39,6 +39,7 @@ cocoa = "0.20"
 core-graphics = "0.19"
 block = "0.1.5"
 lazy_static = "*"
+sema = "*"
 
 [dependencies.objc]
 version = "0.2.4"
