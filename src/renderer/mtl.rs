@@ -1038,10 +1038,7 @@ impl Renderer for Mtl {
     type BufferCache = crate::renderer::VoidCache;
 
     fn alloc_buffer_cache() -> Self::BufferCache {
-        Self::BufferCache {
-            inner: 0
-        }
-
+        Self::BufferCache::new()
     }
 
     fn view_size(&self) -> Size {

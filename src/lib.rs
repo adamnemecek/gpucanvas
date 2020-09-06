@@ -244,7 +244,7 @@ where
             tess_tol: 0.25,
             dist_tol: 0.01,
             frame: 0,
-            cache: T::alloc_buffer_cache()
+            cache: T::alloc_buffer_cache(),
         };
 
         canvas.save();
@@ -302,7 +302,6 @@ where
     ///
     /// Call this at the end of each frame.
     pub fn flush(&mut self) {
-
         self.renderer
             .render(&self.images, &mut self.cache, &self.verts, &self.commands);
         self.commands.clear();

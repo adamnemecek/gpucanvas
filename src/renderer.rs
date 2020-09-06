@@ -87,7 +87,13 @@ pub enum RenderTarget {
 pub trait BufferCache {}
 
 pub struct VoidCache {
-    inner: u32,
+    _inner: u32,
+}
+
+impl VoidCache {
+    pub fn new() -> Self {
+        Self { _inner: 0 }
+    }
 }
 
 impl BufferCache for VoidCache {}
@@ -95,6 +101,9 @@ impl BufferCache for VoidCache {}
 /// This is the main renderer trait that the [Canvas](../struct.Canvas.html) draws to.
 pub trait Renderer {
     type Image;
+    ///
+    /// Use the cache for [Multiple buffering](https://en.wikipedia.org/wiki/Multiple_buffering)
+    ///
     type BufferCache: BufferCache;
 
     fn set_size(&mut self, width: u32, height: u32, dpi: f32);
