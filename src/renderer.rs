@@ -108,7 +108,7 @@ pub trait Renderer {
 
     fn set_size(&mut self, width: u32, height: u32, dpi: f32);
 
-    fn alloc_buffer_cache() -> Self::BufferCache;
+    fn alloc_buffer_cache(&self) -> Self::BufferCache;
 
     fn render(
         &mut self,

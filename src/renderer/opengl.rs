@@ -390,7 +390,7 @@ impl Renderer for OpenGl {
     type Image = GlTexture;
     type BufferCache = crate::renderer::VoidCache;
 
-    fn alloc_buffer_cache() -> Self::BufferCache {
+    fn alloc_buffer_cache(&self) -> Self::BufferCache {
         Self::BufferCache::new()
     }
 

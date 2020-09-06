@@ -100,6 +100,7 @@ pub struct Mtl {
     clear_color: Color,
     // view_size_buffer: GPUVar<Size>,
     view_size: Size,
+    multiple_buffering: usize,
     // screen_view: [f32; 2],
     // vertex_descriptor: metal::VertexDescriptor,
 
@@ -337,6 +338,7 @@ impl Mtl {
 
         Self {
             // temp_texture,
+            multiple_buffering: 3,
             layer: layer.to_owned(),
             // buffers_cache: MtlBuffersCache::new(&device, 3),
             debug,
@@ -1031,14 +1033,14 @@ fn new_render_command_encoder<'a>(
     }
 }
 
-// impl crate::renderer::BufferCache for () {}
+impl crate::renderer::BufferCache for MtlBuffersCache {}
 
 impl Renderer for Mtl {
     type Image = MtlTexture;
-    type BufferCache = crate::renderer::VoidCache;
+    type BufferCache = MtlBuffersCache;
 
-    fn alloc_buffer_cache() -> Self::BufferCache {
-        Self::BufferCache::new()
+    fn alloc_buffer_cache(&self) -> Self::BufferCache {
+        Self::BufferCache::new(&self.device, self.multiple_buffering)
     }
 
     fn view_size(&self) -> Size {
