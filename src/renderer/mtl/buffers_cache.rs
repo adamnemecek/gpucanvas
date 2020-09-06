@@ -20,15 +20,38 @@ impl MtlBuffers {
             index_buffer: GPUVec::with_capacity(device, 32),
         }
     }
+
+    fn release(&mut self) {
+        self.vertex_buffer.clear();
+        self.index_buffer.clear();
+    }
+
+    fn is_ident(&self, other: &Self) -> bool {
+        // self.stencil_texture.
+        self.vertex_buffer.ptr_hash() == other.vertex_buffer.ptr_hash()
+    }
+
+    pub fn to_owned(&self) -> Self {
+       let ret = Self {
+           stencil_texture: self.stencil_texture.to_owned(),
+           vertex_buffer: self.vertex_buffer.to_owned(),
+           index_buffer: self.index_buffer.to_owned(),
+       };
+       assert!(self.is_ident(&ret));
+       ret
+    }
 }
 
 struct MtlBufferCacheEntry {
+    inner: MtlBuffers,
     busy: bool,
-    buffers: MtlBuffers,
+
+    // command_buffer: Option<metal::CommandBuffer>,
 }
 pub struct MtlBuffersCache {
     device: metal::Device,
     inner: Vec<MtlBufferCacheEntry>,
+    // semaphore
 }
 
 impl MtlBuffersCache {
@@ -40,13 +63,20 @@ impl MtlBuffersCache {
     }
 
     // finds an empty
-    pub fn acquire(&mut self) -> (BufferIndex, MtlBuffers) {
-        let fst = self.inner.iter().enumerate().find(|(i, x)| !x.busy);
-        todo!()
+    pub fn acquire(&mut self, queue: &metal::CommandQueueRef) -> (BufferIndex, MtlBuffers) {
+        // select a buffer similarly as mtlnvg__renderViewport
+        // wait on semaphore
+        let (idx, buffers) = self.inner.iter().enumerate().find(|(i, x)| !x.busy).unwrap();
+        (BufferIndex { inner: idx}, buffers.inner.to_owned())
+
     }
 
     pub fn release(&mut self, index: BufferIndex) {
-        self.inner[index.inner].busy = false;
+        // call buffers clear
+        // set busy to false
+        // signal_semaphore
+        // let x = &mutself.inner[index.inner];
+        // self.inner[index.inner].busy = false;
         todo!()
     }
 }

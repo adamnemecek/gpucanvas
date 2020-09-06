@@ -1120,7 +1120,7 @@ impl Renderer for Mtl {
         let index_buffer_hash = self.index_buffer.ptr_hash();
 
         // let e = BUFFER_CACHE.acquire();
-        // let e = self.buffers_cache.acquire();
+        // let (buffers_index, buffers) = self.buffers_cache.acquire();
 
         // let mut stroke_vert_offset = max_verts - lens.stroke_count;
 
@@ -1175,6 +1175,7 @@ impl Renderer for Mtl {
         let block = block::ConcreteBlock::new(move |buffer: &metal::CommandBufferRef| {
             //     // println!("{}", buffer.label());
             // self.vertex_buffer.clear();
+
             unlock();
         })
         .copy();
