@@ -1031,8 +1031,18 @@ fn new_render_command_encoder<'a>(
     }
 }
 
+// impl crate::renderer::BufferCache for () {}
+
 impl Renderer for Mtl {
     type Image = MtlTexture;
+    type BufferCache = crate::renderer::VoidCache;
+
+    fn alloc_buffer_cache() -> Self::BufferCache {
+        Self::BufferCache {
+            inner: 0
+        }
+
+    }
 
     fn view_size(&self) -> Size {
         // *self.view_size_buffer
@@ -1075,7 +1085,13 @@ impl Renderer for Mtl {
     }
 
     // called flush in ollix and nvg
-    fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]) {
+    fn render(
+        &mut self,
+        images: &ImageStore<Self::Image>,
+        cache: &mut Self::BufferCache,
+        verts: &[Vertex],
+        commands: &[Command],
+    ) {
         //println!("verts len {:?}", verts.len());
         //// println!("index_buffer.byte_len {}", self.index_buffer.byte_len());
         //// println!("index_buffer.byte_capacity {}", self.index_buffer.byte_capacity());

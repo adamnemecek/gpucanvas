@@ -12,6 +12,13 @@ pub struct Void;
 
 impl Renderer for Void {
     type Image = VoidImage;
+    type BufferCache = crate::renderer::VoidCache;
+
+    fn alloc_buffer_cache() -> Self::BufferCache {
+        Self::BufferCache {
+            inner: 0
+        }
+    }
 
     fn view_size(&self) -> Size {
         todo!("not implemented");
@@ -19,7 +26,14 @@ impl Renderer for Void {
 
     fn set_size(&mut self, width: u32, height: u32, dpi: f32) {}
 
-    fn render(&mut self, images: &ImageStore<VoidImage>, verts: &[Vertex], commands: &[Command]) {}
+    fn render(
+        &mut self,
+        images: &ImageStore<VoidImage>,
+        cache: &mut Self::BufferCache,
+        verts: &[Vertex],
+        commands: &[Command],
+    ) {
+    }
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind> {
         Ok(VoidImage { info })

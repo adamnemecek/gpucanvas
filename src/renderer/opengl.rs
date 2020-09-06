@@ -388,6 +388,13 @@ impl OpenGl {
 
 impl Renderer for OpenGl {
     type Image = GlTexture;
+    type BufferCache = crate::renderer::VoidCache;
+
+    fn alloc_buffer_cache() -> Self::BufferCache {
+        Self::BufferCache {
+            inner: 0
+        }
+    }
 
     fn view_size(&self) -> Size {
         Size::new(self.view[0], self.view[1])
@@ -414,7 +421,13 @@ impl Renderer for OpenGl {
 
     fn set_label(&self, images: &ImageStore<Self::Image>, id: ImageId, label: &str) {}
 
-    fn render(&mut self, images: &ImageStore<GlTexture>, verts: &[Vertex], commands: &[Command]) {
+    fn render(
+        &mut self,
+        images: &ImageStore<GlTexture>,
+        cache: &mut Self::BufferCache,
+        verts: &[Vertex],
+        commands: &[Command],
+    ) {
         self.main_program.bind();
 
         unsafe {

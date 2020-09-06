@@ -32,20 +32,19 @@ impl MtlBuffers {
     }
 
     pub fn to_owned(&self) -> Self {
-       let ret = Self {
-           stencil_texture: self.stencil_texture.to_owned(),
-           vertex_buffer: self.vertex_buffer.to_owned(),
-           index_buffer: self.index_buffer.to_owned(),
-       };
-       assert!(self.is_ident(&ret));
-       ret
+        let ret = Self {
+            stencil_texture: self.stencil_texture.to_owned(),
+            vertex_buffer: self.vertex_buffer.to_owned(),
+            index_buffer: self.index_buffer.to_owned(),
+        };
+        assert!(self.is_ident(&ret));
+        ret
     }
 }
 
 struct MtlBufferCacheEntry {
     inner: MtlBuffers,
     busy: bool,
-
     // command_buffer: Option<metal::CommandBuffer>,
 }
 pub struct MtlBuffersCache {
@@ -67,8 +66,7 @@ impl MtlBuffersCache {
         // select a buffer similarly as mtlnvg__renderViewport
         // wait on semaphore
         let (idx, buffers) = self.inner.iter().enumerate().find(|(i, x)| !x.busy).unwrap();
-        (BufferIndex { inner: idx}, buffers.inner.to_owned())
-
+        (BufferIndex { inner: idx }, buffers.inner.to_owned())
     }
 
     pub fn release(&mut self, index: BufferIndex) {

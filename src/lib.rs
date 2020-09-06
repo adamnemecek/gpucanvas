@@ -221,6 +221,7 @@ pub struct Canvas<T: Renderer> {
     tess_tol: f32,
     dist_tol: f32,
     frame: usize,
+    cache: T::BufferCache,
 }
 
 impl<T> Canvas<T>
@@ -243,6 +244,7 @@ where
             tess_tol: 0.25,
             dist_tol: 0.01,
             frame: 0,
+            cache: T::alloc_buffer_cache()
         };
 
         canvas.save();
@@ -300,7 +302,9 @@ where
     ///
     /// Call this at the end of each frame.
     pub fn flush(&mut self) {
-        self.renderer.render(&self.images, &self.verts, &self.commands);
+
+        self.renderer
+            .render(&self.images, &mut self.cache, &self.verts, &self.commands);
         self.commands.clear();
         self.verts.clear();
         self.frame += 1;

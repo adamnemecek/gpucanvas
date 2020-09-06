@@ -84,13 +84,30 @@ pub enum RenderTarget {
     Image(ImageId),
 }
 
+pub trait BufferCache {}
+
+pub struct VoidCache {
+    inner: u32,
+}
+
+impl BufferCache for VoidCache {}
+
 /// This is the main renderer trait that the [Canvas](../struct.Canvas.html) draws to.
 pub trait Renderer {
     type Image;
+    type BufferCache: BufferCache;
 
     fn set_size(&mut self, width: u32, height: u32, dpi: f32);
 
-    fn render(&mut self, images: &ImageStore<Self::Image>, verts: &[Vertex], commands: &[Command]);
+    fn alloc_buffer_cache() -> Self::BufferCache;
+
+    fn render(
+        &mut self,
+        images: &ImageStore<Self::Image>,
+        cache: &mut Self::BufferCache,
+        verts: &[Vertex],
+        commands: &[Command],
+    );
 
     fn alloc_image(&mut self, info: ImageInfo) -> Result<Self::Image, ErrorKind>;
     fn update_image(&mut self, image: &mut Self::Image, data: ImageSource, x: usize, y: usize)
