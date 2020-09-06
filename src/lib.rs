@@ -244,7 +244,7 @@ where
             device_px_ratio: 1.0,
             tess_tol: 0.25,
             dist_tol: 0.01,
-            frame: 0
+            frame: 0,
         };
 
         canvas.save();

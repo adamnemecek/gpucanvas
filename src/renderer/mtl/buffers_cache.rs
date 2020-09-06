@@ -53,6 +53,8 @@ pub struct MtlBuffersCache {
     // semaphore
 }
 
+static mut FREED: Vec<BufferIndex> = Vec::new();
+
 impl MtlBuffersCache {
     pub fn new(device: &metal::DeviceRef, count: usize) -> Self {
         todo!()
@@ -62,14 +64,34 @@ impl MtlBuffersCache {
     }
 
     // finds an empty
-    pub fn acquire(&mut self, queue: &metal::CommandQueueRef) -> (BufferIndex, MtlBuffers) {
+    pub fn acquire(&mut self, queue: &metal::CommandQueueRef) -> (BufferIndex, MtlBuffers, metal::CommandBuffer) {
         // select a buffer similarly as mtlnvg__renderViewport
         // wait on semaphore
+        unsafe {
+            for e in FREED.iter() {
+                self.inner[e.inner].busy = false;
+            }
+            FREED.clear();
+        }
+        let command_buffer = queue.new_command_buffer();
         let (idx, buffers) = self.inner.iter().enumerate().find(|(i, x)| !x.busy).unwrap();
-        (BufferIndex { inner: idx }, buffers.inner.to_owned())
+        let index = BufferIndex { inner: idx };
+        let block = block::ConcreteBlock::new(move |buffer: &metal::CommandBufferRef| {
+            //     // println!("{}", buffer.label());
+            // self.vertex_buffer.clear();
+            // self.release(index);
+            unsafe {
+                FREED.push(index);
+            }
+            // unlock();
+        })
+        .copy();
+        command_buffer.add_completed_handler(&block);
+        // (index, buffers.inner.to_owned())
+        todo!()
     }
 
-    pub fn release(&mut self, index: BufferIndex) {
+    pub fn release(&self, index: BufferIndex) {
         // call buffers clear
         // set busy to false
         // signal_semaphore

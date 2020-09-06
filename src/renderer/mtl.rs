@@ -1037,10 +1037,12 @@ impl crate::renderer::BufferCache for MtlBuffersCache {}
 
 impl Renderer for Mtl {
     type Image = MtlTexture;
-    type BufferCache = MtlBuffersCache;
+    // type BufferCache = MtlBuffersCache;
+    type BufferCache = crate::renderer::VoidCache;
 
     fn alloc_buffer_cache(&self) -> Self::BufferCache {
-        Self::BufferCache::new(&self.device, self.multiple_buffering)
+        // Self::BufferCache::new(&self.device, self.multiple_buffering)
+        Self::BufferCache::new()
     }
 
     fn view_size(&self) -> Size {
