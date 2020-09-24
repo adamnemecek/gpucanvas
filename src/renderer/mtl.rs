@@ -277,7 +277,7 @@ impl Mtl {
 
         let back_face_stencil_descriptor = metal::StencilDescriptor::new();
         back_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Always);
-        // we set only 
+        // we set only
         back_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::DecrementWrap);
 
         stencil_descriptor.set_depth_compare_function(metal::MTLCompareFunction::Always);
@@ -287,34 +287,40 @@ impl Mtl {
         let fill_shape_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
 
         // Fill anti-aliased stencil.
-        front_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Equal);
-        front_face_stencil_descriptor.set_stencil_failure_operation(metal::MTLStencilOperation::Keep);
-        front_face_stencil_descriptor.set_depth_failure_operation(metal::MTLStencilOperation::Keep);
-        front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
+        let fill_anti_alias_stencil_state = {
+            front_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Equal);
+            front_face_stencil_descriptor.set_stencil_failure_operation(metal::MTLStencilOperation::Keep);
+            front_face_stencil_descriptor.set_depth_failure_operation(metal::MTLStencilOperation::Keep);
+            front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
 
-        stencil_descriptor.set_back_face_stencil(None);
-        stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
-        let fill_anti_alias_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
+            stencil_descriptor.set_back_face_stencil(None);
+            stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
+            device.new_depth_stencil_state(&stencil_descriptor)
+        };
 
         // Fill stencil.
-        front_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::NotEqual);
-        front_face_stencil_descriptor.set_stencil_failure_operation(metal::MTLStencilOperation::Zero);
-        front_face_stencil_descriptor.set_depth_failure_operation(metal::MTLStencilOperation::Zero);
-        front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
+        let fill_stencil_state = {
+            front_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::NotEqual);
+            front_face_stencil_descriptor.set_stencil_failure_operation(metal::MTLStencilOperation::Zero);
+            front_face_stencil_descriptor.set_depth_failure_operation(metal::MTLStencilOperation::Zero);
+            front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
 
-        stencil_descriptor.set_back_face_stencil(None);
-        stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
-        let fill_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
+            stencil_descriptor.set_back_face_stencil(None);
+            stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
+            device.new_depth_stencil_state(&stencil_descriptor)
+        };
 
         // Stroke shape stencil.
-        front_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Equal);
-        front_face_stencil_descriptor.set_stencil_failure_operation(metal::MTLStencilOperation::Keep);
-        front_face_stencil_descriptor.set_depth_failure_operation(metal::MTLStencilOperation::Keep);
-        front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::IncrementClamp);
+        let stroke_shape_stencil_state = {
+            front_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Equal);
+            front_face_stencil_descriptor.set_stencil_failure_operation(metal::MTLStencilOperation::Keep);
+            front_face_stencil_descriptor.set_depth_failure_operation(metal::MTLStencilOperation::Keep);
+            front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::IncrementClamp);
 
-        stencil_descriptor.set_back_face_stencil(None);
-        stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
-        let stroke_shape_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
+            stencil_descriptor.set_back_face_stencil(None);
+            stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
+            device.new_depth_stencil_state(&stencil_descriptor)
+        };
 
         // Stroke anti-aliased stencil.
         front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Keep);
@@ -324,15 +330,16 @@ impl Mtl {
         let stroke_anti_alias_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
 
         // Stroke clear stencil.
-        front_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Always);
-        front_face_stencil_descriptor.set_stencil_failure_operation(metal::MTLStencilOperation::Zero);
-        front_face_stencil_descriptor.set_depth_failure_operation(metal::MTLStencilOperation::Zero);
-        front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
+        let stroke_clear_stencil_state = {
+            front_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Always);
+            front_face_stencil_descriptor.set_stencil_failure_operation(metal::MTLStencilOperation::Zero);
+            front_face_stencil_descriptor.set_depth_failure_operation(metal::MTLStencilOperation::Zero);
+            front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
 
-        stencil_descriptor.set_back_face_stencil(None);
-        stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
-
-        let stroke_clear_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
+            stencil_descriptor.set_back_face_stencil(None);
+            stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
+            device.new_depth_stencil_state(&stencil_descriptor)
+        };
 
         let image_info = ImageInfo::new(ImageFlags::empty(), size.w as _, size.h as _, crate::PixelFormat::Rgba8);
         // let temp_texture = MtlTexture::new(device, &command_queue, image_info).unwrap();
