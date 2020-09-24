@@ -277,6 +277,7 @@ impl Mtl {
 
         let back_face_stencil_descriptor = metal::StencilDescriptor::new();
         back_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Always);
+        // we set only 
         back_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::DecrementWrap);
 
         stencil_descriptor.set_depth_compare_function(metal::MTLCompareFunction::Always);

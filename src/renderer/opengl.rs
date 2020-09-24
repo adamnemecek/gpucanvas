@@ -167,7 +167,7 @@ impl OpenGl {
         }
 
         self.set_uniforms(images, stencil_paint, None, None);
-
+        // these corresponds to the front and back face stencil descriptors
         unsafe {
             gl::StencilOpSeparate(gl::FRONT, gl::KEEP, gl::KEEP, gl::INCR_WRAP);
             gl::StencilOpSeparate(gl::BACK, gl::KEEP, gl::KEEP, gl::DECR_WRAP);
