@@ -413,16 +413,16 @@ impl Renderer for OpenGl {
 
     fn stop_capture(&self) {}
 
-    fn label(&self, images: &ImageStore<Self::Image>, id: ImageId) -> String {
+    fn label(&self, _images: &ImageStore<Self::Image>, _id: ImageId) -> String {
         "labels are not supported on opengl".to_owned()
     }
 
-    fn set_label(&self, images: &ImageStore<Self::Image>, id: ImageId, label: &str) {}
+    fn set_label(&self, _images: &ImageStore<Self::Image>, _id: ImageId, _label: &str) {}
 
     fn render(
         &mut self,
         images: &ImageStore<GlTexture>,
-        cache: &mut Self::BufferCache,
+        _cache: &mut Self::BufferCache,
         verts: &[Vertex],
         commands: &[Command],
     ) {
