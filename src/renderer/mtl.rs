@@ -597,8 +597,14 @@ impl Mtl {
         self.set_uniforms(encoder, images, fill_paint, cmd.image, cmd.alpha_mask);
         if self.antialias {
             match cmd.fill_rule {
-                FillRule::NonZero => {} //gl::StencilFunc(gl::EQUAL, 0x0, 0xff),
-                FillRule::EvenOdd => {} // gl::StencilFunc(gl::EQUAL, 0x0, 0x1),
+                FillRule::NonZero => {
+                    //gl::StencilFunc(gl::EQUAL, 0x0, 0xff),
+                    // encoder.set_stencil_reference_value(0xff);
+                }
+                FillRule::EvenOdd => {
+                    // gl::StencilFunc(gl::EQUAL, 0x0, 0x1),
+                    // encoder.set_stencil_reference_value(0x1);
+                }
             }
             encoder.set_depth_stencil_state(&self.fill_anti_alias_stencil_state);
 
@@ -613,8 +619,14 @@ impl Mtl {
         // Draws fill.
 
         match cmd.fill_rule {
-            FillRule::NonZero => {} //gl::StencilFunc(gl::NOTEQUAL, 0x0, 0xff),
-            FillRule::EvenOdd => {} // gl::StencilFunc(gl::NOTEQUAL, 0x0, 0x1),
+            FillRule::NonZero => {
+                //gl::StencilFunc(gl::NOTEQUAL, 0x0, 0xff),
+                // encoder.set_stencil_reference_value(0xff);
+            }
+            FillRule::EvenOdd => {
+                // gl::StencilFunc(gl::NOTEQUAL, 0x0, 0x1),
+                // encoder.set_stencil_reference_value(0x1);
+            }
         }
         encoder.set_depth_stencil_state(&self.fill_stencil_state);
         if let Some((start, count)) = cmd.triangles_verts {
