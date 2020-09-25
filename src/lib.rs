@@ -1071,8 +1071,8 @@ where
 
         // TODO: Early out if text is outside the canvas bounds, or maybe even check for each character in layout.
 
-        // if paint.font_size > 92.0 {
-        if paint.font_size > 20.0 {
+        if paint.font_size > 92.0 {
+        // if paint.font_size > 20.0 {
             text::render_direct(self, &layout, &paint, render_mode, invscale)?;
         } else {
             let cmds = text::render_atlas(self, &layout, &paint, render_mode)?;

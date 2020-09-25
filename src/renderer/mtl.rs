@@ -562,7 +562,7 @@ impl Mtl {
         let stencil_only_pipeline_state = &rps.stencil_only_pipeline_state;
 
         encoder.set_cull_mode(metal::MTLCullMode::None);
-        //encoder.set_stencil_reference_value(0xff);
+        encoder.set_stencil_reference_value(0xff);
         encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
         encoder.set_render_pipeline_state(stencil_only_pipeline_state);
 
@@ -602,11 +602,11 @@ impl Mtl {
             match cmd.fill_rule {
                 FillRule::NonZero => {
                     //gl::StencilFunc(gl::EQUAL, 0x0, 0xff),
-                    //encoder.set_stencil_reference_value(0xff);
+                    // encoder.set_stencil_reference_value(0xff);
                 }
                 FillRule::EvenOdd => {
                     // gl::StencilFunc(gl::EQUAL, 0x0, 0x1),
-                    //encoder.set_stencil_reference_value(0x1);
+                    // encoder.set_stencil_reference_value(0x1);
                 }
             }
             encoder.set_depth_stencil_state(&self.fill_anti_alias_stencil_state);
@@ -620,16 +620,15 @@ impl Mtl {
         }
 
         // Draws fill.
-
         match cmd.fill_rule {
             FillRule::NonZero => {
                 //gl::StencilFunc(gl::NOTEQUAL, 0x0, 0xff),
 
-                //encoder.set_stencil_reference_value(0xff);
+                // encoder.set_stencil_reference_value(0xff);
             }
             FillRule::EvenOdd => {
                 // gl::StencilFunc(gl::NOTEQUAL, 0x0, 0x1),
-                //encoder.set_stencil_reference_value(0x1);
+                // encoder.set_stencil_reference_value(0x1);
             }
         }
         encoder.set_depth_stencil_state(&self.fill_stencil_state);
@@ -683,6 +682,7 @@ impl Mtl {
 
         // Fills the stroke base without overlap.
         self.set_uniforms(encoder, images, paint2, cmd.image, cmd.alpha_mask);
+        encoder.set_stencil_reference_value(0xff);
         encoder.set_depth_stencil_state(&self.stroke_shape_stencil_state);
         encoder.set_render_pipeline_state(pipeline_state);
 
@@ -694,6 +694,7 @@ impl Mtl {
 
         // Draw anti-aliased pixels.
         self.set_uniforms(encoder, images, paint1, cmd.image, cmd.alpha_mask);
+        encoder.set_stencil_reference_value(0xff);
         encoder.set_depth_stencil_state(&self.stroke_anti_alias_stencil_state);
 
         for drawable in &cmd.drawables {
@@ -712,6 +713,7 @@ impl Mtl {
                 encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64);
             }
         }
+        encoder.set_stencil_reference_value(0xff);
         encoder.set_depth_stencil_state(&self.default_stencil_state);
 
         #[cfg(debug_assertions)]
@@ -1023,11 +1025,11 @@ fn new_render_command_encoder<'a>(
         stencil_attachment.set_store_action(metal::MTLStoreAction::DontCare);
         stencil_attachment.set_texture(Some(&stencil_texture.tex()));
 
-        let mut encoder = command_buffer.new_render_command_encoder(&desc);
+        let encoder = command_buffer.new_render_command_encoder(&desc);
 
         encoder.set_cull_mode(metal::MTLCullMode::Back);
         encoder.set_front_facing_winding(metal::MTLWinding::CounterClockwise);
-        //encoder.set_stencil_reference_value(0);
+        encoder.set_stencil_reference_value(0);
 
         encoder.set_viewport(metal::MTLViewport {
             originX: 0.0,
@@ -1303,26 +1305,26 @@ impl Renderer for Mtl {
 
             match cmd.cmd_type {
                 CommandType::ConvexFill { params } => {
-                    //counters.convex_fill += 1;
+                    counters.convex_fill += 1;
                     self.convex_fill(&encoder, images, cmd, params)
                 }
                 CommandType::ConcaveFill {
                     stencil_params,
                     fill_params,
                 } => {
-                    //counters.concave_fill += 1;
+                    counters.concave_fill += 1;
                     self.concave_fill(&encoder, images, cmd, stencil_params, fill_params)
                 }
                 CommandType::Stroke { params } => {
-                    //counters.stroke += 1;
+                    counters.stroke += 1;
                     self.stroke(&encoder, images, cmd, params)
                 }
                 CommandType::StencilStroke { params1, params2 } => {
-                    //counters.stencil_stroke += 1;
+                    counters.stencil_stroke += 1;
                     self.stencil_stroke(&encoder, images, cmd, params1, params2)
                 }
                 CommandType::Triangles { params } => {
-                    //counters.triangles += 1;
+                    counters.triangles += 1;
                     self.triangles(&encoder, images, cmd, params)
                 }
                 CommandType::ClearRect {
@@ -1332,7 +1334,7 @@ impl Renderer for Mtl {
                     height,
                     color,
                 } => {
-                    //counters.clear_rect += 1;
+                    counters.clear_rect += 1;
                     self.clear_rect(&encoder, images, x, y, width, height, color);
                 }
                 CommandType::SetRenderTarget(target) => {
@@ -1343,7 +1345,7 @@ impl Renderer for Mtl {
                     encoder.pop_debug_group();
 
                     target_set += 1;
-                    //counters.set_render_target += 1;
+                    counters.set_render_target += 1;
                     // println!("---------switching from {:?} to {:?}", self.render_target, target);
 
                     encoder.end_encoding();
