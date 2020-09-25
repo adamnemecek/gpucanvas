@@ -110,7 +110,8 @@ fn main() {
         .collect();
 
     // let mut first = true;
-    let capture = false;
+    let capture = true;
+    let stop_frame = 3;
 
     //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
 
@@ -448,11 +449,11 @@ fn main() {
                 // canvas.restore();
 
                 canvas.flush();
-                // if canvas.frame() == 3 {
-                //     println!("stop capture");
-                //     canvas.stop_capture();
-                //     // first = false;
-                // }
+                if capture && canvas.frame() == stop_frame {
+                    println!("stop capture");
+                    canvas.stop_capture();
+                    // first = false;
+                }
                 // if canvas.frame() == 8 {
                 // use gpucanvas::renderer::MtlTexture
                 // canvas.stop_capture();

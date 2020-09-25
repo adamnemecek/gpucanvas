@@ -95,22 +95,23 @@ fn main() {
     let dpi_factor = window.scale_factor().round();
     println!("dpi_factor: {:?}", dpi_factor);
 
-    let images: Vec<ImageId> = (1..=12)
-        .map(|i| {
-            // let name = format!("{:?}/examples/assets/images/image{}.jpg", root, i);
-            let name = format!(
-                "{}/examples/assets/images/image{}.jpg",
-                root.to_str().unwrap().to_string(),
-                i
-            );
-            canvas
-                .load_image_file(name, ImageFlags::empty())
-                .expect("cannot load image")
-        })
-        .collect();
+    // let images: Vec<ImageId> = (1..=12)
+    //     .map(|i| {
+    //         // let name = format!("{:?}/examples/assets/images/image{}.jpg", root, i);
+    //         let name = format!(
+    //             "{}/examples/assets/images/image{}.jpg",
+    //             root.to_str().unwrap().to_string(),
+    //             i
+    //         );
+    //         canvas
+    //             .load_image_file(name, ImageFlags::empty())
+    //             .expect("cannot load image")
+    //     })
+    //     .collect();
 
     // let mut first = true;
-    let capture = true;
+    let capture = false;
+    let stop_frame = 3;
 
     //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
 
@@ -394,7 +395,7 @@ fn main() {
                 // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                 // draw_image(&mut canvas, images[0], 5.0, 300.0);
                 draw_text(&mut canvas, &fonts, "tea", 50.0, 200.0, 100.0, 100.0);
-                draw_text(&mut canvas, &fonts, "tea2", 200.0, 200.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "tea3", 200.0, 200.0, 100.0, 100.0);
                 // draw_image(&mut canvas, red_rect, 100.0, 100.0);
                 // draw_clear_rect2(&mut canvas, 0, 0, 200, 150);
 
@@ -422,7 +423,7 @@ fn main() {
                 // canvas.restore();
 
                 canvas.flush();
-                if canvas.frame() == 3 {
+                if capture && canvas.frame() == stop_frame {
                     println!("stop capture");
                     canvas.stop_capture();
                     // first = false;
