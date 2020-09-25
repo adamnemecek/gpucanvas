@@ -64,9 +64,9 @@ pub struct Command {
 }
 
 impl Command {
-    pub fn new(flavor: CommandType) -> Self {
+    pub fn new(cmd_type: CommandType) -> Self {
         Self {
-            cmd_type: flavor,
+            cmd_type,
             drawables: Default::default(),
             triangles_verts: Default::default(),
             image: Default::default(),

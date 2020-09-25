@@ -323,11 +323,13 @@ impl Mtl {
         };
 
         // Stroke anti-aliased stencil.
-        front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Keep);
+        let stroke_anti_alias_stencil_state = {
+            front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Keep);
 
-        stencil_descriptor.set_back_face_stencil(None);
-        stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
-        let stroke_anti_alias_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
+            stencil_descriptor.set_back_face_stencil(None);
+            stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
+            device.new_depth_stencil_state(&stencil_descriptor)
+        };
 
         // Stroke clear stencil.
         let stroke_clear_stencil_state = {
@@ -560,6 +562,7 @@ impl Mtl {
         let stencil_only_pipeline_state = &rps.stencil_only_pipeline_state;
 
         encoder.set_cull_mode(metal::MTLCullMode::None);
+        //encoder.set_stencil_reference_value(0xff);
         encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
         encoder.set_render_pipeline_state(stencil_only_pipeline_state);
 
@@ -599,11 +602,11 @@ impl Mtl {
             match cmd.fill_rule {
                 FillRule::NonZero => {
                     //gl::StencilFunc(gl::EQUAL, 0x0, 0xff),
-                    // encoder.set_stencil_reference_value(0xff);
+                    //encoder.set_stencil_reference_value(0xff);
                 }
                 FillRule::EvenOdd => {
                     // gl::StencilFunc(gl::EQUAL, 0x0, 0x1),
-                    // encoder.set_stencil_reference_value(0x1);
+                    //encoder.set_stencil_reference_value(0x1);
                 }
             }
             encoder.set_depth_stencil_state(&self.fill_anti_alias_stencil_state);
@@ -621,11 +624,12 @@ impl Mtl {
         match cmd.fill_rule {
             FillRule::NonZero => {
                 //gl::StencilFunc(gl::NOTEQUAL, 0x0, 0xff),
-                // encoder.set_stencil_reference_value(0xff);
+
+                //encoder.set_stencil_reference_value(0xff);
             }
             FillRule::EvenOdd => {
                 // gl::StencilFunc(gl::NOTEQUAL, 0x0, 0x1),
-                // encoder.set_stencil_reference_value(0x1);
+                //encoder.set_stencil_reference_value(0x1);
             }
         }
         encoder.set_depth_stencil_state(&self.fill_stencil_state);
@@ -1023,7 +1027,7 @@ fn new_render_command_encoder<'a>(
 
         encoder.set_cull_mode(metal::MTLCullMode::Back);
         encoder.set_front_facing_winding(metal::MTLWinding::CounterClockwise);
-        encoder.set_stencil_reference_value(0);
+        //encoder.set_stencil_reference_value(0);
 
         encoder.set_viewport(metal::MTLViewport {
             originX: 0.0,
