@@ -293,6 +293,7 @@ impl Mtl {
             front_face_stencil_descriptor.set_depth_failure_operation(metal::MTLStencilOperation::Keep);
             front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
 
+            stencil_descriptor.set_label("fill_anti_alias_stencil_state");
             stencil_descriptor.set_back_face_stencil(None);
             stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
             device.new_depth_stencil_state(&stencil_descriptor)
@@ -305,6 +306,7 @@ impl Mtl {
             front_face_stencil_descriptor.set_depth_failure_operation(metal::MTLStencilOperation::Zero);
             front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
 
+            stencil_descriptor.set_label("fill_stencil_state");
             stencil_descriptor.set_back_face_stencil(None);
             stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
             device.new_depth_stencil_state(&stencil_descriptor)
@@ -317,6 +319,7 @@ impl Mtl {
             front_face_stencil_descriptor.set_depth_failure_operation(metal::MTLStencilOperation::Keep);
             front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::IncrementClamp);
 
+            stencil_descriptor.set_label("stroke_shape_stencil_state");
             stencil_descriptor.set_back_face_stencil(None);
             stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
             device.new_depth_stencil_state(&stencil_descriptor)
@@ -326,6 +329,7 @@ impl Mtl {
         let stroke_anti_alias_stencil_state = {
             front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Keep);
 
+            stencil_descriptor.set_label("stroke_anti_alias_stencil_state");
             stencil_descriptor.set_back_face_stencil(None);
             stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
             device.new_depth_stencil_state(&stencil_descriptor)
@@ -338,6 +342,7 @@ impl Mtl {
             front_face_stencil_descriptor.set_depth_failure_operation(metal::MTLStencilOperation::Zero);
             front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
 
+            stencil_descriptor.set_label("stroke_clear_stencil_state");
             stencil_descriptor.set_back_face_stencil(None);
             stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
             device.new_depth_stencil_state(&stencil_descriptor)
@@ -562,7 +567,7 @@ impl Mtl {
         let stencil_only_pipeline_state = &rps.stencil_only_pipeline_state;
 
         encoder.set_cull_mode(metal::MTLCullMode::None);
-        encoder.set_stencil_reference_value(0xff);
+        // encoder.set_stencil_reference_value(0xff);
         encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
         encoder.set_render_pipeline_state(stencil_only_pipeline_state);
 
@@ -681,11 +686,11 @@ impl Mtl {
         let stencil_only_pipeline_state = &rps.stencil_only_pipeline_state;
 
         // Fills the stroke base without overlap.
-        self.set_uniforms(encoder, images, paint2, cmd.image, cmd.alpha_mask);
-        encoder.set_stencil_reference_value(0xff);
+
+        // encoder.set_stencil_reference_value(0xff);
         encoder.set_depth_stencil_state(&self.stroke_shape_stencil_state);
         encoder.set_render_pipeline_state(pipeline_state);
-
+        self.set_uniforms(encoder, images, paint2, cmd.image, cmd.alpha_mask);
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.stroke_verts {
                 encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
@@ -694,7 +699,7 @@ impl Mtl {
 
         // Draw anti-aliased pixels.
         self.set_uniforms(encoder, images, paint1, cmd.image, cmd.alpha_mask);
-        encoder.set_stencil_reference_value(0xff);
+        // encoder.set_stencil_reference_value(0xff);
         encoder.set_depth_stencil_state(&self.stroke_anti_alias_stencil_state);
 
         for drawable in &cmd.drawables {
@@ -713,7 +718,7 @@ impl Mtl {
                 encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64);
             }
         }
-        encoder.set_stencil_reference_value(0xff);
+        // encoder.set_stencil_reference_value(0xff);
         encoder.set_depth_stencil_state(&self.default_stencil_state);
 
         #[cfg(debug_assertions)]
