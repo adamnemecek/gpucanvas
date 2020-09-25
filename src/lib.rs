@@ -206,7 +206,7 @@ impl Default for State {
     }
 }
 
-pub struct Canvas<T: Renderer> {
+pub struct Canvas<T: Renderer + 'static> {
     width: u32,
     height: u32,
     renderer: T,
@@ -226,7 +226,7 @@ pub struct Canvas<T: Renderer> {
 
 impl<T> Canvas<T>
 where
-    T: Renderer,
+    T: Renderer + 'static,
 {
     pub fn new(renderer: T) -> Result<Self, ErrorKind> {
         let mut canvas = Self {

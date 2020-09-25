@@ -111,7 +111,7 @@ fn main() {
 
     // let mut first = true;
     let capture = true;
-    let stop_frame = 3;
+    let stop_frame = 2;
 
     //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
 
@@ -395,7 +395,7 @@ fn main() {
                     // draw_rect(&mut canvas, 200.0, 200.0, 40.0, 40.0);
                     // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                     // draw_image(&mut canvas, images[0], 5.0, 300.0);
-                    draw_text(&mut canvas, &fonts, "tea", 50.0, 200.0, 100.0, 100.0);
+                    // draw_text(&mut canvas, &fonts, "tea", 50.0, 200.0, 100.0, 100.0);
                     draw_text(&mut canvas, &fonts, "tea3", 200.0, 200.0, 100.0, 100.0);
                     // draw_image(&mut canvas, red_rect, 100.0, 100.0);
                     // draw_clear_rect2(&mut canvas, 0, 0, 200, 150);

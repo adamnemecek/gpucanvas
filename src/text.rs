@@ -588,7 +588,7 @@ pub(crate) struct Quad {
     pub t1: f32,
 }
 
-pub(crate) fn render_atlas<T: Renderer>(
+pub(crate) fn render_atlas<T: Renderer + 'static>(
     canvas: &mut Canvas<T>,
     text_layout: &TextMetrics,
     paint: &Paint,
@@ -659,13 +659,17 @@ pub(crate) fn render_atlas<T: Renderer>(
 
     canvas.set_render_target(initial_render_target);
 
+    // use std::any::{Any, TypeId};
+    // let is_metal = TypeId::of::<crate::renderer::Mtl>() == TypeId::of::<T>();
+
     // adam
     // debug draw
-    if false {
+    if true {
         canvas.save();
         canvas.reset();
 
         let image_id = canvas.text_context.textures[0].image_id;
+        canvas.set_label(image_id, "font atlas");
 
         let mut path = Path::new();
         path.rect(20.5, 20.5, 512.0, 512.0);
