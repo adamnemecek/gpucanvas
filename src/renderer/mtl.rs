@@ -107,12 +107,14 @@ pub struct Mtl {
     // blend_func: Blend,
     // clear_buffer_on_flush: bool,
     //
-    // fill and stroke have a stencil, anti_alias_stencil and shape_stencil
+    // each of fill and stroke have: stencil, anti_alias_stencil and shape_stencil
     //
     default_stencil_state: metal::DepthStencilState,
+
     fill_shape_stencil_state: metal::DepthStencilState,
     fill_anti_alias_stencil_state: metal::DepthStencilState,
     fill_stencil_state: metal::DepthStencilState,
+
     stroke_shape_stencil_state: metal::DepthStencilState,
     stroke_anti_alias_stencil_state: metal::DepthStencilState,
     stroke_clear_stencil_state: metal::DepthStencilState,
@@ -255,8 +257,6 @@ impl Mtl {
         pseudo_texture.set_label("pseudo_texture");
 
         let stencil_texture = MtlStencilTexture::new(&device, drawable_size.into());
-        #[cfg(debug_assertions)]
-        stencil_texture.set_label("stencil_texture");
 
         // Initializes default blend states.
         // let blend_func = Blend {

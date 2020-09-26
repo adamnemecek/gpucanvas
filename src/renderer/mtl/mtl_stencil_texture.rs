@@ -1,4 +1,5 @@
 use crate::Size;
+use super::MtlTextureExt;
 
 fn create_stencil_texture_descriptor(size: Size) -> metal::TextureDescriptor {
     let desc = metal::TextureDescriptor::new();
@@ -30,7 +31,7 @@ impl MtlStencilTexture {
         let tex = device.new_texture(&desc);
         let gen = 0;
 
-        tex.set_label(&format!("gen: {:?}", gen));
+        tex.set_label(&format!("stencil texture gen: {:?}", gen));
         Self {
             device: device.to_owned(),
             tex,
@@ -43,11 +44,9 @@ impl MtlStencilTexture {
         &self.tex
     }
 
+    #[inline]
     pub fn size(&self) -> Size {
-        Size {
-            w: self.tex.width() as _,
-            h: self.tex.height() as _,
-        }
+        self.tex.size()
     }
 
     pub fn resize(&mut self, size: Size) {
@@ -72,13 +71,13 @@ impl MtlStencilTexture {
         self.tex.set_label(&format!("stencil texture gen: {:?}", self.gen));
     }
 
-    pub fn label(&self) -> &str {
-        self.tex.label()
-    }
+    // pub fn label(&self) -> &str {
+    //     self.tex.label()
+    // }
 
-    pub fn set_label(&self, label: &str) {
-        self.tex.set_label(label)
-    }
+    // pub fn set_label(&self, label: &str) {
+    //     self.tex.set_label(label)
+    // }
 
     // pub fn clear(&mut self) {
     //     self.size = Size::default();
