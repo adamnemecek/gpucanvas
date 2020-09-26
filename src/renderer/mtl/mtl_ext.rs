@@ -98,17 +98,20 @@ impl MtlTextureExt for metal::TextureRef {
 //     }
 // }
 
-pub trait CommandEncoderExt {
-    fn group<F>(&self, label: &str, f: F) where F: Fn(&Self) -> ();
-}
+// pub trait CommandEncoderExt {
+//     fn group<F>(&self, label: &str, f: F) where F: Fn(&Self) -> ();
+// }
 
-impl CommandEncoderExt for metal::CommandEncoderRef {
-    fn group<F>(&self, label: &str, f: F) where F: Fn(&Self) -> () {
-        self.push_debug_group(label);
-        f(self);
-        self.pop_debug_group();
-    }
-}
+// impl CommandEncoderExt for metal::CommandEncoderRef {
+//     #[inline]
+//     fn group<F>(&self, label: &str, f: F) where F: Fn(&Self) -> () {
+//         #[cfg(debug_assertions)]
+//         self.push_debug_group(label);
+//         f(self);
+//         #[cfg(debug_assertions)]
+//         self.pop_debug_group();
+//     }
+// }
 
 pub trait GPUVecExt {
     fn extend_with_triange_fan_indices_cw(&mut self, start: u32, count: u32) -> usize;

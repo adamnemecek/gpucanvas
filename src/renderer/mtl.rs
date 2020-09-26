@@ -694,14 +694,11 @@ impl Mtl {
         #[cfg(debug_assertions)]
         encoder.push_debug_group("stencil_stroke");
 
-        // let rps = self.current_rps.as_ref().unwrap();
         let RPS {
             pipeline_state,
             stencil_only_pipeline_state,
             ..
         } = self.current_rps.as_ref().unwrap();
-        // let pipeline_state = &rps.pipeline_state;
-        // let stencil_only_pipeline_state = &rps.stencil_only_pipeline_state;
 
         // Fills the stroke base without overlap.
 
