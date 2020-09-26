@@ -10,6 +10,7 @@ struct RPSKey {
 
 // #[derive(Clone)]
 pub struct RPS {
+    pub id: usize,
     pub blend_func: Blend,
     pub pixel_format: metal::MTLPixelFormat,
     pub pipeline_state: metal::RenderPipelineState,
@@ -20,6 +21,7 @@ pub struct RPS {
 impl std::fmt::Debug for RPS {
     fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         fmt.debug_tuple("RPS")
+            .field(&self.id)
             .field(&self.blend_func)
             .field(&self.pixel_format)
             .finish()
@@ -33,6 +35,7 @@ impl PartialEq for RPS {
 
 impl RPS {
     fn new(
+        id: usize,
         device: &metal::DeviceRef,
         blend_func: Blend,
         pixel_format: metal::MTLPixelFormat,
@@ -95,6 +98,7 @@ impl RPS {
 
         // clear_rect_pipeline_state.set_label("clear_rect_pipeline_state");
         Self {
+            id,
             pipeline_state,
             blend_func,
             pixel_format,
@@ -114,6 +118,7 @@ pub struct RPSCache {
     clear_rect_frag_func: metal::Function,
 
     inner: HashMap<RPSKey, Rc<RPS>>,
+    id: usize,
 }
 
 impl RPSCache {
@@ -172,6 +177,7 @@ impl RPSCache {
             clear_rect_vert_func,
             clear_rect_frag_func,
             inner: Default::default(),
+            id: 0,
         }
     }
 
@@ -186,6 +192,7 @@ impl RPSCache {
         };
         if !self.inner.contains_key(&key) {
             let rps = RPS::new(
+                self.id,
                 &self.device,
                 blend_func,
                 pixel_format,
@@ -195,6 +202,7 @@ impl RPSCache {
                 &self.clear_rect_vert_func,
                 &self.clear_rect_frag_func,
             );
+            self.id += 1;
 
             self.inner.insert(key, Rc::new(rps));
         }
