@@ -303,7 +303,7 @@ fn main() {
 
                 // draw_colorwheel(&mut canvas, 200.0, 200.0, 200.0, 200.0, 5.0);
                 // draw_image(&mut canvas, images[0], 300.0, 300.0);
-                draw_text(&mut canvas, &fonts, "title", 50.0, 200.0, 100.0, 100.0);
+                draw_text(&mut canvas, &fonts, "title", 0.0, 0.0, 100.0, 100.0);
                 // draw_image(&mut canvas, red_rect, 100.0, 100.0);
                 // if true {
                 //     let paint = Paint::image(image_id, size.width as f32, 15.0, 1920.0, 1080.0, 0.0, 1.0);

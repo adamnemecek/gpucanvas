@@ -265,25 +265,29 @@ impl Mtl {
 
         // // Initializes stencil states.
         let stencil_descriptor = metal::DepthStencilDescriptor::new();
+        stencil_descriptor.set_label("default_stencil_state");
 
         // Default stencil state.
         let default_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
 
-        // Fill shape stencil.
         let front_face_stencil_descriptor = metal::StencilDescriptor::new();
-        front_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Always);
-        front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::IncrementWrap);
-
         let back_face_stencil_descriptor = metal::StencilDescriptor::new();
-        back_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Always);
-        // we set only
-        back_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::DecrementWrap);
 
-        stencil_descriptor.set_depth_compare_function(metal::MTLCompareFunction::Always);
-        stencil_descriptor.set_back_face_stencil(Some(&back_face_stencil_descriptor));
-        stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
+        // Fill shape stencil.
+        let fill_shape_stencil_state = {
+            front_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Always);
+            front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::IncrementWrap);
 
-        let fill_shape_stencil_state = device.new_depth_stencil_state(&stencil_descriptor);
+            back_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Always);
+            // we set only
+            back_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::DecrementWrap);
+
+            stencil_descriptor.set_depth_compare_function(metal::MTLCompareFunction::Always);
+            stencil_descriptor.set_back_face_stencil(Some(&back_face_stencil_descriptor));
+            stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
+            stencil_descriptor.set_label("fill_shape_stencil_state");
+            device.new_depth_stencil_state(&stencil_descriptor)
+        };
 
         // Fill anti-aliased stencil.
         let fill_anti_alias_stencil_state = {
