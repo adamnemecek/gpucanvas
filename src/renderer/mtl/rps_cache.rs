@@ -54,8 +54,8 @@ impl RPS {
         desc.set_fragment_function(Some(frag_func));
         desc.set_vertex_descriptor(Some(vertex_descriptor));
         desc.set_label(&format!(
-            "rps: blend_func: {:?}, pixel_format: {:?}",
-            blend_func, pixel_format
+            "rps: id: {:?}, blend_func: {:?}, pixel_format: {:?}",
+            id, blend_func, pixel_format
         ));
 
         color_attachment_desc.set_blending_enabled(true);
