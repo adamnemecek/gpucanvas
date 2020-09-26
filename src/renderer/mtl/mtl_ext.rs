@@ -1,8 +1,7 @@
 use crate::Size;
 use imgref::ImgVec;
 use metalgear::GPUVec;
-use rgb::ComponentBytes;
-use rgb::RGBA8;
+use rgb::{ComponentBytes, RGBA8};
 
 pub trait MtlTextureExt {
     fn save(&self) -> ImgVec<RGBA8>;
@@ -75,8 +74,9 @@ impl MtlTextureExt for metal::TextureRef {
     fn generate_mipmaps(&self, command_queue: &metal::CommandQueueRef) {
         let command_buffer = command_queue.new_command_buffer();
         let encoder = command_buffer.new_blit_command_encoder();
+        encoder.push_debug_group("generate mipmap encoder");
         encoder.generate_mipmaps(self);
-
+        encoder.pop_debug_group();
         encoder.end_encoding();
         command_buffer.commit();
         command_buffer.wait_until_completed();
@@ -94,23 +94,6 @@ impl MtlTextureExt for metal::TextureRef {
 //             height: self.height(),
 //             depth: self.depth()
 //         }
-//     }
-// }
-
-// pub trait RenderCommandEncoderExt {
-//     fn set_vertex_value<T>(&self, index: u64, value: &T);
-//     fn set_fragment_value<T>(&self, index: u64, value: &T);
-// }
-
-// impl RenderCommandEncoderExt for metal::RenderCommandEncoderRef {
-//     fn set_vertex_value<T>(&self, index: u64, value: &T) {
-//         let ptr = value as *const T;
-//         self.set_vertex_bytes(index, std::mem::size_of::<T>() as u64, ptr as *const _)
-//     }
-
-//     fn set_fragment_value<T>(&self, index: u64, value: &T) {
-//         let ptr = value as *const T;
-//         self.set_fragment_bytes(index, std::mem::size_of::<T>() as u64, ptr as *const _)
 //     }
 // }
 
