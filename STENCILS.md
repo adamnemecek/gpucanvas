@@ -1,11 +1,41 @@
 # stencils
 
+the default values are 
+    * stencilcompare function = always
+    * and operations are keep for all
+    * default masks as 0xffff_ffff
 
 # metal
 * convex_fill
-* convave_fill
+  * no stencil
+* concave_fill
+  *  match cmd.fill_rule {
+                FillRule::NonZero => {
+                    //gl::StencilFunc(gl::EQUAL, 0x0, 0xff),
+                    encoder.set_stencil_reference_value(0xff);
+                }
+                FillRule::EvenOdd => {
+                    // gl::StencilFunc(gl::EQUAL, 0x0, 0x1),
+                    encoder.set_stencil_reference_value(0x1);
+                }
+            }
+  * fill_shape_stencil_state
+
+  * FillRule::NonZero => {
+                //gl::StencilFunc(gl::NOTEQUAL, 0x0, 0xff),
+                encoder.set_stencil_reference_value(0xff);
+            }
+            FillRule::EvenOdd => {
+                // gl::StencilFunc(gl::NOTEQUAL, 0x0, 0x1),
+                encoder.set_stencil_reference_value(0x1);
+            }
+  * fill_stencil_state
 * stroke
+  * no stencils
 * stencil_stroke
+  * stroke_shape_stencil_state
+  * stroke_anti_alias_stencil_state
+  * stroke_clear_stencil_state
 * triangles
 * clear_rect
 

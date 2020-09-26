@@ -7,7 +7,7 @@ use metalgear::{GPUVar, GPUVec, RenderCommandEncoderExt};
 //use super::mtl::mtl_ext::RenderCommandEncoderExt;
 use super::{Command, CommandType, Params, RenderTarget, Renderer};
 use crate::{
-    image::ImageFlags,
+    // image::ImageFlags,
     renderer::{ImageId, Vertex},
     BlendFactor, Color, CompositeOperationState, ErrorKind, FillRule, ImageInfo, ImageSource, ImageStore, Rect, Size,
 };
