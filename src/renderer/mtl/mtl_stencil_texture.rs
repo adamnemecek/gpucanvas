@@ -1,23 +1,6 @@
 use crate::Size;
 use super::MtlTextureExt;
 
-fn create_stencil_texture_descriptor(size: Size) -> metal::TextureDescriptor {
-    let desc = metal::TextureDescriptor::new();
-    desc.set_texture_type(metal::MTLTextureType::D2);
-    desc.set_pixel_format(metal::MTLPixelFormat::Stencil8);
-
-    desc.set_width(size.w as u64);
-    desc.set_height(size.h as u64);
-    desc.set_mipmap_level_count(1);
-
-    #[cfg(target_os = "macos")]
-    {
-        desc.set_resource_options(metal::MTLResourceOptions::StorageModePrivate);
-    }
-    desc.set_usage(metal::MTLTextureUsage::RenderTarget);
-    desc
-}
-
 pub struct MtlStencilTexture {
     device: metal::Device,
     tex: metal::Texture,
@@ -38,6 +21,16 @@ impl MtlStencilTexture {
             // size,
             gen,
         }
+    }
+
+    pub fn device(&self) -> &metal::DeviceRef {
+        &self.device
+    }
+
+    pub fn set_device(&mut self, device: &metal::DeviceRef) {
+        let size = self.size();
+        self.device = device.to_owned();
+        self.resize(size);
     }
 
     pub fn tex(&self) -> &metal::TextureRef {
@@ -91,4 +84,21 @@ impl MtlStencilTexture {
             gen: self.gen,
         }
     }
+}
+
+fn create_stencil_texture_descriptor(size: Size) -> metal::TextureDescriptor {
+    let desc = metal::TextureDescriptor::new();
+    desc.set_texture_type(metal::MTLTextureType::D2);
+    desc.set_pixel_format(metal::MTLPixelFormat::Stencil8);
+
+    desc.set_width(size.w as u64);
+    desc.set_height(size.h as u64);
+    desc.set_mipmap_level_count(1);
+
+    #[cfg(target_os = "macos")]
+    {
+        desc.set_resource_options(metal::MTLResourceOptions::StorageModePrivate);
+    }
+    desc.set_usage(metal::MTLTextureUsage::RenderTarget);
+    desc
 }
