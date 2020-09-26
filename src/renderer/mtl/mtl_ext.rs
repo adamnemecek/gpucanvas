@@ -120,7 +120,7 @@ pub trait GPUVecExt {
 
 impl GPUVecExt for GPUVec<u32> {
     /// Creates an indidex buffer which can be used to "fake" triangle fans
-    /// Based on pathfinder.
+    /// Based on pathfinder &
     /// https://www.gamedev.net/forums/topic/643945-how-to-generate-a-triangle-fan-index-list-for-a-circle-shape/
 
     fn extend_with_triange_fan_indices_cw(&mut self, start: u32, count: u32) -> usize {

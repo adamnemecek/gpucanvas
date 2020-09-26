@@ -40,8 +40,8 @@ struct Fonts {
 fn main() {
     let events_loop = winit::event_loop::EventLoop::new();
 
-    let square = false;
-    let size = if square {
+    let square = true;
+    let mut size = if square {
         winit::dpi::LogicalSize::new(512, 512)
     } else {
         winit::dpi::LogicalSize::new(1000, 600)
@@ -192,7 +192,8 @@ fn main() {
                 // Event::LoopDestroyed => return,
                 Event::WindowEvent { event, .. } => match event {
                     WindowEvent::Resized(physical_size) => {
-                        layer.set_drawable_size(CGSize::new(size.width as f64, size.height as f64));
+                        layer.set_drawable_size(CGSize::new(physical_size.width as f64, physical_size.height as f64));
+                        size = winit::dpi::LogicalSize::new(size.width, size.height);
                     }
                     WindowEvent::CursorMoved {
                         device_id: _, position, ..
@@ -396,7 +397,7 @@ fn main() {
                     // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                     // draw_image(&mut canvas, images[0], 5.0, 300.0);
                     // draw_text(&mut canvas, &fonts, "tea", 50.0, 200.0, 100.0, 100.0);
-                    draw_text(&mut canvas, &fonts, "tea3", 200.0, 200.0, 100.0, 100.0);
+                    draw_text(&mut canvas, &fonts, "tea3", 0.0, 0.0, 100.0, 100.0);
                     // draw_image(&mut canvas, red_rect, 100.0, 100.0);
                     // draw_clear_rect2(&mut canvas, 0, 0, 200, 150);
 
