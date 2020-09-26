@@ -83,6 +83,7 @@ impl From<CompositeOperationState> for Blend {
 
 // }
 
+use std::rc::Rc;
 pub struct Mtl {
     device: metal::Device, // not present in metalnanovg
     // metal has debug and antialias in the flags, opengl
@@ -120,7 +121,7 @@ pub struct Mtl {
     stroke_clear_stencil_state: metal::DepthStencilState,
 
     rps_cache: RPSCache,
-    current_rps: Option<RPS>,
+    current_rps: Option<Rc<RPS>>,
     // vert_func: metal::Function,
     // frag_func: metal::Function,
 
@@ -501,7 +502,8 @@ impl Mtl {
         cmd: &Command,
         paint: Params,
     ) {
-        let RPS { pipeline_state, .. } = self.current_rps.as_ref().unwrap();
+        let rps = self.current_rps.as_ref().unwrap();
+        let pipeline_state = &rps.pipeline_state;
 
         #[cfg(debug_assertions)]
         encoder.push_debug_group("convex_fill");
@@ -575,11 +577,9 @@ impl Mtl {
         #[cfg(debug_assertions)]
         encoder.push_debug_group("concave_fill");
 
-        let RPS {
-            pipeline_state,
-            stencil_only_pipeline_state,
-            ..
-        } = self.current_rps.as_ref().unwrap();
+        let rps = self.current_rps.as_ref().unwrap();
+        let pipeline_state = &rps.pipeline_state;
+        let stencil_only_pipeline_state = &rps.stencil_only_pipeline_state;
 
         encoder.set_cull_mode(metal::MTLCullMode::None);
         // encoder.set_stencil_reference_value(0xff);
@@ -695,11 +695,9 @@ impl Mtl {
         #[cfg(debug_assertions)]
         encoder.push_debug_group("stencil_stroke");
 
-        let RPS {
-            pipeline_state,
-            stencil_only_pipeline_state,
-            ..
-        } = self.current_rps.as_ref().unwrap();
+        let rps = self.current_rps.as_ref().unwrap();
+        let pipeline_state = &rps.pipeline_state;
+        let stencil_only_pipeline_state = &rps.stencil_only_pipeline_state;
 
         // Fills the stroke base without overlap.
 
@@ -752,7 +750,8 @@ impl Mtl {
         #[cfg(debug_assertions)]
         encoder.push_debug_group("triangles");
 
-        let RPS { pipeline_state, .. } = self.current_rps.as_ref().unwrap();
+        let rps = self.current_rps.as_ref().unwrap();
+        let pipeline_state = &rps.pipeline_state;
 
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
         encoder.set_render_pipeline_state(&pipeline_state);

@@ -8,7 +8,7 @@ struct RPSKey {
     pub pixel_format: metal::MTLPixelFormat,
 }
 
-#[derive(Clone)]
+// #[derive(Clone)]
 pub struct RPS {
     pub blend_func: Blend,
     pub pixel_format: metal::MTLPixelFormat,
@@ -104,6 +104,7 @@ impl RPS {
     }
 }
 
+use std::rc::Rc;
 pub struct RPSCache {
     pub device: metal::Device,
     vertex_descriptor: metal::VertexDescriptor,
@@ -112,7 +113,7 @@ pub struct RPSCache {
     clear_rect_vert_func: metal::Function,
     clear_rect_frag_func: metal::Function,
 
-    inner: HashMap<RPSKey, RPS>,
+    inner: HashMap<RPSKey, Rc<RPS>>,
 }
 
 impl RPSCache {
@@ -178,7 +179,7 @@ impl RPSCache {
         self.inner.len()
     }
 
-    pub fn get(&mut self, blend_func: Blend, pixel_format: metal::MTLPixelFormat) -> RPS {
+    pub fn get(&mut self, blend_func: Blend, pixel_format: metal::MTLPixelFormat) -> Rc<RPS> {
         let key = RPSKey {
             blend_func,
             pixel_format,
@@ -195,8 +196,9 @@ impl RPSCache {
                 &self.clear_rect_frag_func,
             );
 
-            self.inner.insert(key, rps);
+            self.inner.insert(key, Rc::new(rps));
         }
+        // clone adds a reference
         self.inner.get(&key).unwrap().clone()
     }
 }
