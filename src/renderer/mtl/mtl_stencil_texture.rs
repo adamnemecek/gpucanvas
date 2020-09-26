@@ -1,5 +1,5 @@
-use crate::Size;
 use super::MtlTextureExt;
+use crate::Size;
 
 pub struct MtlStencilTexture {
     device: metal::Device,
@@ -85,7 +85,6 @@ impl MtlStencilTexture {
         }
     }
 }
-
 
 trait TextureDescriptorExt {
     fn new_stencil_descriptor(size: Size) -> Self;

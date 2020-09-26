@@ -501,8 +501,7 @@ impl Mtl {
         cmd: &Command,
         paint: Params,
     ) {
-        let rps = self.current_rps.as_ref().unwrap();
-        let pipeline_state = &rps.pipeline_state;
+        let RPS { pipeline_state, .. } = self.current_rps.as_ref().unwrap();
 
         #[cfg(debug_assertions)]
         encoder.push_debug_group("convex_fill");
@@ -576,9 +575,11 @@ impl Mtl {
         #[cfg(debug_assertions)]
         encoder.push_debug_group("concave_fill");
 
-        let rps = self.current_rps.as_ref().unwrap();
-        let pipeline_state = &rps.pipeline_state;
-        let stencil_only_pipeline_state = &rps.stencil_only_pipeline_state;
+        let RPS {
+            pipeline_state,
+            stencil_only_pipeline_state,
+            ..
+        } = self.current_rps.as_ref().unwrap();
 
         encoder.set_cull_mode(metal::MTLCullMode::None);
         // encoder.set_stencil_reference_value(0xff);
@@ -751,8 +752,7 @@ impl Mtl {
         #[cfg(debug_assertions)]
         encoder.push_debug_group("triangles");
 
-        let rps = self.current_rps.as_ref().unwrap();
-        let pipeline_state = &rps.pipeline_state;
+        let RPS { pipeline_state, .. } = self.current_rps.as_ref().unwrap();
 
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
         encoder.set_render_pipeline_state(&pipeline_state);
