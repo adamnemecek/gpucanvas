@@ -10,7 +10,7 @@ pub struct MtlStencilTexture {
 
 impl MtlStencilTexture {
     pub fn new(device: &metal::DeviceRef, size: Size) -> Self {
-        let desc = create_stencil_texture_descriptor(size);
+        let desc = metal::TextureDescriptor::new_stencil_descriptor(size);
         let tex = device.new_texture(&desc);
         let gen = 0;
 
@@ -53,7 +53,7 @@ impl MtlStencilTexture {
         // one vertical, one horizontal. if we just use the new size, we will be allocating
         // and releasing a lot. the max accomodates both of them.
         let size = size.max(&self.size());
-        let desc = create_stencil_texture_descriptor(size);
+        let desc = metal::TextureDescriptor::new_stencil_descriptor(size);
 
         // self.size = size;
         self.gen += 1;
@@ -86,19 +86,26 @@ impl MtlStencilTexture {
     }
 }
 
-fn create_stencil_texture_descriptor(size: Size) -> metal::TextureDescriptor {
-    let desc = metal::TextureDescriptor::new();
-    desc.set_texture_type(metal::MTLTextureType::D2);
-    desc.set_pixel_format(metal::MTLPixelFormat::Stencil8);
 
-    desc.set_width(size.w as u64);
-    desc.set_height(size.h as u64);
-    desc.set_mipmap_level_count(1);
+trait TextureDescriptorExt {
+    fn new_stencil_descriptor(size: Size) -> Self;
+}
 
-    #[cfg(target_os = "macos")]
-    {
-        desc.set_resource_options(metal::MTLResourceOptions::StorageModePrivate);
+impl TextureDescriptorExt for metal::TextureDescriptor {
+    fn new_stencil_descriptor(size: Size) -> Self {
+        let desc = metal::TextureDescriptor::new();
+        desc.set_texture_type(metal::MTLTextureType::D2);
+        desc.set_pixel_format(metal::MTLPixelFormat::Stencil8);
+
+        desc.set_width(size.w as u64);
+        desc.set_height(size.h as u64);
+        desc.set_mipmap_level_count(1);
+
+        #[cfg(target_os = "macos")]
+        {
+            desc.set_resource_options(metal::MTLResourceOptions::StorageModePrivate);
+        }
+        desc.set_usage(metal::MTLTextureUsage::RenderTarget);
+        desc
     }
-    desc.set_usage(metal::MTLTextureUsage::RenderTarget);
-    desc
 }
