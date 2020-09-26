@@ -251,8 +251,11 @@ impl Mtl {
 
         // pseudosampler sescriptor
         let pseudo_texture = MtlTexture::new_pseudo_texture(device, &command_queue).unwrap();
+        #[cfg(debug_assertions)]
         pseudo_texture.set_label("pseudo_texture");
+
         let stencil_texture = StencilTexture::new(&device, drawable_size.into());
+        #[cfg(debug_assertions)]
         stencil_texture.set_label("stencil_texture");
 
         // Initializes default blend states.
@@ -265,6 +268,7 @@ impl Mtl {
 
         // // Initializes stencil states.
         let stencil_descriptor = metal::DepthStencilDescriptor::new();
+        #[cfg(debug_assertions)]
         stencil_descriptor.set_label("default_stencil_state");
 
         // Default stencil state.
@@ -285,6 +289,7 @@ impl Mtl {
             stencil_descriptor.set_depth_compare_function(metal::MTLCompareFunction::Always);
             stencil_descriptor.set_back_face_stencil(Some(&back_face_stencil_descriptor));
             stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
+            #[cfg(debug_assertions)]
             stencil_descriptor.set_label("fill_shape_stencil_state");
             device.new_depth_stencil_state(&stencil_descriptor)
         };
@@ -297,6 +302,7 @@ impl Mtl {
             desc.set_depth_failure_operation(metal::MTLStencilOperation::Keep);
             desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
 
+            #[cfg(debug_assertions)]
             stencil_descriptor.set_label("fill_anti_alias_stencil_state");
             stencil_descriptor.set_back_face_stencil(None);
             stencil_descriptor.set_front_face_stencil(Some(&desc));
@@ -311,6 +317,7 @@ impl Mtl {
             desc.set_depth_failure_operation(metal::MTLStencilOperation::Zero);
             desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
 
+            #[cfg(debug_assertions)]
             stencil_descriptor.set_label("fill_stencil_state");
             stencil_descriptor.set_back_face_stencil(None);
             stencil_descriptor.set_front_face_stencil(Some(&desc));
@@ -325,6 +332,7 @@ impl Mtl {
             desc.set_depth_failure_operation(metal::MTLStencilOperation::Keep);
             desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::IncrementClamp);
 
+            #[cfg(debug_assertions)]
             stencil_descriptor.set_label("stroke_shape_stencil_state");
             stencil_descriptor.set_back_face_stencil(None);
             stencil_descriptor.set_front_face_stencil(Some(&desc));
@@ -336,6 +344,7 @@ impl Mtl {
             let desc = metal::StencilDescriptor::new();
             desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Keep);
 
+            #[cfg(debug_assertions)]
             stencil_descriptor.set_label("stroke_anti_alias_stencil_state");
             stencil_descriptor.set_back_face_stencil(None);
             stencil_descriptor.set_front_face_stencil(Some(&desc));
@@ -350,6 +359,7 @@ impl Mtl {
             desc.set_depth_failure_operation(metal::MTLStencilOperation::Zero);
             desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
 
+            #[cfg(debug_assertions)]
             stencil_descriptor.set_label("stroke_clear_stencil_state");
             stencil_descriptor.set_back_face_stencil(None);
             stencil_descriptor.set_front_face_stencil(Some(&desc));
