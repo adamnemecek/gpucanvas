@@ -267,7 +267,7 @@ impl Mtl {
         //     dst_alpha: metal::MTLBlendFactor::OneMinusSourceAlpha,
         // };
 
-        // // Initializes stencil states.
+        // Initializes stencil states.
 
         // Default stencil state.
         let default_stencil_state = {
@@ -509,11 +509,11 @@ impl Mtl {
         cmd: &Command,
         paint: Params,
     ) {
-        let rps = self.current_rps.as_ref().unwrap();
-        let pipeline_state = &rps.pipeline_state;
-
         #[cfg(debug_assertions)]
         encoder.push_debug_group("convex_fill");
+
+        let rps = self.current_rps.as_ref().unwrap();
+        let pipeline_state = &rps.pipeline_state;
 
         encoder.set_render_pipeline_state(&pipeline_state);
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
