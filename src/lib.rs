@@ -206,6 +206,26 @@ impl Default for State {
     }
 }
 
+pub trait DynamicImageExt {
+    fn convert_rgb_if_needed(self) -> Self;
+}
+
+impl DynamicImageExt for ::image::DynamicImage {
+    fn convert_rgb_if_needed(self) -> Self {
+        #[cfg(not(feature = "convert-rgb"))]
+        {
+            self
+        }
+        #[cfg(feature = "convert-rgb")]
+        {
+            match self {
+                Self::ImageRgb8(_) => Self::ImageRgba8(self.to_rgba()),
+                _ => self,
+            }
+        }
+    }
+}
+
 pub struct Canvas<T: Renderer + 'static> {
     width: u32,
     height: u32,
@@ -479,21 +499,7 @@ where
     ) -> Result<ImageId, ErrorKind> {
         use ::image::DynamicImage;
 
-        fn convert_rgb_if_needed(img: DynamicImage) -> DynamicImage {
-            #[cfg(not(feature = "convert-rgb"))]
-            {
-                img
-            }
-            #[cfg(feature = "convert-rgb")]
-            {
-                match img {
-                    DynamicImage::ImageRgb8(_) => DynamicImage::ImageRgba8(img.to_rgba()),
-                    _ => img,
-                }
-            }
-        }
-
-        let image = convert_rgb_if_needed(::image::open(filename)?);
+        let image = ::image::open(filename)?.convert_rgb_if_needed();
         use std::convert::TryFrom;
 
         let src = ImageSource::try_from(&image)?;
