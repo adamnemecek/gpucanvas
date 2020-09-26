@@ -18,8 +18,8 @@ pub use mtl_texture::MtlTexture;
 mod rps_cache;
 pub use rps_cache::{RPSCache, RPS};
 
-mod stencil_texture;
-use stencil_texture::StencilTexture;
+mod mtl_stencil_texture;
+use mtl_stencil_texture::MtlStencilTexture;
 
 mod mtl_ext;
 pub use mtl_ext::{GPUVecExt, MtlTextureExt};
@@ -128,7 +128,7 @@ pub struct Mtl {
     // stencil_only_pipeline_state: Option<metal::RenderPipelineState>,
 
     // these are from mvgbuffer
-    stencil_texture: StencilTexture,
+    stencil_texture: MtlStencilTexture,
     index_buffer: GPUVec<u32>,
     vertex_buffer: GPUVec<Vertex>,
     // uniform_buffer: GPUVec<Params>,
@@ -254,7 +254,7 @@ impl Mtl {
         #[cfg(debug_assertions)]
         pseudo_texture.set_label("pseudo_texture");
 
-        let stencil_texture = StencilTexture::new(&device, drawable_size.into());
+        let stencil_texture = MtlStencilTexture::new(&device, drawable_size.into());
         #[cfg(debug_assertions)]
         stencil_texture.set_label("stencil_texture");
 
@@ -1014,7 +1014,7 @@ fn new_render_command_encoder<'a>(
     target_texture: &metal::TextureRef,
     command_buffer: &'a metal::CommandBufferRef,
     clear_color: Color,
-    stencil_texture: &mut StencilTexture,
+    stencil_texture: &mut MtlStencilTexture,
     // view_size: Size,
     vertex_buffer: &GPUVec<Vertex>,
     // view_size_buffer: &GPUVar<Size>,

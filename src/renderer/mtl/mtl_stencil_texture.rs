@@ -17,14 +17,14 @@ fn create_stencil_texture_descriptor(size: Size) -> metal::TextureDescriptor {
     desc
 }
 
-pub struct StencilTexture {
+pub struct MtlStencilTexture {
     device: metal::Device,
     tex: metal::Texture,
     // size: Size,
     gen: u32,
 }
 
-impl StencilTexture {
+impl MtlStencilTexture {
     pub fn new(device: &metal::DeviceRef, size: Size) -> Self {
         let desc = create_stencil_texture_descriptor(size);
         let tex = device.new_texture(&desc);

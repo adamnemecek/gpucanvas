@@ -1,4 +1,4 @@
-use super::{StencilTexture, Vertex};
+use super::{MtlStencilTexture, Vertex};
 use metalgear::GPUVec;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Hash)]
@@ -7,7 +7,7 @@ pub struct BufferIndex {
 }
 
 pub struct MtlBuffers {
-    pub stencil_texture: StencilTexture,
+    pub stencil_texture: MtlStencilTexture,
     pub vertex_buffer: GPUVec<Vertex>,
     pub index_buffer: GPUVec<u32>,
 }
@@ -15,7 +15,7 @@ pub struct MtlBuffers {
 impl MtlBuffers {
     pub fn new(device: &metal::DeviceRef, size: crate::Size) -> Self {
         Self {
-            stencil_texture: StencilTexture::new(device, size),
+            stencil_texture: MtlStencilTexture::new(device, size),
             vertex_buffer: GPUVec::with_capacity(device, 32),
             index_buffer: GPUVec::with_capacity(device, 32),
         }
