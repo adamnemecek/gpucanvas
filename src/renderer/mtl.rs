@@ -19,7 +19,7 @@ mod rps_cache;
 pub use rps_cache::{RPSCache, RPS};
 
 mod mtl_stencil_texture;
-use mtl_stencil_texture::MtlStencilTexture;
+pub use mtl_stencil_texture::MtlStencilTexture;
 
 mod mtl_ext;
 pub use mtl_ext::{GPUVecExt, MtlTextureExt};
@@ -303,7 +303,7 @@ impl Mtl {
             desc.set_stencil_compare_function(metal::MTLCompareFunction::Equal);
             desc.set_stencil_failure_operation(metal::MTLStencilOperation::Keep);
             desc.set_depth_failure_operation(metal::MTLStencilOperation::Keep);
-            desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
+            desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Keep);
 
             let stencil_descriptor = metal::DepthStencilDescriptor::new();
             #[cfg(debug_assertions)]
@@ -348,6 +348,7 @@ impl Mtl {
         // Stroke anti-aliased stencil.
         let stroke_anti_alias_stencil_state = {
             let desc = metal::StencilDescriptor::new();
+            desc.set_stencil_compare_function(metal::MTLCompareFunction::Equal);
             desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Keep);
 
             let stencil_descriptor = metal::DepthStencilDescriptor::new();
@@ -589,7 +590,7 @@ impl Mtl {
         let stencil_only_pipeline_state = &rps.stencil_only_pipeline_state;
 
         encoder.set_cull_mode(metal::MTLCullMode::None);
-        // encoder.set_stencil_reference_value(0xff);
+        encoder.set_stencil_reference_value(0xff);
         encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
         encoder.set_render_pipeline_state(stencil_only_pipeline_state);
 
@@ -1027,16 +1028,17 @@ fn new_render_command_encoder<'a>(
     // clear_buffer_on_flush: bool,
 ) -> &'a metal::RenderCommandEncoderRef {
     if true {
+        let desc = metal::RenderPassDescriptor::new();
+
+        stencil_texture.resize(view_size);
+        // let view_size = **view_size_buffer;
+
         let load_action =
         // if clear_buffer_on_flush {
             metal::MTLLoadAction::Load;
         // } else {
         // metal::MTLLoadAction::Clear;
         // };
-        let desc = metal::RenderPassDescriptor::new();
-
-        stencil_texture.resize(view_size);
-        // let view_size = **view_size_buffer;
 
         let color_attachment = desc.color_attachments().object_at(0).unwrap();
         color_attachment.set_clear_color(clear_color.into());

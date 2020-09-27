@@ -158,6 +158,7 @@ impl MtlTexture {
     }
 
     pub fn size(&self) -> Size {
+        // todo adam
         let a = Size::new(self.info.width() as _, self.info.height() as _);
         let b = self.tex().size();
         assert!(a == b);
@@ -220,7 +221,6 @@ impl MtlTexture {
 
         let generate_mipmaps = self.info.flags().contains(ImageFlags::GENERATE_MIPMAPS);
         if generate_mipmaps {
-            // super::generate_mipmaps(&self.command_queue, &self.tex);
             self.tex.generate_mipmaps(&self.command_queue);
         }
 
@@ -228,13 +228,14 @@ impl MtlTexture {
     }
 
     pub fn delete(self) {
+        self.tex.set_purgeable_state(metal::MTLPurgeableState::Empty);
         // unsafe {
         //     gl::DeleteTextures(1, &self.id);
         // }
     }
 
     pub fn save_to(&self, path: &str) {
-        use super::MtlTextureExt;
+        // use super::MtlTextureExt;
         self.tex.save_to(path)
     }
 

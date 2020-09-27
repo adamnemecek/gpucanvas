@@ -9,7 +9,7 @@ mod opengl;
 pub use opengl::OpenGl;
 
 mod mtl;
-pub use mtl::{Mtl, MtlTexture};
+pub use mtl::{Mtl, MtlTexture, MtlStencilTexture};
 
 mod void;
 pub use void::Void;

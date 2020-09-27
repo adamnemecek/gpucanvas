@@ -37,12 +37,12 @@ mod color;
 pub use color::Color;
 
 pub mod renderer;
-pub use renderer::{MtlTexture, RenderTarget, Renderer};
+pub use renderer::{MtlTexture, MtlStencilTexture, RenderTarget, Renderer};
 
 use renderer::{Command, CommandType, Drawable, Params, ShaderType, Vertex};
 
 pub(crate) mod geometry;
-pub use geometry::Transform2D;
+pub use geometry::{Transform2D, Size};
 use geometry::*;
 
 mod paint;
