@@ -7,7 +7,7 @@
 
 extern crate objc;
 
-use cocoa::{appkit::NSView, base::id as cocoa_id, foundation::NSRange};
+use cocoa::{appkit::NSView, base::id as cocoa_id};
 
 use metal::*;
 use objc::{rc::autoreleasepool, runtime::YES};
@@ -19,8 +19,7 @@ use winit::{
     event_loop::ControlFlow,
 };
 
-// use gpucanvas::MtlStencilTexture;
-use gpucanvas::Size;
+use gpucanvas::{Size, MtlStencilTexture};
 
 #[repr(C)]
 struct Rect {
@@ -113,7 +112,7 @@ fn main() {
     layer.set_drawable_size(CGSize::new(draw_size.width as f64, draw_size.height as f64));
 
     let library_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("examples/window/shaders.metallib");
+        .join("examples/shaders.metallib");
 
     let library = device.new_library_with_file(library_path).unwrap();
     let triangle_pipeline_state =
@@ -127,6 +126,8 @@ fn main() {
 
 
 
+    let mut gsize = Size::new(800.0, 600.0);
+    let stencil_texture = MtlStencilTexture::new(&device, gsize);
     let command_queue = device.new_command_queue();
     //let nc: () = msg_send![command_queue.0, setExecutionEnabled:true];
 
@@ -174,6 +175,7 @@ fn main() {
                     WindowEvent::CloseRequested => *control_flow = ControlFlow::Exit,
                     WindowEvent::Resized(size) => {
                         layer.set_drawable_size(CGSize::new(size.width as f64, size.height as f64));
+                        gsize = Size::new(size.width as _, size.height as _);
                     }
                     _ => (),
                 },
@@ -226,26 +228,26 @@ fn main() {
                     let encoder =
                         command_buffer.new_render_command_encoder(&render_pass_descriptor);
 
-                    encoder.set_scissor_rect(MTLScissorRect {
-                        x: 20,
-                        y: 20,
-                        width: 100,
-                        height: 100,
-                    });
-                    encoder.set_render_pipeline_state(&clear_rect_pipeline_state);
-                    encoder.set_vertex_buffer(0, Some(&clear_rect_buffer), 0);
-                    encoder.draw_primitives_instanced(
-                        metal::MTLPrimitiveType::TriangleStrip,
-                        0,
-                        4,
-                        1,
-                    );
-                    encoder.set_scissor_rect(MTLScissorRect {
-                        x: 0,
-                        y: 0,
-                        width: size.width as _,
-                        height: size.height as _,
-                    });
+                    // encoder.set_scissor_rect(MTLScissorRect {
+                    //     x: 20,
+                    //     y: 20,
+                    //     width: 100,
+                    //     height: 100,
+                    // });
+                    // encoder.set_render_pipeline_state(&clear_rect_pipeline_state);
+                    // encoder.set_vertex_buffer(0, Some(&clear_rect_buffer), 0);
+                    // encoder.draw_primitives_instanced(
+                    //     metal::MTLPrimitiveType::TriangleStrip,
+                    //     0,
+                    //     4,
+                    //     1,
+                    // );
+                    // encoder.set_scissor_rect(MTLScissorRect {
+                    //     x: 0,
+                    //     y: 0,
+                    //     width: size.width as _,
+                    //     height: size.height as _,
+                    // });
 
                     encoder.set_render_pipeline_state(&triangle_pipeline_state);
                     encoder.set_vertex_buffer(0, Some(&vbuf), 0);
