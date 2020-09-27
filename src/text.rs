@@ -475,9 +475,9 @@ fn shape_word(
             let mut g = ShapedGlyph {
                 x: 0.0,
                 y: 0.0,
-                c: c,
+                c,
                 byte_index: info.cluster as usize,
-                font_id: font_id,
+                font_id,
                 codepoint: info.codepoint,
                 width: 0.0,
                 height: 0.0,
@@ -629,9 +629,6 @@ pub(crate) fn render_atlas<T: Renderer + 'static>(
             let itw = 1.0 / size.0 as f32;
             let ith = 1.0 / size.1 as f32;
 
-            // let itw = (size.0 as f32/view_size.w) / size.0 as f32;
-            // let ith = (size.1 as f32/view_size.h) / size.1 as f32;
-
             let cmd = cmd_map.entry(rendered.texture_index).or_insert_with(|| DrawCmd {
                 image_id,
                 quads: Vec::new(),
@@ -639,12 +636,12 @@ pub(crate) fn render_atlas<T: Renderer + 'static>(
 
             let mut q = Quad::default();
 
-            // adam
             q.x0 = glyph.x - half_line_width - GLYPH_PADDING as f32;
             q.y0 = glyph.y - half_line_width - GLYPH_PADDING as f32;
             q.x1 = q.x0 + rendered.width as f32;
             q.y1 = q.y0 + rendered.height as f32;
 
+            // adam
             q.s0 = rendered.atlas_x as f32 * itw;
             q.t0 = rendered.atlas_y as f32 * ith;
             q.s1 = (rendered.atlas_x + rendered.width) as f32 * itw;
