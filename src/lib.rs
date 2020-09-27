@@ -37,13 +37,13 @@ mod color;
 pub use color::Color;
 
 pub mod renderer;
-pub use renderer::{MtlTexture, MtlStencilTexture, RenderTarget, Renderer};
+pub use renderer::{MtlStencilTexture, MtlTexture, RenderTarget, Renderer};
 
 use renderer::{Command, CommandType, Drawable, Params, ShaderType, Vertex};
 
 pub(crate) mod geometry;
-pub use geometry::{Transform2D, Size};
 use geometry::*;
+pub use geometry::{Size, Transform2D};
 
 mod paint;
 pub use paint::Paint;
@@ -1078,7 +1078,7 @@ where
         // TODO: Early out if text is outside the canvas bounds, or maybe even check for each character in layout.
 
         if paint.font_size > 92.0 {
-            // if paint.font_size > 20.0 {
+        // if paint.font_size > 20.0 {
             text::render_direct(self, &layout, &paint, render_mode, invscale)?;
         } else {
             let cmds = text::render_atlas(self, &layout, &paint, render_mode)?;

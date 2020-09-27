@@ -9,7 +9,16 @@ use super::{Command, CommandType, Params, RenderTarget, Renderer};
 use crate::{
     // image::ImageFlags,
     renderer::{ImageId, Vertex},
-    BlendFactor, Color, CompositeOperationState, ErrorKind, FillRule, ImageInfo, ImageSource, ImageStore, Rect, Size,
+    BlendFactor,
+    Color,
+    CompositeOperationState,
+    ErrorKind,
+    FillRule,
+    ImageInfo,
+    ImageSource,
+    ImageStore,
+    Rect,
+    Size,
 };
 
 mod mtl_texture;
@@ -348,7 +357,7 @@ impl Mtl {
         // Stroke anti-aliased stencil.
         let stroke_anti_alias_stencil_state = {
             let desc = metal::StencilDescriptor::new();
-            desc.set_stencil_compare_function(metal::MTLCompareFunction::Equal);
+            // desc.set_stencil_compare_function(metal::MTLCompareFunction::Equal);
             desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Keep);
 
             let stencil_descriptor = metal::DepthStencilDescriptor::new();

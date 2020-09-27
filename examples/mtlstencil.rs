@@ -19,7 +19,7 @@ use winit::{
     event_loop::ControlFlow,
 };
 
-use gpucanvas::{Size, MtlStencilTexture};
+use gpucanvas::{MtlStencilTexture, Size};
 
 #[repr(C)]
 struct Rect {
@@ -55,10 +55,7 @@ fn prepare_pipeline_state<'a>(
     let pipeline_state_descriptor = RenderPipelineDescriptor::new();
     pipeline_state_descriptor.set_vertex_function(Some(&vert));
     pipeline_state_descriptor.set_fragment_function(Some(&frag));
-    let attachment = pipeline_state_descriptor
-        .color_attachments()
-        .object_at(0)
-        .unwrap();
+    let attachment = pipeline_state_descriptor.color_attachments().object_at(0).unwrap();
     attachment.set_pixel_format(MTLPixelFormat::BGRA8Unorm);
 
     attachment.set_blending_enabled(true);
@@ -69,9 +66,7 @@ fn prepare_pipeline_state<'a>(
     attachment.set_destination_rgb_blend_factor(metal::MTLBlendFactor::OneMinusSourceAlpha);
     attachment.set_destination_alpha_blend_factor(metal::MTLBlendFactor::OneMinusSourceAlpha);
 
-    device
-        .new_render_pipeline_state(&pipeline_state_descriptor)
-        .unwrap()
+    device.new_render_pipeline_state(&pipeline_state_descriptor).unwrap()
 }
 
 fn prepare_render_pass_descriptor(descriptor: &RenderPassDescriptorRef, texture: &TextureRef) {
@@ -111,20 +106,12 @@ fn main() {
     let draw_size = window.inner_size();
     layer.set_drawable_size(CGSize::new(draw_size.width as f64, draw_size.height as f64));
 
-    let library_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("examples/shaders.metallib");
+    let library_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("examples/shaders.metallib");
 
     let library = device.new_library_with_file(library_path).unwrap();
-    let triangle_pipeline_state =
-        prepare_pipeline_state(&device, &library, "triangle_vertex", "triangle_fragment");
-    let clear_rect_pipeline_state = prepare_pipeline_state(
-        &device,
-        &library,
-        "clear_rect_vertex",
-        "clear_rect_fragment",
-    );
-
-
+    let triangle_pipeline_state = prepare_pipeline_state(&device, &library, "triangle_vertex", "triangle_fragment");
+    let clear_rect_pipeline_state =
+        prepare_pipeline_state(&device, &library, "clear_rect_vertex", "clear_rect_fragment");
 
     let mut gsize = Size::new(800.0, 600.0);
     let stencil_texture = MtlStencilTexture::new(&device, gsize);
@@ -225,8 +212,7 @@ fn main() {
                     prepare_render_pass_descriptor(&render_pass_descriptor, drawable.texture());
 
                     let command_buffer = command_queue.new_command_buffer();
-                    let encoder =
-                        command_buffer.new_render_command_encoder(&render_pass_descriptor);
+                    let encoder = command_buffer.new_render_command_encoder(&render_pass_descriptor);
 
                     // encoder.set_scissor_rect(MTLScissorRect {
                     //     x: 20,

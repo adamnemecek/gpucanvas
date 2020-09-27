@@ -63,6 +63,7 @@ impl RPS {
         color_attachment_desc.set_source_alpha_blend_factor(blend_func.src_alpha);
         color_attachment_desc.set_destination_rgb_blend_factor(blend_func.dst_rgb);
         color_attachment_desc.set_destination_alpha_blend_factor(blend_func.dst_alpha);
+        // color_attachment_desc.set_write_mask(metal::MTLColorWriteMask::all());
 
         let pipeline_state = device.new_render_pipeline_state(&desc).unwrap();
 
