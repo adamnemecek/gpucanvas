@@ -100,7 +100,7 @@ impl TextureDescriptorExt for metal::TextureDescriptor {
         desc.set_height(size.h as u64);
         desc.set_mipmap_level_count(1);
 
-        #[cfg(target_os = "macos")]
+        #[cfg(target_os = "macos")] // todo: or simulator
         {
             desc.set_resource_options(metal::MTLResourceOptions::StorageModePrivate);
         }

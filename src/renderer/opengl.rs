@@ -158,10 +158,12 @@ impl OpenGl {
     }
 
     fn concave_fill(&self, images: &ImageStore<GlTexture>, cmd: &Command, stencil_paint: &Params, fill_paint: &Params) {
+        // enable stencil test
+        // stencil_only_pipeline_state
         unsafe {
             gl::Enable(gl::STENCIL_TEST);
-            gl::StencilMask(0xff);
-            gl::StencilFunc(gl::ALWAYS, 0, 0xff);
+            gl::StencilMask(0xff); // this is write mask
+            gl::StencilFunc(gl::ALWAYS, 0, 0xff); // ref, read mask
             gl::ColorMask(gl::FALSE, gl::FALSE, gl::FALSE, gl::FALSE);
             //gl::DepthMask(gl::FALSE);
         }

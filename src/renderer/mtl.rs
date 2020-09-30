@@ -129,6 +129,8 @@ pub struct Mtl {
     stroke_anti_alias_stencil_state: metal::DepthStencilState,
     stroke_clear_stencil_state: metal::DepthStencilState,
 
+    clear_rect_stencil_state: metal::DepthStencilState,
+
     rps_cache: RPSCache,
     current_rps: Option<Rc<RPS>>,
     // vert_func: metal::Function,
@@ -281,6 +283,7 @@ impl Mtl {
         // Default stencil state.
         let default_stencil_state = {
             let stencil_descriptor = metal::DepthStencilDescriptor::new();
+            // stencil_descriptor.set_depth_write_enabled(true);
             #[cfg(debug_assertions)]
             stencil_descriptor.set_label("default_stencil_state");
             device.new_depth_stencil_state(&stencil_descriptor)
@@ -293,14 +296,19 @@ impl Mtl {
 
             front_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Always);
             front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::IncrementWrap);
-
+            // front_face_stencil_descriptor.set_read_mask(0);
+            front_face_stencil_descriptor.set_write_mask(0xff);
             back_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Always);
             back_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::DecrementWrap);
+            // back_face_stencil_descriptor.set_read_mask(0);
+            // back_face_stencil_descriptor.set_write_mask(0);
+            back_face_stencil_descriptor.set_write_mask(0xff);
 
             let stencil_descriptor = metal::DepthStencilDescriptor::new();
             stencil_descriptor.set_depth_compare_function(metal::MTLCompareFunction::Always);
             stencil_descriptor.set_back_face_stencil(Some(&back_face_stencil_descriptor));
             stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
+            // stencil_descriptor.set_depth_write_enabled(true);
             #[cfg(debug_assertions)]
             stencil_descriptor.set_label("fill_shape_stencil_state");
             device.new_depth_stencil_state(&stencil_descriptor)
@@ -316,6 +324,7 @@ impl Mtl {
 
             let stencil_descriptor = metal::DepthStencilDescriptor::new();
             #[cfg(debug_assertions)]
+            // stencil_descriptor.set_depth_write_enabled(true);
             stencil_descriptor.set_label("fill_anti_alias_stencil_state");
             stencil_descriptor.set_back_face_stencil(None);
             stencil_descriptor.set_front_face_stencil(Some(&desc));
@@ -329,8 +338,10 @@ impl Mtl {
             desc.set_stencil_failure_operation(metal::MTLStencilOperation::Zero);
             desc.set_depth_failure_operation(metal::MTLStencilOperation::Zero);
             desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
+            
 
             let stencil_descriptor = metal::DepthStencilDescriptor::new();
+            // stencil_descriptor.set_depth_write_enabled(true);
             #[cfg(debug_assertions)]
             stencil_descriptor.set_label("fill_stencil_state");
             stencil_descriptor.set_back_face_stencil(None);
@@ -347,6 +358,7 @@ impl Mtl {
             desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::IncrementClamp);
 
             let stencil_descriptor = metal::DepthStencilDescriptor::new();
+            // stencil_descriptor.set_depth_write_enabled(true);
             #[cfg(debug_assertions)]
             stencil_descriptor.set_label("stroke_shape_stencil_state");
             stencil_descriptor.set_back_face_stencil(None);
@@ -361,6 +373,7 @@ impl Mtl {
             desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Keep);
 
             let stencil_descriptor = metal::DepthStencilDescriptor::new();
+            // stencil_descriptor.set_depth_write_enabled(true);
             #[cfg(debug_assertions)]
             stencil_descriptor.set_label("stroke_anti_alias_stencil_state");
             stencil_descriptor.set_back_face_stencil(None);
@@ -377,11 +390,48 @@ impl Mtl {
             desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
 
             let stencil_descriptor = metal::DepthStencilDescriptor::new();
+            // stencil_descriptor.set_depth_write_enabled(true);
             #[cfg(debug_assertions)]
             stencil_descriptor.set_label("stroke_clear_stencil_state");
             stencil_descriptor.set_back_face_stencil(None);
             stencil_descriptor.set_front_face_stencil(Some(&desc));
             device.new_depth_stencil_state(&stencil_descriptor)
+        };
+
+        let clear_rect_stencil_state = {
+            let desc = metal::StencilDescriptor::new();
+            desc.set_stencil_compare_function(metal::MTLCompareFunction::NotEqual);
+            desc.set_stencil_failure_operation(metal::MTLStencilOperation::Zero);
+            desc.set_depth_failure_operation(metal::MTLStencilOperation::Zero);
+            desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
+
+            let stencil_descriptor = metal::DepthStencilDescriptor::new();
+            // stencil_descriptor.set_depth_write_enabled(true);
+            #[cfg(debug_assertions)]
+            stencil_descriptor.set_label("clear_rect_stencil_state");
+            stencil_descriptor.set_back_face_stencil(None);
+            stencil_descriptor.set_front_face_stencil(Some(&desc));
+            device.new_depth_stencil_state(&stencil_descriptor)
+            // let front_face_stencil_descriptor = metal::StencilDescriptor::new();
+            // let back_face_stencil_descriptor = metal::StencilDescriptor::new();
+
+            // front_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::NotEqual);
+            // front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::IncrementWrap);
+            // // front_face_stencil_descriptor.set_read_mask(0);
+            // // front_face_stencil_descriptor.set_write_mask(0);
+            // back_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::NotEqual);
+            // back_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::DecrementWrap);
+            // // back_face_stencil_descriptor.set_read_mask(0);
+            // // back_face_stencil_descriptor.set_write_mask(0);
+
+            // let stencil_descriptor = metal::DepthStencilDescriptor::new();
+            // stencil_descriptor.set_depth_compare_function(metal::MTLCompareFunction::Always);
+            // stencil_descriptor.set_back_face_stencil(Some(&back_face_stencil_descriptor));
+            // stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
+            // // stencil_descriptor.set_depth_write_enabled(true);
+            // #[cfg(debug_assertions)]
+            // stencil_descriptor.set_label("clear_rect_stencil_state");
+            // device.new_depth_stencil_state(&stencil_descriptor)
         };
 
         Self {
@@ -410,6 +460,7 @@ impl Mtl {
             stroke_shape_stencil_state,
             stroke_anti_alias_stencil_state,
             stroke_clear_stencil_state,
+            clear_rect_stencil_state,
             frag_size: std::mem::size_of::<Params>(),
             index_size: 4, // MTLIndexTypeUInt32
             // stencil_only_pipeline_state: None,
@@ -528,7 +579,6 @@ impl Mtl {
         encoder.set_render_pipeline_state(&pipeline_state);
         self.set_uniforms(encoder, images, paint, cmd.image, cmd.alpha_mask);
 
-        //println!("convex_fill start");
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
                 #[cfg(debug_assertions)]
@@ -579,7 +629,6 @@ impl Mtl {
         #[cfg(debug_assertions)]
         encoder.pop_debug_group();
 
-        //println!("convex_fill end\n");
     }
 
     /// done
@@ -598,24 +647,28 @@ impl Mtl {
         let pipeline_state = &rps.pipeline_state;
         let stencil_only_pipeline_state = &rps.stencil_only_pipeline_state;
 
+        // - first we draw to the stencil buffer
+        // - change the pipeline state to stencil
+        // - we disable culling since fill_shape_stencil_state
+        // does the incr/decr thing
+        // - note that we are binding the pseudotexture
+        //  thereby disabling writing to color buffer
+        //
         encoder.set_cull_mode(metal::MTLCullMode::None);
-        encoder.set_stencil_reference_value(0xff);
-        encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
+        // encoder.set_stencil_reference_value(0xff);
         encoder.set_render_pipeline_state(stencil_only_pipeline_state);
+        encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
 
         // todo metal nanovg doesn't have this but gpucanvas does
         self.set_uniforms(encoder, images, stencil_paint, None, None);
 
+        // fill verts
         for drawable in &cmd.drawables {
             if let Some((start, count)) = drawable.fill_verts {
                 //println!("concave_fill/fill verts #{}: start: {}, count {}", 0, start, count);
                 let offset = self.index_buffer.len();
                 let byte_index_buffer_offset = offset * self.index_size;
-                // let byte_index_buffer_offset = start * self.index_size;
-                // assert!(self.index_buffer.len() == start);
-                // let indices = triangle_fan_indices_cw(start as u32, count as u32);
-                //println!("\tindex_buffer.extend_from_slice {:?}", indices);
-                // self.index_buffer.extend_from_slice(&indices);
+
                 let triangle_fan_index_count = self
                     .index_buffer
                     .extend_with_triange_fan_indices_cw(start as u32, count as u32);
@@ -635,6 +688,8 @@ impl Mtl {
 
         // Draws anti-aliased fragments.
         self.set_uniforms(encoder, images, fill_paint, cmd.image, cmd.alpha_mask);
+        
+        // fringes
         if self.antialias {
             match cmd.fill_rule {
                 FillRule::NonZero => {
@@ -657,6 +712,7 @@ impl Mtl {
         }
 
         // Draws fill.
+        // triangle verts
         match cmd.fill_rule {
             FillRule::NonZero => {
                 //gl::StencilFunc(gl::NOTEQUAL, 0x0, 0xff),
@@ -854,6 +910,7 @@ impl Mtl {
         let rps = self.current_rps.as_ref().unwrap();
         let pipeline_state = &rps.pipeline_state;
         let clear_rect_pipeline_state = &rps.clear_rect_pipeline_state;
+        // let clear_rect_stencil_state = &rps.clear_rect_stencil_state;
 
         // let view_size = *self.view_size_buffer;
 
@@ -884,6 +941,19 @@ impl Mtl {
             h: 2.0,
         };
         let clear_rect = ClearRect { rect: ndc_rect, color };
+        // encoder.set_depth_stencil_state(&clear_rect_stencil_state);
+
+        // encoder.set_stencil_reference_value(0x00);
+        // fill_shape_stencil_state
+        // encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
+        // encoder.set_stencil_reference_value(0);
+        // encoder.set_depth_stencil_state(&self.clear_rect_stencil_state);
+        // encoder.set_depth_stencil_state(&self.fill_anti_alias_stencil_state);
+        // encoder.set_depth_stencil_state(&self.fill_stencil_state);
+
+        // encoder.set_depth_stencil_state(&self.stroke_shape_stencil_state);
+        // encoder.set_depth_stencil_state(&self.stroke_anti_alias_stencil_state);
+        // encoder.set_depth_stencil_state(&self.stroke_clear_stencil_state);
 
         encoder.set_render_pipeline_state(clear_rect_pipeline_state);
         encoder.set_vertex_value(0, &clear_rect);
@@ -1468,7 +1538,7 @@ impl Renderer for Mtl {
         assert!(index_buffer_hash == self.index_buffer.ptr_hash());
 
         // command_buffer.wait_until_scheduled();
-        // println!("counters {:?}", counters);
+        println!("counters {:?}", counters);
 
         // if !self.layer.presents_with_transaction() {
         //     command_buffer.present_drawable(&drawable);
