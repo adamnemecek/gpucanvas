@@ -1195,34 +1195,34 @@ fn draw_thumbnails<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, 
         let v = i as f32 * dv;
         let a = ((u2 - v) / dv).max(0.0).min(1.0);
 
-        if a < 1.0 {
-            draw_spinner(canvas, tx + thumb / 2.0, ty + thumb / 2.0, thumb * 0.25, t);
-        }
+        // if a < 1.0 {
+        //     draw_spinner(canvas, tx + thumb / 2.0, ty + thumb / 2.0, thumb * 0.25, t);
+        // }
 
         let img_paint = Paint::image(*image, tx + ix, ty + iy, iw, ih, 0.0 / 180.0 * PI, a);
         let mut path = Path::new();
         path.rounded_rect(tx, ty, thumb, thumb, 5.0);
         canvas.fill_path(&mut path, img_paint);
 
-        let shadow_paint = Paint::box_gradient(
-            tx - 1.0,
-            ty,
-            thumb + 2.0,
-            thumb + 2.0,
-            5.0,
-            3.0,
-            Color::rgba(0, 0, 0, 128),
-            Color::rgba(0, 0, 0, 0),
-        );
-        let mut path = Path::new();
-        path.rect(tx - 5.0, ty - 5.0, thumb + 10.0, thumb + 10.0);
-        path.rounded_rect(tx, ty, thumb, thumb, 6.0);
-        path.solidity(Solidity::Hole);
-        canvas.fill_path(&mut path, shadow_paint);
+        // let shadow_paint = Paint::box_gradient(
+        //     tx - 1.0,
+        //     ty,
+        //     thumb + 2.0,
+        //     thumb + 2.0,
+        //     5.0,
+        //     3.0,
+        //     Color::rgba(0, 0, 0, 128),
+        //     Color::rgba(0, 0, 0, 0),
+        // );
+        // let mut path = Path::new();
+        // path.rect(tx - 5.0, ty - 5.0, thumb + 10.0, thumb + 10.0);
+        // path.rounded_rect(tx, ty, thumb, thumb, 6.0);
+        // path.solidity(Solidity::Hole);
+        // canvas.fill_path(&mut path, shadow_paint);
 
-        let mut path = Path::new();
-        path.rounded_rect(tx + 0.5, ty + 0.5, thumb - 1.0, thumb - 1.0, 4.0 - 0.5);
-        canvas.stroke_path(&mut path, Paint::color(Color::rgba(255, 255, 255, 192)));
+        // let mut path = Path::new();
+        // path.rounded_rect(tx + 0.5, ty + 0.5, thumb - 1.0, thumb - 1.0, 4.0 - 0.5);
+        // canvas.stroke_path(&mut path, Paint::color(Color::rgba(255, 255, 255, 192)));
     }
 
     canvas.restore();

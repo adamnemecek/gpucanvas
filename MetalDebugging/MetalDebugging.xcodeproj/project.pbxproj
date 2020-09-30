@@ -18,7 +18,7 @@
 /* Begin PBXLegacyTarget section */
 		37FD8CD124D5EB61005F668B /* MetalDebugging */ = {
 			isa = PBXLegacyTarget;
-			buildArgumentsString = "build --example mtlsimple";
+			buildArgumentsString = "build --example mtlimgs";
 			buildConfigurationList = 37FD8CD424D5EB61005F668B /* Build configuration list for PBXLegacyTarget "MetalDebugging" */;
 			buildPhases = (
 			);
