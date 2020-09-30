@@ -297,12 +297,12 @@ impl Mtl {
             front_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Always);
             front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::IncrementWrap);
             // front_face_stencil_descriptor.set_read_mask(0);
-            front_face_stencil_descriptor.set_write_mask(0xff);
+            // front_face_stencil_descriptor.set_write_mask(0xff);
             back_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::Always);
             back_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::DecrementWrap);
             // back_face_stencil_descriptor.set_read_mask(0);
             // back_face_stencil_descriptor.set_write_mask(0);
-            back_face_stencil_descriptor.set_write_mask(0xff);
+            // back_face_stencil_descriptor.set_write_mask(0xff);
 
             let stencil_descriptor = metal::DepthStencilDescriptor::new();
             stencil_descriptor.set_depth_compare_function(metal::MTLCompareFunction::Always);
