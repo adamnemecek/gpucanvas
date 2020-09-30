@@ -631,7 +631,7 @@ impl Mtl {
             if let Some((start, count)) = drawable.fill_verts {
                 #[cfg(debug_assertions)]
                 self.vertex_buffer
-                    .add_debug_marker("convex_fill/fill", start as u64..(start + count) as u64);
+                    .add_debug_marker("convex_fill/fill buffer", start as u64..(start + count) as u64);
 
                 //println!("\tconvex_fill/fill: verts #{}: start: {}, count {}", 0, start, count);
 
@@ -665,7 +665,7 @@ impl Mtl {
             if let Some((start, count)) = drawable.stroke_verts {
                 #[cfg(debug_assertions)]
                 self.vertex_buffer
-                    .add_debug_marker("convex_fill/stroke", start as u64..(start + count) as u64);
+                    .add_debug_marker("convex_fill/stroke buffer", start as u64..(start + count) as u64);
 
                 //println!("\tconvex_fill/stroke: verts #{}: start: {}, count {}", 0, start, count);
                 encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64)
@@ -703,7 +703,6 @@ impl Mtl {
         //  thereby disabling writing to color buffer
         //
         encoder.set_cull_mode(metal::MTLCullMode::None);
-        // encoder.set_stencil_reference_value(0xff);
         encoder.set_render_pipeline_state(stencil_only_pipeline_state);
         encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
 
@@ -742,12 +741,10 @@ impl Mtl {
             match cmd.fill_rule {
                 FillRule::NonZero => {
                     //gl::StencilFunc(gl::EQUAL, 0x0, 0xff),
-                    // encoder.set_stencil_reference_value(0xff);
                     encoder.set_depth_stencil_state(&self.fill_anti_alias_stencil_state_nonzero)
                 }
                 FillRule::EvenOdd => {
                     // gl::StencilFunc(gl::EQUAL, 0x0, 0x1),
-                    // encoder.set_stencil_reference_value(0x1);
                     encoder.set_depth_stencil_state(&self.fill_anti_alias_stencil_state_evenodd)
                 }
             }
@@ -765,12 +762,10 @@ impl Mtl {
         match cmd.fill_rule {
             FillRule::NonZero => {
                 //gl::StencilFunc(gl::NOTEQUAL, 0x0, 0xff),
-                // encoder.set_stencil_reference_value(0xff);
                 encoder.set_depth_stencil_state(&self.fill_stencil_state_nonzero)
             }
             FillRule::EvenOdd => {
                 // gl::StencilFunc(gl::NOTEQUAL, 0x0, 0x1),
-                // encoder.set_stencil_reference_value(0x1);
                 encoder.set_depth_stencil_state(&self.fill_stencil_state_evenodd)
             }
         }
@@ -825,7 +820,6 @@ impl Mtl {
 
         // Fills the stroke base without overlap.
 
-        // encoder.set_stencil_reference_value(0xff);
         encoder.set_depth_stencil_state(&self.stroke_shape_stencil_state);
         encoder.set_render_pipeline_state(pipeline_state);
         self.set_uniforms(encoder, images, paint2, cmd.image, cmd.alpha_mask);
@@ -837,7 +831,6 @@ impl Mtl {
 
         // Draw anti-aliased pixels.
         self.set_uniforms(encoder, images, paint1, cmd.image, cmd.alpha_mask);
-        // encoder.set_stencil_reference_value(0xff);
         encoder.set_depth_stencil_state(&self.stroke_anti_alias_stencil_state);
 
         for drawable in &cmd.drawables {
@@ -856,7 +849,6 @@ impl Mtl {
                 encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, start as u64, count as u64);
             }
         }
-        // encoder.set_stencil_reference_value(0xff);
         encoder.set_depth_stencil_state(&self.default_stencil_state);
 
         #[cfg(debug_assertions)]
