@@ -195,7 +195,7 @@ fragment float4 fragmentShaderAA(
     } else if (uniforms.shaderType == 1) {
         // MNVG_SHADER_IMG
         // revisit: should this be ftcoord or fpos or the other one?
-        float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
+        float2 pt = (uniforms.paintMat * float3(in.ftcoord, 1.0)).xy / uniforms.extent;
         // float4 color = texture.sample(samplr, in.ftcoord);
         
         float4 color = texture.sample(samplr, pt);
@@ -206,7 +206,7 @@ fragment float4 fragmentShaderAA(
             color = float4(color.x);
         }
         // color *= scissor;
-        result = color * uniforms.innerCol;
+        result = color * scissor * uniforms.innerCol;
     } else {
         // stencil
         // MNVG_SHADER_FILLIMG
@@ -288,11 +288,11 @@ fragment float4 fragmentShaderAAUpdated(
     if (u.shaderType == 0) {
         // MNVG_SHADER_FILLGRAD
         // gradient
-        float2 pt = (u.paintMat * float3(in.fpos, 1.0)).xy;
-        float d = clamp((sdroundrect2(pt, u.extent, u.radius) + u.feather*0.5) / u.feather, 0.0, 1.0);
+        // float2 pt = (u.paintMat * float3(in.fpos, 1.0)).xy;
+        // float d = clamp((sdroundrect2(pt, u.extent, u.radius) + u.feather*0.5) / u.feather, 0.0, 1.0);
 
-        float4 color = mix(u.innerCol, u.outerCol, d);
-        result = color;
+        // float4 color = mix(u.innerCol, u.outerCol, d);
+        // result = color;
     } else if (u.shaderType == 1) {
         // MNVG_SHADER_FILLIMG
         // image
