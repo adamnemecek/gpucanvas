@@ -83,11 +83,11 @@ float sdroundrect(constant Uniforms& uniforms, float2 pt) {
     float2 d = abs(pt) - ext2;
     return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - uniforms.radius;
 }
-float sdroundrect2(float2 pt, float2 ext, float rad) {
-    float2 ext2 = ext - float2(rad);
-    float2 d = abs(pt) - ext2;
-    return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - rad;
-}
+// float sdroundrect2(float2 pt, float2 ext, float rad) {
+//     float2 ext2 = ext - float2(rad);
+//     float2 d = abs(pt) - ext2;
+//     return min(max(d.x, d.y), 0.0) + length(max(d, 0.0)) - rad;
+// }
 
 
 float strokeMask(constant Uniforms& uniforms, float2 ftcoord) {

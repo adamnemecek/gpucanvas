@@ -2,7 +2,6 @@
 
 * we are debugging concave stencil
 * concave fill
-  * 
 
 the default values are 
     * stencilcompare function = always

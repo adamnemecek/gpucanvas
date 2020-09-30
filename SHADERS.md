@@ -18,3 +18,13 @@ impl ShaderType {
 }
 
 ```
+
+* nanovg has 4
+```rust
+enum NVGMTLShaderID {
+    NVGMTL_SHADER_FILLGRAD,
+    NVGMTL_SHADER_FILLIMG,
+    NVGMTL_SHADER_SIMPLE,
+    NVGMTL_SHADER_IMG
+};
+```
