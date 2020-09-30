@@ -14,6 +14,9 @@ struct RasterizerData {
     float2 ftcoord;
 };
 
+
+
+
 // float scissorMat[12]; // matrices are actually 3 vec4s
 // float paintMat[12];
 // struct NVGcolor innerCol;
@@ -32,6 +35,14 @@ struct RasterizerData {
 #define COMPILE_TIME_ASSERT3(X,L) STATIC_ASSERT(X,static_assertion_at_line_##L)
 #define COMPILE_TIME_ASSERT2(X,L) COMPILE_TIME_ASSERT3(X,L)
 #define COMPILE_TIME_ASSERT(X)    COMPILE_TIME_ASSERT2(X,__LINE__)
+
+enum ShaderType {
+    FillGradient,
+    FillImage,
+    Stencil,
+};
+
+// COMPILE_TIME_ASSERT(sizeof(Uniforms) == 4);
 
 struct Uniforms {
     float3x4 scissorMat;
@@ -59,11 +70,12 @@ float strokeMask(constant Uniforms& uniforms, float2 ftcoord);
 
 float scissorMask(constant Uniforms& uniforms, float2 p) {
     float2 sc = (abs((uniforms.scissorMat * float3(p, 1.0f)).xy)
-                 - uniforms.scissorExt) \
-    * uniforms.scissorScale;
-    sc = saturate(float2(0.5f) - sc);
+                 - uniforms.scissorExt);
+    
+    sc = float2(0.5f) - sc * uniforms.scissorScale;
     // clamp
-    return sc.x * sc.y;
+    // return sc.x * sc.y;
+    return clamp(sc.x, 0.0, 1.0) * clamp(sc.y, 0.0, 1.0);
 }
 
 float sdroundrect(constant Uniforms& uniforms, float2 pt) {
@@ -173,9 +185,9 @@ fragment float4 fragmentShaderAA(
         // MNVG_SHADER_FILLGRAD
         float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy;
         // revisit d
-        // float d = clamp((sdroundrect(pt, extent, radius) + feather*0.5) / feather, 0.0, 1.0);
-        float d = saturate((uniforms.feather * 0.5 + sdroundrect(uniforms, pt))
-                           / uniforms.feather);
+        float d = clamp((sdroundrect(uniforms, pt) + uniforms.feather*0.5) / uniforms.feather, 0.0, 1.0);
+        // float d = saturate((uniforms.feather * 0.5 + sdroundrect(uniforms, pt))
+        //                    / uniforms.feather);
         float4 color = mix(uniforms.innerCol, uniforms.outerCol, d);
         // color *= scissor;
         // color *= strokeAlpha;

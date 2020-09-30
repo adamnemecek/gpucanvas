@@ -157,6 +157,7 @@ impl Vertex {
     }
 }
 
+#[repr(u32)]
 #[derive(Copy, Clone)]
 pub enum ShaderType {
     FillGradient,
