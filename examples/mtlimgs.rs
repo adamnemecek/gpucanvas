@@ -116,6 +116,14 @@ fn main() {
 
     let mut perf = PerfGraph::new();
 
+    let capture = true;
+    let stop_frame = 2;
+
+    if capture {
+        println!("start capture");
+        canvas.start_capture();
+    }
+
     events_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
 
@@ -330,6 +338,11 @@ fn main() {
                 //canvas.restore();
 
                 canvas.flush();
+                if capture && canvas.frame() == stop_frame {
+                    println!("stop capture");
+                    canvas.stop_capture();
+                    // first = false;
+                }
                 // windowed_context.swap_buffers().unwrap();
             }
             Event::MainEventsCleared => {
@@ -1226,7 +1239,7 @@ fn draw_thumbnails<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, 
         // canvas.stroke_path(&mut path, Paint::color(Color::rgba(255, 255, 255, 192)));
     }
 
-    canvas.restore();
+    // canvas.restore();
 
     // // Hide fades
     // let fade_paint = Paint::linear_gradient(

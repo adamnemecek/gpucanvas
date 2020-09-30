@@ -114,7 +114,15 @@ fn main() {
     let mut mousey = 0.0;
     let mut dragging = false;
 
+    let capture = true;
+    let stop_frame = 2;
+
     let mut perf = PerfGraph::new();
+
+    if capture {
+        println!("start capture");
+        canvas.start_capture();
+    }
 
     events_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Poll;
@@ -322,14 +330,19 @@ fn main() {
                 //     canvas.fill_path(&mut path, paint);
                 // }
 
-                canvas.save_with(|canvas| {
-                    canvas.reset();
-                    perf.render(canvas, 5.0, 5.0);
-                });
+                // canvas.save_with(|canvas| {
+                //     canvas.reset();
+                //     perf.render(canvas, 5.0, 5.0);
+                // });
 
                 //canvas.restore();
 
                 canvas.flush();
+                if capture && canvas.frame() == stop_frame {
+                    println!("stop capture");
+                    canvas.stop_capture();
+                    // first = false;
+                }
                 // windowed_context.swap_buffers().unwrap();
             }
             Event::MainEventsCleared => {
