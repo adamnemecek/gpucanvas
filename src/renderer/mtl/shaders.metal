@@ -191,9 +191,8 @@ fragment float4 fragmentShaderAA(
         result = color;
     } else if (uniforms.shaderType == 1) {
         // MNVG_SHADER_IMG
-        // revisit: should this be ftcoord or fpos or the other one?
+        // this has to be fpos
         float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
-        // float4 color = texture.sample(samplr, in.ftcoord);
         
         float4 color = texture.sample(samplr, pt);
         if (uniforms.texType == 1) {
@@ -202,7 +201,6 @@ fragment float4 fragmentShaderAA(
         else if (uniforms.texType == 2) {
             color = float4(color.x);
         }
-        // color *= scissor;
         result = color * uniforms.innerCol;
     } else {
         // stencil
@@ -226,33 +224,8 @@ fragment float4 fragmentShaderAA(
         float2 ftcoord = float2(in.ftcoord.x, 1.0 - in.ftcoord.y);
         float4 mask = float4(alpha_texture.sample(alpha_samplr, ftcoord).r);
 
-        // if (alpha < uniforms.strokeThr) {
-        //     discard_fragment();
-        // }
-    //     // result /= strokeAlpha;
-    //     result /= 0.02;
         mask *= scissor;
         result *= mask;
-        // result = float4(result.xyz, alpha);
-
-        // return float4(0.5, 0.5, 0.5, 0.3);
-    //     //  float r = alpha_texture.sample(alpha_samplr, in.ftcoord).x;
-    //     //  float4 smpl = vec4(1.0, 1.0, 1.0, smpl);
-    //     //  result = vec4(result.xyz, 1.0) * smpl;
-    //     // if(type.type == TypeText) {
-	// 	//     out_color.a *= texture(font, in_uv).a;
-	//     // }
-    //     // result.a *= alpha_texture.sample(alpha_samplr, in.ftcoord).a;
-
-    //     // float4 smpl = alpha_texture.sample(alpha_samplr, in.ftcoord);
-    //     // float4 mask = float4(smpl.x);
-    //     // result *= smpl;
-    //     // return float4(1.0);
-
-    
-    //     // else {
-    //         // return float4(result.xyz, smpl.a);
-    //     // }
     }
     else if (uniforms.shaderType != 2.0) {
         result *= strokeAlpha * scissor;
