@@ -192,7 +192,7 @@ fragment float4 fragmentShaderAA(
     } else if (uniforms.shaderType == 1) {
         // MNVG_SHADER_IMG
         // revisit: should this be ftcoord or fpos or the other one?
-        float2 pt = (uniforms.paintMat * float3(in.ftcoord, 1.0)).xy / uniforms.extent;
+        float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
         // float4 color = texture.sample(samplr, in.ftcoord);
         
         float4 color = texture.sample(samplr, pt);
