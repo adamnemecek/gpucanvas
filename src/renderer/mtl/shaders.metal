@@ -56,8 +56,8 @@ struct Uniforms {
     float feather;
     float strokeMult;
     float strokeThr;
-    int texType;
-    int shaderType;
+    float texType;
+    float shaderType;
     float hasMask;
     float padding[19];
 };

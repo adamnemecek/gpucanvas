@@ -6,6 +6,7 @@
     "configurations": [
 
 
+
         {
             "type": "lldb",
             "request": "launch",
@@ -222,6 +223,24 @@
                 ],
                 "filter": {
                     "name": "mtldemo",
+                    "kind": "example"
+                }
+            },
+            "args": [],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
+            "name": "Debug example 'mtlimgs'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--example=mtlimgs",
+                    "--package=gpucanvas"
+                ],
+                "filter": {
+                    "name": "mtlimgs",
                     "kind": "example"
                 }
             },
