@@ -131,7 +131,7 @@ pub struct Mtl {
     stroke_anti_alias_stencil_state: metal::DepthStencilState,
     stroke_clear_stencil_state: metal::DepthStencilState,
 
-    clear_rect_stencil_state: metal::DepthStencilState,
+    // clear_rect_stencil_state: metal::DepthStencilState,
 
     rps_cache: RPSCache,
     current_rps: Option<Rc<RPS>>,
@@ -444,41 +444,41 @@ impl Mtl {
             device.new_depth_stencil_state(&stencil_descriptor)
         };
 
-        let clear_rect_stencil_state = {
-            let desc = metal::StencilDescriptor::new();
-            desc.set_stencil_compare_function(metal::MTLCompareFunction::NotEqual);
-            desc.set_stencil_failure_operation(metal::MTLStencilOperation::Zero);
-            desc.set_depth_failure_operation(metal::MTLStencilOperation::Zero);
-            desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
+        // let clear_rect_stencil_state = {
+        //     let desc = metal::StencilDescriptor::new();
+        //     desc.set_stencil_compare_function(metal::MTLCompareFunction::NotEqual);
+        //     desc.set_stencil_failure_operation(metal::MTLStencilOperation::Zero);
+        //     desc.set_depth_failure_operation(metal::MTLStencilOperation::Zero);
+        //     desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Zero);
 
-            let stencil_descriptor = metal::DepthStencilDescriptor::new();
-            // stencil_descriptor.set_depth_write_enabled(true);
-            #[cfg(debug_assertions)]
-            stencil_descriptor.set_label("clear_rect_stencil_state");
-            stencil_descriptor.set_back_face_stencil(None);
-            stencil_descriptor.set_front_face_stencil(Some(&desc));
-            device.new_depth_stencil_state(&stencil_descriptor)
-            // let front_face_stencil_descriptor = metal::StencilDescriptor::new();
-            // let back_face_stencil_descriptor = metal::StencilDescriptor::new();
+        //     let stencil_descriptor = metal::DepthStencilDescriptor::new();
+        //     // stencil_descriptor.set_depth_write_enabled(true);
+        //     #[cfg(debug_assertions)]
+        //     stencil_descriptor.set_label("clear_rect_stencil_state");
+        //     stencil_descriptor.set_back_face_stencil(None);
+        //     stencil_descriptor.set_front_face_stencil(Some(&desc));
+        //     device.new_depth_stencil_state(&stencil_descriptor)
+        //     // let front_face_stencil_descriptor = metal::StencilDescriptor::new();
+        //     // let back_face_stencil_descriptor = metal::StencilDescriptor::new();
 
-            // front_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::NotEqual);
-            // front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::IncrementWrap);
-            // // front_face_stencil_descriptor.set_read_mask(0);
-            // // front_face_stencil_descriptor.set_write_mask(0);
-            // back_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::NotEqual);
-            // back_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::DecrementWrap);
-            // // back_face_stencil_descriptor.set_read_mask(0);
-            // // back_face_stencil_descriptor.set_write_mask(0);
+        //     // front_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::NotEqual);
+        //     // front_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::IncrementWrap);
+        //     // // front_face_stencil_descriptor.set_read_mask(0);
+        //     // // front_face_stencil_descriptor.set_write_mask(0);
+        //     // back_face_stencil_descriptor.set_stencil_compare_function(metal::MTLCompareFunction::NotEqual);
+        //     // back_face_stencil_descriptor.set_depth_stencil_pass_operation(metal::MTLStencilOperation::DecrementWrap);
+        //     // // back_face_stencil_descriptor.set_read_mask(0);
+        //     // // back_face_stencil_descriptor.set_write_mask(0);
 
-            // let stencil_descriptor = metal::DepthStencilDescriptor::new();
-            // stencil_descriptor.set_depth_compare_function(metal::MTLCompareFunction::Always);
-            // stencil_descriptor.set_back_face_stencil(Some(&back_face_stencil_descriptor));
-            // stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
-            // // stencil_descriptor.set_depth_write_enabled(true);
-            // #[cfg(debug_assertions)]
-            // stencil_descriptor.set_label("clear_rect_stencil_state");
-            // device.new_depth_stencil_state(&stencil_descriptor)
-        };
+        //     // let stencil_descriptor = metal::DepthStencilDescriptor::new();
+        //     // stencil_descriptor.set_depth_compare_function(metal::MTLCompareFunction::Always);
+        //     // stencil_descriptor.set_back_face_stencil(Some(&back_face_stencil_descriptor));
+        //     // stencil_descriptor.set_front_face_stencil(Some(&front_face_stencil_descriptor));
+        //     // // stencil_descriptor.set_depth_write_enabled(true);
+        //     // #[cfg(debug_assertions)]
+        //     // stencil_descriptor.set_label("clear_rect_stencil_state");
+        //     // device.new_depth_stencil_state(&stencil_descriptor)
+        // };
 
         Self {
             multiple_buffering: 3,
@@ -508,7 +508,7 @@ impl Mtl {
             stroke_shape_stencil_state,
             stroke_anti_alias_stencil_state,
             stroke_clear_stencil_state,
-            clear_rect_stencil_state,
+            // clear_rect_stencil_state,
             frag_size: std::mem::size_of::<Params>(),
             index_size: 4, // MTLIndexTypeUInt32
             // stencil_only_pipeline_state: None,

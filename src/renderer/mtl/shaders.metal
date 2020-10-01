@@ -89,7 +89,7 @@ float sdroundrect(constant Uniforms& uniforms, float2 pt) {
 
 float strokeMask(constant Uniforms& uniforms, float2 ftcoord) {
     return min(1.0, (1.0 - abs(ftcoord.x * 2.0 - 1.0)) * uniforms.strokeMult) \
-    * min(1.0, ftcoord.y);
+       * min(1.0, ftcoord.y);
 }
 
 // Vertex Function
@@ -167,17 +167,9 @@ fragment float4 fragmentShaderAA(
     
     float strokeAlpha = strokeMask(uniforms, in.ftcoord);
     if (strokeAlpha < uniforms.strokeThr) {
-        // result = float4(0);
         discard_fragment();
     }
 
-    // if (scissor == 0) {
-    //     return float4(0);
-    // }
-
-// Self::FillGradient => 0.0,
-// Self::FillImage => 1.0,
-// Self::Stencil => 2.0,
     if (uniforms.shaderType == 0) {
         // MNVG_SHADER_FILLGRAD
         float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy;

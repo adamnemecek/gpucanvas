@@ -222,16 +222,16 @@ fn main() {
 
                 // draw_eyes(&mut canvas, width - 250.0, 50.0, 150.0, 100.0, mousex, mousey, t);
 
-                // draw_paragraph(
-                //     &mut canvas,
-                //     fonts.regular,
-                //     width - 450.0,
-                //     50.0,
-                //     150.0,
-                //     100.0,
-                //     mousex,
-                //     mousey,
-                // );
+                draw_paragraph(
+                    &mut canvas,
+                    fonts.regular,
+                    width - 450.0,
+                    50.0,
+                    150.0,
+                    100.0,
+                    mousex,
+                    mousey,
+                );
 
                 // draw_colorwheel(&mut canvas, width - 300.0, height - 350.0, 250.0, 250.0, t);
 
@@ -303,7 +303,7 @@ fn main() {
                 //     Color::rgba(0, 0, 0, 0),
                 // );
 
-                draw_thumbnails(&mut canvas, 365.0, popy - 30.0, 160.0, 300.0, &images, 0.0);
+                // draw_thumbnails(&mut canvas, 365.0, popy - 30.0, 160.0, 300.0, &images, 0.0);
 
                 // draw_clear_rect2(&mut canvas, t, 20, 60, 50, 50);
                 // draw_rounded_rect(&mut canvas, 100.0, 100.0, 40.0, 40.0, 5.0, t);
@@ -419,6 +419,7 @@ fn draw_paragraph<T: Renderer>(
             let hit = mx > x && mx < (x + width) && my >= y && my < (y + res.height());
 
             if hit {
+                println!("mx {}, my {}", mx, my);
                 caret_x = if mx < x + res.width() / 2.0 { x } else { x + res.width() };
                 px = x;
 
