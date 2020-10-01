@@ -14,9 +14,6 @@ struct RasterizerData {
     float2 ftcoord;
 };
 
-
-
-
 // float scissorMat[12]; // matrices are actually 3 vec4s
 // float paintMat[12];
 // struct NVGcolor innerCol;
@@ -206,7 +203,7 @@ fragment float4 fragmentShaderAA(
             color = float4(color.x);
         }
         // color *= scissor;
-        result = color * scissor * uniforms.innerCol;
+        result = color * uniforms.innerCol;
     } else {
         // stencil
         // MNVG_SHADER_FILLIMG

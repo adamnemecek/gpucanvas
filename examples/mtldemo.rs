@@ -330,12 +330,12 @@ fn main() {
                 //     canvas.fill_path(&mut path, paint);
                 // }
 
-                // canvas.save_with(|canvas| {
-                //     canvas.reset();
-                //     perf.render(canvas, 5.0, 5.0);
-                // });
+                canvas.save_with(|canvas| {
+                    canvas.reset();
+                    perf.render(canvas, 5.0, 5.0);
+                });
 
-                //canvas.restore();
+                canvas.restore();
 
                 canvas.flush();
                 if capture && canvas.frame() == stop_frame {

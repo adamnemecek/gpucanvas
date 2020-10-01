@@ -1215,7 +1215,6 @@ fn draw_thumbnails<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, 
 
         let img_paint = Paint::image(*image, tx + ix, ty + iy, iw, ih, 0.0 / 180.0 * PI, a);
         let mut path = Path::new();
-        println!("image {}", i);
         path.rounded_rect(tx, ty, thumb, thumb, 5.0);
         canvas.fill_path(&mut path, img_paint);
 
