@@ -132,7 +132,6 @@ pub struct Mtl {
     stroke_clear_stencil_state: metal::DepthStencilState,
 
     // clear_rect_stencil_state: metal::DepthStencilState,
-
     rps_cache: RPSCache,
     current_rps: Option<Rc<RPS>>,
     // vert_func: metal::Function,
@@ -676,7 +675,6 @@ impl Mtl {
 
         #[cfg(debug_assertions)]
         encoder.pop_debug_group();
-
     }
 
     /// done
