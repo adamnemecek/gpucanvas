@@ -1,7 +1,5 @@
 use super::MtlTextureExt;
 use crate::{ErrorKind, ImageFlags, ImageInfo, ImageSource, PixelFormat, Size};
-use image::{DynamicImage, GenericImageView};
-use rgb::ComponentBytes;
 
 impl From<PixelFormat> for metal::MTLPixelFormat {
     fn from(a: PixelFormat) -> Self {
@@ -39,7 +37,6 @@ impl MtlTexture {
         command_queue: &metal::CommandQueueRef,
         info: ImageInfo,
     ) -> Result<Self, ErrorKind> {
-        // println!("format: {:?}", info.format());
         assert!(info.format() != PixelFormat::Rgb8);
 
         if info.format() == PixelFormat::Gray8 {

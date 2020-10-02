@@ -58,7 +58,8 @@ void main(void) {
 #ifdef EDGE_AA
     float strokeAlpha = strokeMask();
 
-    if (strokeAlpha < strokeThr) discard;
+    if (strokeAlpha < strokeThr)
+        discard;
 #else
     float strokeAlpha = 1.0;
 #endif

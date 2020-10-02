@@ -68,7 +68,7 @@ float strokeMask(constant Uniforms& uniforms, float2 ftcoord);
 float scissorMask(constant Uniforms& uniforms, float2 p) {
     float2 sc = (abs((uniforms.scissorMat * float3(p, 1.0f)).xy)
                  - uniforms.scissorExt);
-    
+
     sc = float2(0.5f) - sc * uniforms.scissorScale;
     // clamp
     // return sc.x * sc.y;
@@ -164,7 +164,7 @@ fragment float4 fragmentShaderAA(
 ) {
     float4 result;
     float scissor = scissorMask(uniforms, in.fpos);
-    
+
     float strokeAlpha = strokeMask(uniforms, in.ftcoord);
     if (strokeAlpha < uniforms.strokeThr) {
         discard_fragment();
@@ -185,7 +185,7 @@ fragment float4 fragmentShaderAA(
         // MNVG_SHADER_IMG
         // this has to be fpos
         float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
-        
+
         float4 color = texture.sample(samplr, pt);
         if (uniforms.texType == 1) {
             color = float4(color.xyz * color.w, color.w);
@@ -198,23 +198,12 @@ fragment float4 fragmentShaderAA(
         // stencil
         // MNVG_SHADER_FILLIMG
         result = float4(1.0);
-        // float2 pt = (uniforms.paintMat * float3(in.fpos, 1.0)).xy / uniforms.extent;
-        // float4 color = texture.sample(samplr, pt);
-        // if (uniforms.texType == 1) {
-        //     color = float4(color.xyz * color.w, color.w);
-        // }
-        // else if (uniforms.texType == 2) {
-        //     color = float4(color.x);
-        // }
-        // color *= scissor;
-        // color *= strokeAlpha;
-        // result = color * uniforms.innerCol;
     }
 
     if (uniforms.hasMask == 1.0) {
         // revisit ftcoord
         float2 ftcoord = float2(in.ftcoord.x, 1.0 - in.ftcoord.y);
-        float4 mask = float4(alpha_texture.sample(alpha_samplr, ftcoord).r);
+        float4 mask = float4(alpha_texture.sample(samplr, ftcoord).r);
 
         mask *= scissor;
         result *= mask;

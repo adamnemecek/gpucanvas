@@ -906,7 +906,6 @@ impl Mtl {
         encoder.set_fragment_texture(0, Some(&tex.tex()));
         encoder.set_fragment_sampler_state(0, Some(&tex.sampler()));
         encoder.set_fragment_value(0, &paint);
-        // encoder.set_
 
         let mut alpha = false;
         let alpha_tex = if let Some(id) = alpha_tex {
