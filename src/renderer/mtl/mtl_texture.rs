@@ -1,5 +1,6 @@
 use super::MtlTextureExt;
 use crate::{ErrorKind, ImageFlags, ImageInfo, ImageSource, PixelFormat, Size};
+use rgb::ComponentBytes;
 
 impl From<PixelFormat> for metal::MTLPixelFormat {
     fn from(a: PixelFormat) -> Self {
