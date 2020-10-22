@@ -242,6 +242,8 @@ pub struct Canvas<T: Renderer + 'static> {
     dist_tol: f32,
     frame: usize,
     cache: T::BufferCache,
+
+    render_target_stack: ngds::Stack<RenderTarget>,
 }
 
 impl<T> Canvas<T>
@@ -265,6 +267,7 @@ where
             tess_tol: 0.25,
             dist_tol: 0.01,
             frame: 0,
+            render_target_stack: ngds::Stack::new(),
         };
 
         canvas.save();
@@ -332,6 +335,18 @@ where
     pub fn screenshot(&mut self) -> Result<ImgVec<RGBA8>, ErrorKind> {
         self.flush();
         self.renderer.screenshot(&self.images)
+    }
+
+    pub fn push_render_target(&mut self, render_target: RenderTarget) {
+        self.render_target_stack.push(self.current_render_target);
+        self.set_render_target(render_target);
+    }
+
+    pub fn pop_render_target(&mut self) {
+        assert!(!self.render_target_stack.is_empty());
+        if let Some(render_target) = self.render_target_stack.pop() {
+            self.set_render_target(render_target);
+        }
     }
 
     // State Handling

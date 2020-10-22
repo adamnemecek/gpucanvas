@@ -152,7 +152,7 @@ fn main() {
             println!("red_rect_Id {:?}, size: {:?}", red_rect, canvas.image_size(red_rect));
 
             // let image_id = canvas.text_context.textures[0].image_id;
-            canvas.set_render_target(gpucanvas::RenderTarget::Image(red_rect));
+            canvas.push_render_target(gpucanvas::RenderTarget::Image(red_rect));
             let mut path = Path::new();
             path.rect(20.0, 20.0, 80.0, 80.0);
 
@@ -161,7 +161,7 @@ fn main() {
             canvas.flush();
             canvas.restore();
             println!("red_image end");
-            canvas.set_render_target(gpucanvas::RenderTarget::Screen);
+            canvas.pop_render_target();
         } else {
             let texture = canvas.get_image(red_rect).unwrap();
             use rgb::RGBA8;
@@ -398,7 +398,7 @@ fn main() {
                     // draw_image(&mut canvas, images[0], 5.0, 300.0);
                     // draw_text(&mut canvas, &fonts, "tea", 50.0, 200.0, 100.0, 100.0);
                     draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
-                    // draw_image(&mut canvas, red_rect, 100.0, 100.0);
+                    draw_image(&mut canvas, red_rect, 100.0, 100.0);
                     // draw_clear_rect2(&mut canvas, 0, 0, 200, 150);
 
                     // if true {

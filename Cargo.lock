@@ -631,6 +631,7 @@ dependencies = [
  "memoffset",
  "metal",
  "metalgear",
+ "ngds",
  "objc",
  "owned_ttf_parser",
  "rand 0.7.3",
@@ -1004,6 +1005,11 @@ dependencies = [
  "libc 0.2.71",
  "winapi 0.3.8",
 ]
+
+[[package]]
+name = "ngds"
+version = "0.1.3"
+source = "git+https://github.com/adamnemecek/ngds?branch=main#8b049f4a76ef4ede1841ec3a1134f64ea5ea7172"
 
 [[package]]
 name = "nix"
