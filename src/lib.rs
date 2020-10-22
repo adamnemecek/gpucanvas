@@ -337,18 +337,6 @@ where
         self.renderer.screenshot(&self.images)
     }
 
-    pub fn push_render_target(&mut self, render_target: RenderTarget) {
-        self.render_target_stack.push(self.current_render_target);
-        self.set_render_target(render_target);
-    }
-
-    pub fn pop_render_target(&mut self) {
-        assert!(!self.render_target_stack.is_empty());
-        if let Some(render_target) = self.render_target_stack.pop() {
-            self.set_render_target(render_target);
-        }
-    }
-
     // State Handling
 
     /// Pushes and saves the current render state into a state stack.
@@ -434,6 +422,18 @@ where
             src_alpha,
             dst_rgb,
             dst_alpha,
+        }
+    }
+
+    pub fn push_render_target(&mut self, render_target: RenderTarget) {
+        self.render_target_stack.push(self.current_render_target);
+        self.set_render_target(render_target);
+    }
+
+    pub fn pop_render_target(&mut self) {
+        assert!(!self.render_target_stack.is_empty());
+        if let Some(render_target) = self.render_target_stack.pop() {
+            self.set_render_target(render_target);
         }
     }
 
