@@ -109,7 +109,7 @@ impl Color {
     }
 
     pub fn blue() -> Self {
-        Self::rgbaf(0.1, 0.2, 0.3, 1.0)
+        Self::rgbaf(0.5, 0.5, 0.5, 1.0)
     }
 
     pub fn grey() -> Self {

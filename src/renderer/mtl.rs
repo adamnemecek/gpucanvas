@@ -1459,7 +1459,7 @@ impl Renderer for Mtl {
                     let destination_origin = metal::MTLOrigin {
                         x: destination_origin.0 as _,
                         y: destination_origin.1 as _,
-                        z: 1,
+                        z: 0,
                     };
 
                     let blit_encoder = command_buffer.new_blit_command_encoder();

@@ -135,9 +135,7 @@ fn main() {
     }
 
     let red_rect = {
-        let render_with_canvas = true;
-        canvas.save();
-        canvas.reset();
+        let render_with_canvas = false;
 
         let width = 100;
         let height = 100;
@@ -146,6 +144,8 @@ fn main() {
             .unwrap();
 
         if render_with_canvas {
+            canvas.save();
+            canvas.reset();
             println!("red_image start");
             canvas.set_label(red_rect, "red_rect");
 
@@ -156,7 +156,7 @@ fn main() {
             let mut path = Path::new();
             path.rect(20.0, 20.0, 80.0, 80.0);
 
-            canvas.fill_path(&mut path, Paint::color(Color::blue()));
+            canvas.fill_path(&mut path, Paint::color(Color::yellow()));
 
             canvas.flush();
             canvas.restore();
@@ -170,7 +170,7 @@ fn main() {
                 RGBA8 {
                     r: 0,
                     g: 100,
-                    b: 255,
+                    b: 100,
                     a: 255
                 };
                 (width * height) as usize
@@ -398,7 +398,8 @@ fn main() {
                     // draw_image(&mut canvas, images[0], 5.0, 300.0);
                     // draw_text(&mut canvas, &fonts, "tea", 50.0, 200.0, 100.0, 100.0);
                     draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
-                    draw_image(&mut canvas, red_rect, 100.0, 100.0);
+                    // draw_image(&mut canvas, red_rect, 100.0, 100.0);
+                    blit(&mut canvas, red_rect, 10.0, 10.0);
                     // draw_clear_rect2(&mut canvas, 0, 0, 200, 150);
 
                     // if true {
@@ -448,6 +449,19 @@ fn main() {
             }
         });
     })
+}
+
+fn blit<T: Renderer>(canvas: &mut Canvas<T>, image: ImageId, x: f32, y: f32) {
+    canvas.save();
+    canvas.blit(image, (x as _, y as _));
+
+    // let (w, h) = canvas.image_size(image).unwrap();
+    // let img_paint = Paint::image(image, x, y, w as _, h as _, 0.0, 1.0);
+
+    // let mut path = Path::new();
+    // path.rounded_rect(x, y, w as _, h as _, 5.0);
+    // canvas.fill_path(&mut path, img_paint);
+    canvas.restore();
 }
 
 fn draw_image<T: Renderer>(canvas: &mut Canvas<T>, image: ImageId, x: f32, y: f32) {
