@@ -1450,37 +1450,45 @@ impl Renderer for Mtl {
 
             match cmd.cmd_type {
                 CommandType::Blit { source, origin } => {
-                    // encoder.end_encoding();
+                    encoder.end_encoding();
 
-                    // let origin = metal::MTLOrigin {
-                    //     x: origin.0 as _,
-                    //     y: origin.1 as _,
-                    //     z: 1
-                    // };
+                    let dst_origin = metal::MTLOrigin {
+                        x: origin.0 as _,
+                        y: origin.1 as _,
+                        z: 1
+                    };
 
-                    // let blit_encoder = command_buffer.new_blit_command_encoder();
+                    let blit_encoder = command_buffer.new_blit_command_encoder();
+                    let src = images.get(source).map(|x|x.tex()).unwrap();
 
-                    // let target_texture = match self.render_target {
-                    //     RenderTarget::None => todo!(),
-                    //     RenderTarget::Screen => self.layer.as_ref(),
-                    //     RenderTarget::Image(id) => {
-                    //         todo!()
-                    //     }
-                    // };
-                    // blit_encoder.blit(
-
-                    // );
-                    // encoder = new_render_command_encoder(
-                    //     &target_texture,
-                    //     &command_buffer,
-                    //     clear_color,
-                    //     &mut self.stencil_texture,
-                    //     &self.vertex_buffer,
-                    //     // &self.view_size_buffer,
-                    //     self.view_size,
-                    //     // &self.uniform_buffer,
-                    //     // self.clear_buffer_on_flush,
-                    // );
+                    let dst = match self.render_target {
+                        RenderTarget::None => todo!(),
+                        RenderTarget::Screen => {
+                            // self.layer.next_drawable().unwrap().texture()
+                            self.layer.next_drawable().and_then(|x|Some(x.texture()))
+                        }
+                        RenderTarget::Image(id) => {
+                            // images.get(id).unwrap().tex()
+                            images.get(id).and_then(|x| Some(x.tex()))
+                            // todo!()
+                        }
+                    }.unwrap();
+                    blit_encoder.blit(
+                        src,
+                        dst,
+                        dst_origin
+                    );
+                    encoder = new_render_command_encoder(
+                        &target_texture,
+                        &command_buffer,
+                        clear_color,
+                        &mut self.stencil_texture,
+                        &self.vertex_buffer,
+                        // &self.view_size_buffer,
+                        self.view_size,
+                        // &self.uniform_buffer,
+                        // self.clear_buffer_on_flush,
+                    );
                 }
                 CommandType::ConvexFill { params } => {
                     counters.convex_fill += 1;
