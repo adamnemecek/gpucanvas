@@ -51,6 +51,10 @@ pub enum CommandType {
     Triangles {
         params: Params,
     },
+    Blit {
+        source: ImageId,
+        origin: (u32, u32),
+    },
 }
 
 pub struct Command {

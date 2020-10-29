@@ -484,6 +484,9 @@ impl Renderer for OpenGl {
             self.set_composite_operation(cmd.composite_operation);
 
             match &cmd.cmd_type {
+                CommandType::Blit { .. } => {
+                    todo!("blit not implemented for opengl");
+                }
                 CommandType::ConvexFill { params } => self.convex_fill(images, cmd, params),
                 CommandType::ConcaveFill {
                     stencil_params,

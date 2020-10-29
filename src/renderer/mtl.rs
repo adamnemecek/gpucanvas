@@ -31,7 +31,7 @@ mod mtl_stencil_texture;
 pub use mtl_stencil_texture::MtlStencilTexture;
 
 mod mtl_ext;
-pub use mtl_ext::{GPUVecExt, MtlTextureExt};
+pub use mtl_ext::{BlitCommandEncoderExt, GPUVecExt, MtlTextureExt};
 
 mod buffers_cache;
 pub use buffers_cache::*;
@@ -1449,6 +1449,39 @@ impl Renderer for Mtl {
             self.set_composite_operation(cmd.composite_operation, pixel_format);
 
             match cmd.cmd_type {
+                CommandType::Blit { source, origin } => {
+                    // encoder.end_encoding();
+
+                    // let origin = metal::MTLOrigin {
+                    //     x: origin.0 as _,
+                    //     y: origin.1 as _,
+                    //     z: 1
+                    // };
+
+                    // let blit_encoder = command_buffer.new_blit_command_encoder();
+
+                    // let target_texture = match self.render_target {
+                    //     RenderTarget::None => todo!(),
+                    //     RenderTarget::Screen => self.layer.as_ref(),
+                    //     RenderTarget::Image(id) => {
+                    //         todo!()
+                    //     }
+                    // };
+                    // blit_encoder.blit(
+
+                    // );
+                    // encoder = new_render_command_encoder(
+                    //     &target_texture,
+                    //     &command_buffer,
+                    //     clear_color,
+                    //     &mut self.stencil_texture,
+                    //     &self.vertex_buffer,
+                    //     // &self.view_size_buffer,
+                    //     self.view_size,
+                    //     // &self.uniform_buffer,
+                    //     // self.clear_buffer_on_flush,
+                    // );
+                }
                 CommandType::ConvexFill { params } => {
                     counters.convex_fill += 1;
                     self.convex_fill(&encoder, images, cmd, params)
