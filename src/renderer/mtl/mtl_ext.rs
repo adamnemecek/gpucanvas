@@ -8,12 +8,23 @@ pub trait MtlTextureExt {
     fn save_to(&self, path: &str);
     fn generate_mipmaps(&self, command_queue: &metal::CommandQueueRef);
     fn size(&self) -> Size;
+
+    fn mtl_size(&self) -> metal::MTLSize;
 }
 
 impl MtlTextureExt for metal::TextureRef {
     #[inline]
     fn size(&self) -> Size {
         Size::new(self.width() as _, self.height() as _)
+    }
+
+    #[inline]
+    fn mtl_size(&self) -> metal::MTLSize {
+        metal::MTLSize {
+            width: self.width(),
+            height: self.height(),
+            depth: self.depth(),
+        }
     }
 
     fn save(&self) -> ImgVec<RGBA8> {
@@ -130,6 +141,52 @@ impl GPUVecExt for GPUVec<u32> {
         }
 
         added
+    }
+}
+
+// pub trait TextureExt {
+//     fn size(&self) -> metal::MTLSize;
+// }
+
+// impl TextureExt for metal::TextureRef {
+//     #[inline]
+//     fn size(&self) -> metal::MTLSize {
+//         metal::MTLSize {
+//             width: self.width(),
+//             height: self.height(),
+//             depth: self.depth(),
+//         }
+//     }
+// }
+pub trait BlitCommandEncoderExt {
+    fn blit(
+        &self,
+        source_texture: &metal::TextureRef,
+        destination_texture: &metal::TextureRef,
+        destination_origin: metal::MTLOrigin,
+    );
+}
+
+impl BlitCommandEncoderExt for metal::BlitCommandEncoderRef {
+    fn blit(
+        &self,
+        source_texture: &metal::TextureRef,
+        destination_texture: &metal::TextureRef,
+        destination_origin: metal::MTLOrigin,
+    ) {
+        let zero = metal::MTLOrigin::default();
+        let source_size = source_texture.mtl_size();
+        self.copy_from_texture(
+            source_texture,
+            0,
+            0,
+            zero,
+            source_size,
+            destination_texture,
+            0,
+            0,
+            destination_origin,
+        );
     }
 }
 
