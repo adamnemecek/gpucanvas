@@ -53,7 +53,7 @@ pub enum CommandType {
     },
     Blit {
         source: ImageId,
-        origin: (u32, u32),
+        destination_origin: (u32, u32),
     },
 }
 

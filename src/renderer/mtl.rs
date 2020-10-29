@@ -1449,35 +1449,39 @@ impl Renderer for Mtl {
             self.set_composite_operation(cmd.composite_operation, pixel_format);
 
             match cmd.cmd_type {
-                CommandType::Blit { source, origin } => {
+                CommandType::Blit {
+                    source,
+                    destination_origin,
+                } => {
+                    encoder.pop_debug_group();
                     encoder.end_encoding();
 
-                    let dst_origin = metal::MTLOrigin {
-                        x: origin.0 as _,
-                        y: origin.1 as _,
-                        z: 1
+                    let destination_origin = metal::MTLOrigin {
+                        x: destination_origin.0 as _,
+                        y: destination_origin.1 as _,
+                        z: 1,
                     };
 
                     let blit_encoder = command_buffer.new_blit_command_encoder();
-                    let src = images.get(source).map(|x|x.tex()).unwrap();
+                    let source_texture = images.get(source).map(|x| x.tex()).unwrap();
 
-                    let dst = match self.render_target {
+                    let destination_texture = match self.render_target {
                         RenderTarget::None => todo!(),
                         RenderTarget::Screen => {
                             // self.layer.next_drawable().unwrap().texture()
-                            self.layer.next_drawable().and_then(|x|Some(x.texture()))
+                            self.layer.next_drawable().and_then(|x| Some(x.texture()))
                         }
                         RenderTarget::Image(id) => {
                             // images.get(id).unwrap().tex()
                             images.get(id).and_then(|x| Some(x.tex()))
                             // todo!()
                         }
-                    }.unwrap();
-                    blit_encoder.blit(
-                        src,
-                        dst,
-                        dst_origin
-                    );
+                    }
+                    .unwrap();
+                    blit_encoder.blit(source_texture, destination_texture, destination_origin);
+                    blit_encoder.end_encoding();
+
+                    blit_encoder.synchronize_resource(&destination_texture);
                     encoder = new_render_command_encoder(
                         &target_texture,
                         &command_buffer,
@@ -1489,6 +1493,8 @@ impl Renderer for Mtl {
                         // &self.uniform_buffer,
                         // self.clear_buffer_on_flush,
                     );
+                    // encoder.push_debug_group(&format!("target: {:?}", target));
+                    encoder.push_debug_group("unknown debug group from blit");
                 }
                 CommandType::ConvexFill { params } => {
                     counters.convex_fill += 1;

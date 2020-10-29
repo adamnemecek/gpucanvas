@@ -843,6 +843,14 @@ where
         self.append_cmd(cmd);
     }
 
+    pub fn blit(&mut self, source: ImageId, destination_origin: (u32, u32)) {
+        let cmd = CommandType::Blit {
+            source,
+            destination_origin,
+        };
+        self.append_cmd(Command::new(cmd));
+    }
+
     /// Strokes the provided Path using Paint.
     pub fn stroke_path(&mut self, path: &mut Path, mut paint: Paint) {
         let transform = self.state().transform;
