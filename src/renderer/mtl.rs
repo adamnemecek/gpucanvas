@@ -1479,9 +1479,9 @@ impl Renderer for Mtl {
                     }
                     .unwrap();
                     blit_encoder.blit(source_texture, destination_texture, destination_origin);
+                    blit_encoder.synchronize_resource(&destination_texture);
                     blit_encoder.end_encoding();
 
-                    blit_encoder.synchronize_resource(&destination_texture);
                     encoder = new_render_command_encoder(
                         &target_texture,
                         &command_buffer,
