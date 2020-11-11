@@ -609,6 +609,21 @@ impl Mtl {
         // self.clear_rect_pipeline_state = Some(clear_rect_pipeline_state);
     }
 
+    pub fn custom_command(
+        &mut self,
+        encoder: &metal::RenderCommandEncoderRef,
+        custom_encoder: &std::sync::Arc<dyn crate::CommandEncoder>,
+    ) {
+        #[cfg(debug_assertions)]
+        encoder.push_debug_group("custom_command");
+        encoder.set_depth_stencil_state(&self.default_stencil_state);
+
+        custom_encoder.encode(encoder);
+
+        #[cfg(debug_assertions)]
+        encoder.pop_debug_group();
+    }
+
     /// done
     pub fn convex_fill(
         &mut self,
@@ -1497,7 +1512,8 @@ impl Renderer for Mtl {
                     encoder.push_debug_group("unknown debug group from blit");
                 }
                 CommandType::CustomCommand { command_encoder } => {
-                    command_encoder.encode(encoder);
+                    self.custom_command(encoder, &command_encoder);
+                    // command_encoder.encode(encoder);
                 }
                 CommandType::ConvexFill { params } => {
                     counters.convex_fill += 1;
