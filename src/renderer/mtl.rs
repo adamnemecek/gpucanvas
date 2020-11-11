@@ -1496,8 +1496,8 @@ impl Renderer for Mtl {
                     // encoder.push_debug_group(&format!("target: {:?}", target));
                     encoder.push_debug_group("unknown debug group from blit");
                 }
-                CommandType::ComponentEncoder { component_encoder } => {
-                    component_encoder.encode(encoder);
+                CommandType::CustomCommand { command_encoder } => {
+                    command_encoder.encode(encoder);
                 }
                 CommandType::ConvexFill { params } => {
                     counters.convex_fill += 1;

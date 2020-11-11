@@ -37,7 +37,7 @@ mod color;
 pub use color::Color;
 
 pub mod renderer;
-pub use renderer::{GPUComponentEncoder, MtlStencilTexture, MtlTexture, RenderTarget, Renderer};
+pub use renderer::{CommandEncoder, MtlStencilTexture, MtlTexture, RenderTarget, Renderer};
 
 use renderer::{Command, CommandType, Drawable, Params, ShaderType, Vertex};
 
@@ -851,8 +851,8 @@ where
         self.append_cmd(Command::new(cmd));
     }
 
-    pub fn gpu_component(&mut self, component_encoder: Box<dyn crate::GPUComponentEncoder>) {
-        let cmd = CommandType::ComponentEncoder { component_encoder };
+    pub fn gpu_component(&mut self, command_encoder: std::sync::Arc<dyn crate::CommandEncoder>) {
+        let cmd = CommandType::CustomCommand { command_encoder };
         self.append_cmd(Command::new(cmd));
     }
 

@@ -484,7 +484,7 @@ impl Renderer for OpenGl {
             self.set_composite_operation(cmd.composite_operation);
 
             match &cmd.cmd_type {
-                CommandType::ComponentEncoder { .. } => {
+                CommandType::CustomCommand { .. } => {
                     todo!("not implenented");
                 }
                 CommandType::Blit { .. } => {
