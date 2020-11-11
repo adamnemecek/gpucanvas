@@ -24,8 +24,15 @@ pub struct Drawable {
     // pub(crate) index_verts: Option<(usize, usize)>,
 }
 
+// pub type GPUC = fn() -> ();
+pub trait GPUComponent: std::fmt::Debug {
+    fn encode(&self, encoder: &metal::RenderCommandEncoderRef);
+}
 #[derive(Debug)]
 pub enum CommandType {
+    Component {
+        component: Box<dyn GPUComponent>,
+    },
     SetRenderTarget(RenderTarget),
     ClearRect {
         x: u32,

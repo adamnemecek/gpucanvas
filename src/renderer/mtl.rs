@@ -1448,7 +1448,7 @@ impl Renderer for Mtl {
             // println!("command_type: {:?}", dump_command_type(cmd));
             self.set_composite_operation(cmd.composite_operation, pixel_format);
 
-            match cmd.cmd_type {
+            match &cmd.cmd_type {
                 CommandType::Blit {
                     source,
                     destination_origin,
@@ -1463,7 +1463,7 @@ impl Renderer for Mtl {
                     };
 
                     let blit_encoder = command_buffer.new_blit_command_encoder();
-                    let source_texture = images.get(source).map(|x| x.tex()).unwrap();
+                    let source_texture = images.get(*source).map(|x| x.tex()).unwrap();
 
                     let destination_texture = match self.render_target {
                         RenderTarget::None => todo!(),
@@ -1496,28 +1496,31 @@ impl Renderer for Mtl {
                     // encoder.push_debug_group(&format!("target: {:?}", target));
                     encoder.push_debug_group("unknown debug group from blit");
                 }
+                CommandType::Component { component } => {
+                    component.encode(encoder);
+                }
                 CommandType::ConvexFill { params } => {
                     counters.convex_fill += 1;
-                    self.convex_fill(&encoder, images, cmd, params)
+                    self.convex_fill(&encoder, images, cmd, *params)
                 }
                 CommandType::ConcaveFill {
                     stencil_params,
                     fill_params,
                 } => {
                     counters.concave_fill += 1;
-                    self.concave_fill(&encoder, images, cmd, stencil_params, fill_params)
+                    self.concave_fill(&encoder, images, cmd, *stencil_params, *fill_params)
                 }
                 CommandType::Stroke { params } => {
                     counters.stroke += 1;
-                    self.stroke(&encoder, images, cmd, params)
+                    self.stroke(&encoder, images, cmd, *params)
                 }
                 CommandType::StencilStroke { params1, params2 } => {
                     counters.stencil_stroke += 1;
-                    self.stencil_stroke(&encoder, images, cmd, params1, params2)
+                    self.stencil_stroke(&encoder, images, cmd, *params1, *params2)
                 }
                 CommandType::Triangles { params } => {
                     counters.triangles += 1;
-                    self.triangles(&encoder, images, cmd, params)
+                    self.triangles(&encoder, images, cmd, *params)
                 }
                 CommandType::ClearRect {
                     x,
@@ -1527,10 +1530,10 @@ impl Renderer for Mtl {
                     color,
                 } => {
                     counters.clear_rect += 1;
-                    self.clear_rect(&encoder, images, x, y, width, height, color);
+                    self.clear_rect(&encoder, images, *x, *y, *width, *height, *color);
                 }
                 CommandType::SetRenderTarget(target) => {
-                    if self.render_target == target {
+                    if self.render_target == *target {
                         // println!("skipping target setting");
                         continue;
                     }
@@ -1541,7 +1544,7 @@ impl Renderer for Mtl {
                     // println!("---------switching from {:?} to {:?}", self.render_target, target);
 
                     encoder.end_encoding();
-                    self.set_target(images, target);
+                    self.set_target(images, *target);
 
                     // if let Some(drawable) = drawable.as_ref() {
                     //     command_buffer.present_drawable(&drawable);

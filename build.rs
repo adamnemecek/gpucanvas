@@ -16,7 +16,7 @@ fn gl_main() {
         .unwrap();
 }
 
-fn mtl_main() {}
+// fn mtl_main() {}
 
 fn main() {
     gl_main();

@@ -39,7 +39,7 @@ pub use color::Color;
 pub mod renderer;
 pub use renderer::{MtlStencilTexture, MtlTexture, RenderTarget, Renderer};
 
-use renderer::{Command, CommandType, Drawable, Params, ShaderType, Vertex};
+use renderer::{Command, CommandType, Drawable, GPUComponent, Params, ShaderType, Vertex};
 
 pub(crate) mod geometry;
 use geometry::*;
@@ -848,6 +848,11 @@ where
             source,
             destination_origin,
         };
+        self.append_cmd(Command::new(cmd));
+    }
+
+    pub fn gpu_component(&mut self, component: Box<dyn crate::GPUComponent>) {
+        let cmd = CommandType::Component { component };
         self.append_cmd(Command::new(cmd));
     }
 
