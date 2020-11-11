@@ -25,13 +25,14 @@ pub struct Drawable {
 }
 
 // pub type GPUC = fn() -> ();
-pub trait GPUComponent: std::fmt::Debug {
+pub trait GPUComponentEncoder: std::fmt::Debug {
     fn encode(&self, encoder: &metal::RenderCommandEncoderRef);
 }
+
 #[derive(Debug)]
 pub enum CommandType {
-    Component {
-        component: Box<dyn GPUComponent>,
+    ComponentEncoder {
+        component_encoder: Box<dyn GPUComponentEncoder>,
     },
     SetRenderTarget(RenderTarget),
     ClearRect {
