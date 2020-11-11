@@ -1468,19 +1468,55 @@ impl Renderer for Mtl {
                     source,
                     destination_origin,
                 } => {
-                    encoder.pop_debug_group();
+                    // encoder.pop_debug_group();
+                    // encoder.end_encoding();
+
+                    // let destination_origin = metal::MTLOrigin {
+                    //     x: destination_origin.0 as _,
+                    //     y: destination_origin.1 as _,
+                    //     z: 0,
+                    // };
+
+                    // let blit_encoder = command_buffer.new_blit_command_encoder();
+                    // let source_texture = images.get(*source).map(|x| x.tex()).unwrap();
+
+                    // let destination_texture = match self.render_target {
+                    //     RenderTarget::None => todo!(),
+                    //     RenderTarget::Screen => {
+                    //         // self.layer.next_drawable().unwrap().texture()
+                    //         self.layer.next_drawable().and_then(|x| Some(x.texture()))
+                    //     }
+                    //     RenderTarget::Image(id) => {
+                    //         // images.get(id).unwrap().tex()
+                    //         images.get(id).and_then(|x| Some(x.tex()))
+                    //         // todo!()
+                    //     }
+                    // }
+                    // .unwrap();
+                    // blit_encoder.blit(source_texture, destination_texture, destination_origin);
+                    // blit_encoder.synchronize_resource(&destination_texture);
+                    // blit_encoder.end_encoding();
+
+                    // encoder = new_render_command_encoder(
+                    //     &target_texture,
+                    //     &command_buffer,
+                    //     clear_color,
+                    //     &mut self.stencil_texture,
+                    //     &self.vertex_buffer,
+                    //     // &self.view_size_buffer,
+                    //     self.view_size,
+                    //     // &self.uniform_buffer,
+                    //     // self.clear_buffer_on_flush,
+                    // );
+                    // // encoder.push_debug_group(&format!("target: {:?}", target));
+                    // encoder.push_debug_group("unknown debug group from blit");
+                    todo!("blit is not implemented");
+                }
+                CommandType::CustomCommand { command_encoder } => {
+                    // encoder.pop_debug_group();
                     encoder.end_encoding();
 
-                    let destination_origin = metal::MTLOrigin {
-                        x: destination_origin.0 as _,
-                        y: destination_origin.1 as _,
-                        z: 0,
-                    };
-
-                    let blit_encoder = command_buffer.new_blit_command_encoder();
-                    let source_texture = images.get(*source).map(|x| x.tex()).unwrap();
-
-                    let destination_texture = match self.render_target {
+                    let texture = match self.render_target {
                         RenderTarget::None => todo!(),
                         RenderTarget::Screen => {
                             // self.layer.next_drawable().unwrap().texture()
@@ -1493,12 +1529,9 @@ impl Renderer for Mtl {
                         }
                     }
                     .unwrap();
-                    blit_encoder.blit(source_texture, destination_texture, destination_origin);
-                    blit_encoder.synchronize_resource(&destination_texture);
-                    blit_encoder.end_encoding();
 
                     encoder = new_render_command_encoder(
-                        &target_texture,
+                        &texture,
                         &command_buffer,
                         clear_color,
                         &mut self.stencil_texture,
@@ -1508,11 +1541,29 @@ impl Renderer for Mtl {
                         // &self.uniform_buffer,
                         // self.clear_buffer_on_flush,
                     );
-                    // encoder.push_debug_group(&format!("target: {:?}", target));
-                    encoder.push_debug_group("unknown debug group from blit");
-                }
-                CommandType::CustomCommand { command_encoder } => {
-                    self.custom_command(encoder, &command_encoder);
+
+                    #[cfg(debug_assertions)]
+                    encoder.push_debug_group("custom_command");
+                    // encoder.set_depth_stencil_state(&self.default_stencil_state);
+
+                    command_encoder.encode(encoder);
+
+                    #[cfg(debug_assertions)]
+                    encoder.pop_debug_group();
+                    encoder.end_encoding();
+
+                    encoder = new_render_command_encoder(
+                        &texture,
+                        &command_buffer,
+                        clear_color,
+                        &mut self.stencil_texture,
+                        &self.vertex_buffer,
+                        // &self.view_size_buffer,
+                        self.view_size,
+                        // &self.uniform_buffer,
+                        // self.clear_buffer_on_flush,
+                    );
+                    // self.custom_command(encoder, &command_encoder);
                     // command_encoder.encode(encoder);
                 }
                 CommandType::ConvexFill { params } => {
