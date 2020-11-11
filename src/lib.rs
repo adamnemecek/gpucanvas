@@ -851,7 +851,7 @@ where
         self.append_cmd(Command::new(cmd));
     }
 
-    pub fn gpu_component(&mut self, command_encoder: std::sync::Arc<dyn crate::CommandEncoder>) {
+    pub fn custom_encoder(&mut self, command_encoder: std::sync::Arc<dyn crate::CommandEncoder>) {
         let cmd = CommandType::CustomCommand { command_encoder };
         self.append_cmd(Command::new(cmd));
     }
