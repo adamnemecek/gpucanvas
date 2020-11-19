@@ -328,8 +328,9 @@ impl Mtl {
             desc.set_read_mask(0xff);
 
             let stencil_descriptor = metal::DepthStencilDescriptor::new();
-            #[cfg(debug_assertions)]
+
             // stencil_descriptor.set_depth_write_enabled(true);
+            #[cfg(debug_assertions)]
             stencil_descriptor.set_label("fill_anti_alias_stencil_state_nonzero");
             stencil_descriptor.set_back_face_stencil(None);
             stencil_descriptor.set_front_face_stencil(Some(&desc));
@@ -347,8 +348,9 @@ impl Mtl {
             desc.set_read_mask(0x1);
 
             let stencil_descriptor = metal::DepthStencilDescriptor::new();
-            #[cfg(debug_assertions)]
+
             // stencil_descriptor.set_depth_write_enabled(true);
+            #[cfg(debug_assertions)]
             stencil_descriptor.set_label("fill_anti_alias_stencil_state_evenodd");
             stencil_descriptor.set_back_face_stencil(None);
             stencil_descriptor.set_front_face_stencil(Some(&desc));
