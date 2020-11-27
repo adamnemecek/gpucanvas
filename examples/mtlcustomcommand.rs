@@ -470,10 +470,12 @@ fn main() {
                     // draw_image(&mut canvas, images[0], 5.0, 300.0);
                     // draw_text(&mut canvas, &fonts, "tea", 50.0, 200.0, 100.0, 100.0);
 
-                    draw_text(&mut canvas, &fonts, "e", 0.0, 0.0, 100.0, 100.0);
-
+                    // draw_text(&mut canvas, &fonts, "e", 0.0, 0.0, 100.0, 100.0);
+                    draw_red_rect(&mut canvas, 100.0, 100.0, 50.0, 50.0);
+                    draw_red_rect(&mut canvas, 300.0, 300.0, 50.0, 50.0);
                     canvas.custom_encoder(encoder.clone());
-                    draw_text(&mut canvas, &fonts, "e", 300.0, 300.0, 100.0, 100.0);
+
+                    // draw_text(&mut canvas, &fonts, "e", 300.0, 300.0, 100.0, 100.0);
                     // draw_text(&mut canvas, &fonts, "t", 200.0, 200.0, 100.0, 100.0);
 
                     // draw_image(&mut canvas, red_rect, 100.0, 100.0);
@@ -593,6 +595,15 @@ fn draw_clear_rect2<T: Renderer>(canvas: &mut Canvas<T>, x: u32, y: u32, w: u32,
 
 //     canvas.restore();
 // }
+
+fn draw_red_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
+    let mut path = Path::new();
+    path.rect(x, y, w, h);
+
+    let paint = Paint::color(gpucanvas::Color::red());
+
+    canvas.fill_path(&mut path, paint);
+}
 
 fn draw_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
     let mut path = Path::new();
