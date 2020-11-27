@@ -36,9 +36,34 @@ pub use mtl_ext::{BlitCommandEncoderExt, GPUVecExt, MtlTextureExt};
 mod buffers_cache;
 pub use buffers_cache::*;
 
+pub fn clear_stencil_pipeline_state(
+    device: &metal::DeviceRef,
+    library: &metal::LibraryRef,
+    // pixel_format: metal::MTLPixelFormat,
+) -> metal::RenderPipelineState {
+    let pixel_format = metal::MTLPixelFormat::BGRA8Unorm;
+    let vertex = library
+        .get_function("clear_stencil_vertex", None)
+        .expect("frag shader not found");
 
-pub fn clear_stencil_pipeline_state(device: &metal::DeviceRef) {
-    todo!()
+    let desc = metal::RenderPipelineDescriptor::new();
+    desc.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
+
+    desc.set_vertex_function(Some(&vertex));
+    desc.set_fragment_function(None);
+
+    let color_attachment_desc = desc.color_attachments().object_at(0).unwrap();
+    color_attachment_desc.set_pixel_format(pixel_format);
+    color_attachment_desc.set_blending_enabled(true);
+    // color_attachment_desc.set_source_rgb_blend_factor(blend_func.src_rgb);
+    // color_attachment_desc.set_source_alpha_blend_factor(blend_func.src_alpha);
+    // color_attachment_desc.set_destination_rgb_blend_factor(blend_func.dst_rgb);
+    // color_attachment_desc.set_destination_alpha_blend_factor(blend_func.dst_alpha);
+    color_attachment_desc.set_write_mask(metal::MTLColorWriteMask::empty());
+
+    desc.set_label("clear_stencil");
+
+    device.new_render_pipeline_state(&desc).unwrap()
 }
 // lazy_static! {
 //     static ref BUFFER_CACHE: BuffersCache = BuffersCache::new(&metal::Device::system_default().unwrap(), 3);
@@ -138,6 +163,7 @@ pub struct Mtl {
     // clear_rect_stencil_state: metal::DepthStencilState,
     rps_cache: RPSCache,
     current_rps: Option<Rc<RPS>>,
+    clear_stencil_rps: metal::RenderPipelineState,
     // vert_func: metal::Function,
     // frag_func: metal::Function,
 
@@ -214,12 +240,18 @@ impl Mtl {
             layer.set_opaque(false);
         }
 
+        let library = {
+            let root_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+            let library_path = root_path.join("src/renderer/mtl/shaders.metallib");
+            device.new_library_with_file(library_path).expect("library not found")
+        };
+
         // let root_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         // let library_path = root_path.join("src/renderer/mtl/shaders.metallib");
         // let library = device.new_library_with_file(library_path).expect("library not found");
         // let command_queue = device.new_command_queue();
         let command_queue = command_queue.to_owned();
-        let rps_cache = RPSCache::new(device, antialias);
+        let rps_cache = RPSCache::new(device, &library, antialias);
 
         // let vert_func = library
         //     .get_function("vertexShader", None)
@@ -485,7 +517,9 @@ impl Mtl {
         //     // device.new_depth_stencil_state(&stencil_descriptor)
         // };
 
+        let clear_stencil_rps = clear_stencil_pipeline_state(device, &library);
         Self {
+            clear_stencil_rps,
             multiple_buffering: 3,
             layer: layer.to_owned(),
             // buffers_cache: MtlBuffersCache::new(&device, 3),
@@ -1552,12 +1586,6 @@ impl Renderer for Mtl {
                     //     // self.clear_buffer_on_flush,
                     // );
 
-                    #[cfg(debug_assertions)]
-                    encoder.push_debug_group("custom_command");
-                    // // encoder.set_depth_stencil_state(&self.default_stencil_state);
-
-                    command_encoder.encode(encoder);
-
                     // let width = 500;
                     // let height = 500;
                     // let reg = metal::MTLRegion::new_2d(0, 0, width as _, height as _);
@@ -1565,8 +1593,31 @@ impl Renderer for Mtl {
                     //     .tex()
                     //     .replace_region(reg, 0, data.as_ptr() as _, (width) as u64);
 
-                    #[cfg(debug_assertions)]
-                    encoder.pop_debug_group();
+                    {
+                        #[cfg(debug_assertions)]
+                        encoder.push_debug_group("custom_command");
+                        // // encoder.set_depth_stencil_state(&self.default_stencil_state);
+
+                        command_encoder.encode(encoder);
+
+                        #[cfg(debug_assertions)]
+                        encoder.pop_debug_group();
+                    }
+                    {
+                        #[cfg(debug_assertions)]
+                        encoder.push_debug_group("clear_stencil");
+
+                        encoder.set_render_pipeline_state(&self.clear_stencil_rps);
+                        encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
+
+                        // let clear_coords = [-1, -1, 1, -1, -1, 1, 1, 1];
+                        let clear_coords: [f32; 8] = [-1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0];
+                        encoder.set_vertex_bytes(0, (8 * std::mem::size_of::<f32>()) as _, clear_coords.as_ptr() as _);
+                        encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, 0, 4);
+
+                        #[cfg(debug_assertions)]
+                        encoder.pop_debug_group();
+                    }
                     // encoder.end_encoding();
 
                     // encoder = new_render_command_encoder(

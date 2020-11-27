@@ -104,9 +104,21 @@ vertex RasterizerData vertexShader(Vertex vert [[stage_in]],
     return out;
 }
 
-// vertex StencilClear vertexClearStencil() {
+struct ClearStencilIn {
+    float2 position [[attribute(0)]];
+};
 
-// }
+struct ClearStencilOut {
+    float4 position [[position]];
+};
+
+vertex ClearStencilOut clear_stencil_vertex(
+    ClearStencilIn in [[stage_in]]
+) {
+    ClearStencilOut out;
+    out.position = float4(in.position, 0.5, 1.0);
+    return out;
+}
 
 
 // fragment float4 fragmentClearStencil(

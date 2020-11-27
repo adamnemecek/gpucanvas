@@ -124,11 +124,7 @@ pub struct RPSCache {
 }
 
 impl RPSCache {
-    pub fn new(device: &metal::DeviceRef, antialias: bool) -> Self {
-        let root_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-        let library_path = root_path.join("src/renderer/mtl/shaders.metallib");
-        let library = device.new_library_with_file(library_path).expect("library not found");
-
+    pub fn new(device: &metal::DeviceRef, library: &metal::LibraryRef, antialias: bool) -> Self {
         let vert_func = library
             .get_function("vertexShader", None)
             .expect("vert shader not found");
