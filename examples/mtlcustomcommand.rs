@@ -36,10 +36,12 @@ fn prepare_pipeline_state<'a>(
     let vert = library.get_function(vertex_shader, None).unwrap();
     let frag = library.get_function(fragment_shader, None).unwrap();
 
-    let pipeline_state_descriptor = RenderPipelineDescriptor::new();
-    pipeline_state_descriptor.set_vertex_function(Some(&vert));
-    pipeline_state_descriptor.set_fragment_function(Some(&frag));
-    let attachment = pipeline_state_descriptor.color_attachments().object_at(0).unwrap();
+    let desc = RenderPipelineDescriptor::new();
+    desc.set_vertex_function(Some(&vert));
+    desc.set_fragment_function(Some(&frag));
+    desc.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
+
+    let attachment = desc.color_attachments().object_at(0).unwrap();
     attachment.set_pixel_format(MTLPixelFormat::BGRA8Unorm);
 
     attachment.set_blending_enabled(true);
@@ -50,7 +52,8 @@ fn prepare_pipeline_state<'a>(
     attachment.set_destination_rgb_blend_factor(metal::MTLBlendFactor::OneMinusSourceAlpha);
     attachment.set_destination_alpha_blend_factor(metal::MTLBlendFactor::OneMinusSourceAlpha);
 
-    device.new_render_pipeline_state(&pipeline_state_descriptor).unwrap()
+    desc.set_label("custom_command encoder");
+    device.new_render_pipeline_state(&desc).unwrap()
 }
 
 struct CommandEncoder {

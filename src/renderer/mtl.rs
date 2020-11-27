@@ -1429,6 +1429,10 @@ impl Renderer for Mtl {
 
         let mut pixel_format = target_texture.pixel_format();
         encoder.push_debug_group(&format!("target: {:?}", self.render_target));
+        // let mut data: Vec<u8> = Vec::with_capacity(500 * 500);
+        // for data in data.iter_mut() {
+        //     *data = 0x1;
+        // }
         // match self.render_target {
         //     RenderTarget::Screen => {
         //         encoder.push_debug_group("rendering to screen");
@@ -1549,6 +1553,13 @@ impl Renderer for Mtl {
                     // // encoder.set_depth_stencil_state(&self.default_stencil_state);
 
                     command_encoder.encode(encoder);
+
+                    // let width = 500;
+                    // let height = 500;
+                    // let reg = metal::MTLRegion::new_2d(0, 0, width as _, height as _);
+                    // self.stencil_texture
+                    //     .tex()
+                    //     .replace_region(reg, 0, data.as_ptr() as _, (width) as u64);
 
                     // #[cfg(debug_assertions)]
                     // encoder.pop_debug_group();
