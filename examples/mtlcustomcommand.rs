@@ -90,7 +90,7 @@ impl std::fmt::Debug for CommandEncoder {
 }
 impl gpucanvas::CommandEncoder for CommandEncoder {
     fn encode(&self, encoder: &metal::RenderCommandEncoderRef) {
-        
+        todo!()
     }
 }
 
@@ -147,6 +147,11 @@ fn main() {
     let mut canvas = Canvas::new(renderer).expect("Cannot create canvas");
 
     let root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let shaders = root.join("examples/shaders.metallib");
+    let library = device.new_library_with_file(shaders).unwrap();
+
+    let encoder = std::sync::Arc::new(CommandEncoder::new(&device, &library));
+
     let fonts = Fonts {
         regular: canvas
             .add_font(root.join("examples/assets/Roboto-Regular.ttf"))
@@ -465,6 +470,7 @@ fn main() {
                     // draw_image(&mut canvas, images[0], 5.0, 300.0);
                     // draw_text(&mut canvas, &fonts, "tea", 50.0, 200.0, 100.0, 100.0);
                     draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
+                    canvas.custom_encoder(encoder.clone());
                     // draw_image(&mut canvas, red_rect, 100.0, 100.0);
                     // blit(&mut canvas, red_rect, 10.0, 10.0);
                     // draw_clear_rect2(&mut canvas, 0, 0, 200, 150);
