@@ -27,7 +27,7 @@ use gpucanvas::{
     Path, Renderer, Solidity,
 };
 
-fn prepare_pipeline_state<'a>(
+fn prepare_trianglepipeline_state<'a>(
     device: &metal::DeviceRef,
     library: &metal::LibraryRef,
     vertex_shader: &str,
@@ -74,7 +74,7 @@ impl CommandEncoder {
                 MTLResourceOptions::CPUCacheModeDefaultCache | MTLResourceOptions::StorageModeManaged,
             )
         };
-        let rps = prepare_pipeline_state(device, library, "triangle_vertex", "triangle_fragment");
+        let rps = prepare_trianglepipeline_state(device, library, "triangle_vertex", "triangle_fragment");
 
         Self { buffer, rps }
     }
@@ -472,9 +472,10 @@ fn main() {
 
                     // draw_text(&mut canvas, &fonts, "e", 0.0, 0.0, 100.0, 100.0);
                     draw_red_rect(&mut canvas, 100.0, 100.0, 50.0, 50.0);
-                    draw_red_rect(&mut canvas, 300.0, 300.0, 50.0, 50.0);
-                    canvas.custom_encoder(encoder.clone());
 
+                    // canvas.custom_encoder(encoder.clone());
+                    canvas.gpu_triangle();
+                    draw_red_rect(&mut canvas, 300.0, 300.0, 50.0, 50.0);
                     // draw_text(&mut canvas, &fonts, "e", 300.0, 300.0, 100.0, 100.0);
                     // draw_text(&mut canvas, &fonts, "t", 200.0, 200.0, 100.0, 100.0);
 

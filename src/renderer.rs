@@ -35,6 +35,7 @@ pub enum CommandType {
         command_encoder: std::sync::Arc<dyn CommandEncoder>,
     },
     SetRenderTarget(RenderTarget),
+    GPUTriangle,
     ClearRect {
         x: u32,
         y: u32,

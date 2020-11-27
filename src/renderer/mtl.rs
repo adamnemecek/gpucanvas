@@ -36,6 +36,74 @@ pub use mtl_ext::{BlitCommandEncoderExt, GPUVecExt, MtlTextureExt};
 mod buffers_cache;
 pub use buffers_cache::*;
 
+fn prepare_trianglepipeline_state<'a>(
+    device: &metal::DeviceRef,
+    library: &metal::LibraryRef,
+    vertex_shader: &str,
+    fragment_shader: &str,
+) -> metal::RenderPipelineState {
+    let vert = library.get_function(vertex_shader, None).unwrap();
+    let frag = library.get_function(fragment_shader, None).unwrap();
+
+    let desc = metal::RenderPipelineDescriptor::new();
+    desc.set_vertex_function(Some(&vert));
+    desc.set_fragment_function(Some(&frag));
+    desc.set_stencil_attachment_pixel_format(metal::MTLPixelFormat::Stencil8);
+
+    let attachment = desc.color_attachments().object_at(0).unwrap();
+    attachment.set_pixel_format(metal::MTLPixelFormat::BGRA8Unorm);
+
+    attachment.set_blending_enabled(true);
+    attachment.set_rgb_blend_operation(metal::MTLBlendOperation::Add);
+    attachment.set_alpha_blend_operation(metal::MTLBlendOperation::Add);
+    attachment.set_source_rgb_blend_factor(metal::MTLBlendFactor::SourceAlpha);
+    attachment.set_source_alpha_blend_factor(metal::MTLBlendFactor::SourceAlpha);
+    attachment.set_destination_rgb_blend_factor(metal::MTLBlendFactor::OneMinusSourceAlpha);
+    attachment.set_destination_alpha_blend_factor(metal::MTLBlendFactor::OneMinusSourceAlpha);
+
+    desc.set_label("custom_command encoder");
+    device.new_render_pipeline_state(&desc).unwrap()
+}
+
+struct GPUCommandEncoder {
+    buffer: metal::Buffer,
+    rps: metal::RenderPipelineState,
+}
+
+impl GPUCommandEncoder {
+    pub fn new(device: &metal::DeviceRef, library: &metal::LibraryRef) -> Self {
+        let buffer = {
+            let vertex_data = [
+                0.0f32, 0.5, 1.0, 0.0, 0.0, -0.5, -0.5, 0.0, 1.0, 0.0, 0.5, 0.5, 0.0, 0.0, 1.0,
+            ];
+
+            device.new_buffer_with_data(
+                vertex_data.as_ptr() as *const _,
+                (vertex_data.len() * std::mem::size_of::<f32>()) as u64,
+                metal::MTLResourceOptions::CPUCacheModeDefaultCache | metal::MTLResourceOptions::StorageModeManaged,
+            )
+        };
+        let rps = prepare_trianglepipeline_state(device, library, "triangle_vertex", "triangle_fragment");
+
+        Self { buffer, rps }
+    }
+}
+
+impl std::fmt::Debug for GPUCommandEncoder {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // todo!()
+        f.debug_struct("CommandEncoder").finish()
+    }
+}
+// impl crate::CommandEncoder for GPUCommandEncoder {
+impl GPUCommandEncoder {
+    pub fn encode(&self, encoder: &metal::RenderCommandEncoderRef) {
+        encoder.set_render_pipeline_state(&self.rps);
+        encoder.set_vertex_buffer(0, Some(&self.buffer), 0);
+        encoder.draw_primitives_instanced(metal::MTLPrimitiveType::TriangleStrip, 0, 4, 1);
+    }
+}
+
 pub fn clear_stencil_pipeline_state(
     device: &metal::DeviceRef,
     library: &metal::LibraryRef,
@@ -199,6 +267,7 @@ pub struct Mtl {
 
     // todo
     pseudo_texture: MtlTexture,
+    gpu_encoder: GPUCommandEncoder,
     // buffers_cache: MtlBuffersCache,
 
     // // we render into this texture and blit with into the target texture
@@ -263,6 +332,8 @@ impl Mtl {
             let library_path = root_path.join("src/renderer/mtl/shaders.metallib");
             device.new_library_with_file(library_path).expect("library not found")
         };
+
+        let gpu_encoder = GPUCommandEncoder::new(device, &library);
 
         // let root_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         // let library_path = root_path.join("src/renderer/mtl/shaders.metallib");
@@ -341,6 +412,25 @@ impl Mtl {
             // stencil_descriptor.set_depth_write_enabled(true);
             #[cfg(debug_assertions)]
             stencil_descriptor.set_label("default_stencil_state");
+            device.new_depth_stencil_state(&stencil_descriptor)
+        };
+
+        let clear_stencil_state = {
+            let desc = metal::StencilDescriptor::new();
+            desc.set_stencil_compare_function(metal::MTLCompareFunction::Equal);
+            desc.set_stencil_failure_operation(metal::MTLStencilOperation::Keep);
+            desc.set_depth_failure_operation(metal::MTLStencilOperation::Keep);
+            desc.set_depth_stencil_pass_operation(metal::MTLStencilOperation::Keep);
+
+            desc.set_write_mask(0xff);
+            desc.set_read_mask(0xff);
+
+            let stencil_descriptor = metal::DepthStencilDescriptor::new();
+
+            #[cfg(debug_assertions)]
+            stencil_descriptor.set_label("clear_stencil_state");
+            stencil_descriptor.set_back_face_stencil(None);
+            stencil_descriptor.set_front_face_stencil(Some(&desc));
             device.new_depth_stencil_state(&stencil_descriptor)
         };
 
@@ -537,6 +627,7 @@ impl Mtl {
 
         let clear_stencil_rps = clear_stencil_pipeline_state(device, &library);
         Self {
+            gpu_encoder,
             clear_stencil_rps,
             multiple_buffering: 3,
             layer: layer.to_owned(),
@@ -1574,6 +1665,9 @@ impl Renderer for Mtl {
                     // encoder.push_debug_group("unknown debug group from blit");
                     todo!("blit is not implemented");
                 }
+                CommandType::GPUTriangle => {
+                    self.gpu_encoder.encode(encoder);
+                }
                 CommandType::CustomCommand { command_encoder } => {
                     // encoder.pop_debug_group();
                     // encoder.end_encoding();
@@ -1621,12 +1715,14 @@ impl Renderer for Mtl {
                         #[cfg(debug_assertions)]
                         encoder.pop_debug_group();
                     }
-                    {
+                    if false {
                         #[cfg(debug_assertions)]
                         encoder.push_debug_group("clear_stencil");
 
                         encoder.set_render_pipeline_state(&self.clear_stencil_rps);
-                        encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
+                        // encoder.set_depth_stencil_state(&self.fill_shape_stencil_state);
+                        encoder.set_depth_stencil_state(&self.default_stencil_state);
+                        encoder.set_cull_mode(metal::MTLCullMode::None);
 
                         // let clear_coords = [-1, -1, 1, -1, -1, 1, 1, 1];
                         let clear_coords: [f32; 8] = [-1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0];
@@ -1635,6 +1731,7 @@ impl Renderer for Mtl {
                         encoder.set_vertex_bytes(0, (8 * std::mem::size_of::<f32>()) as _, clear_coords.as_ptr() as _);
                         encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, 0, 4);
 
+                        encoder.set_cull_mode(metal::MTLCullMode::Back);
                         #[cfg(debug_assertions)]
                         encoder.pop_debug_group();
                     }

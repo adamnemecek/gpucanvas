@@ -851,6 +851,11 @@ where
         self.append_cmd(Command::new(cmd));
     }
 
+    pub fn gpu_triangle(&mut self, ) {
+        let cmd = CommandType::GPUTriangle;
+        self.append_cmd(Command::new(cmd));
+    }
+
     pub fn custom_encoder(&mut self, command_encoder: std::sync::Arc<dyn crate::CommandEncoder>) {
         let cmd = CommandType::CustomCommand { command_encoder };
         self.append_cmd(Command::new(cmd));
