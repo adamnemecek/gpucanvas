@@ -90,7 +90,15 @@ impl std::fmt::Debug for CommandEncoder {
 }
 impl gpucanvas::CommandEncoder for CommandEncoder {
     fn encode(&self, encoder: &metal::RenderCommandEncoderRef) {
-        todo!()
+        encoder.set_render_pipeline_state(&self.rps);
+        encoder.set_vertex_buffer(0, Some(&self.buffer), 0);
+        encoder.draw_primitives_instanced(
+            metal::MTLPrimitiveType::TriangleStrip,
+            0,
+            4,
+            1,
+        );
+
     }
 }
 
