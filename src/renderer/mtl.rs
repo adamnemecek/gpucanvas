@@ -1630,6 +1630,8 @@ impl Renderer for Mtl {
 
                         // let clear_coords = [-1, -1, 1, -1, -1, 1, 1, 1];
                         let clear_coords: [f32; 8] = [-1.0, -1.0, 1.0, -1.0, -1.0, 1.0, 1.0, 1.0];
+                        // let clear_coords: [f32; 8] = [-0.5, -0.5, 0.5, -0.5, -0.5, 0.5, 0.5, 0.5];
+                        // let clear_coords: [f32; 8] = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
                         encoder.set_vertex_bytes(0, (8 * std::mem::size_of::<f32>()) as _, clear_coords.as_ptr() as _);
                         encoder.draw_primitives(metal::MTLPrimitiveType::TriangleStrip, 0, 4);
 

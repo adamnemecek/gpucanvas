@@ -470,10 +470,10 @@ fn main() {
                     // draw_image(&mut canvas, images[0], 5.0, 300.0);
                     // draw_text(&mut canvas, &fonts, "tea", 50.0, 200.0, 100.0, 100.0);
 
-                    draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
+                    draw_text(&mut canvas, &fonts, "e", 0.0, 0.0, 100.0, 100.0);
 
                     canvas.custom_encoder(encoder.clone());
-                    draw_text(&mut canvas, &fonts, "t", 200.0, 200.0, 100.0, 100.0);
+                    draw_text(&mut canvas, &fonts, "e", 300.0, 300.0, 100.0, 100.0);
                     // draw_text(&mut canvas, &fonts, "t", 200.0, 200.0, 100.0, 100.0);
 
                     // draw_image(&mut canvas, red_rect, 100.0, 100.0);
