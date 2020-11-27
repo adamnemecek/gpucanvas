@@ -27,6 +27,73 @@ use gpucanvas::{
     Path, Renderer, Solidity,
 };
 
+fn prepare_pipeline_state<'a>(
+    device: &metal::DeviceRef,
+    library: &metal::LibraryRef,
+    vertex_shader: &str,
+    fragment_shader: &str,
+) -> RenderPipelineState {
+    let vert = library.get_function(vertex_shader, None).unwrap();
+    let frag = library.get_function(fragment_shader, None).unwrap();
+
+    let pipeline_state_descriptor = RenderPipelineDescriptor::new();
+    pipeline_state_descriptor.set_vertex_function(Some(&vert));
+    pipeline_state_descriptor.set_fragment_function(Some(&frag));
+    let attachment = pipeline_state_descriptor
+        .color_attachments()
+        .object_at(0)
+        .unwrap();
+    attachment.set_pixel_format(MTLPixelFormat::BGRA8Unorm);
+
+    attachment.set_blending_enabled(true);
+    attachment.set_rgb_blend_operation(metal::MTLBlendOperation::Add);
+    attachment.set_alpha_blend_operation(metal::MTLBlendOperation::Add);
+    attachment.set_source_rgb_blend_factor(metal::MTLBlendFactor::SourceAlpha);
+    attachment.set_source_alpha_blend_factor(metal::MTLBlendFactor::SourceAlpha);
+    attachment.set_destination_rgb_blend_factor(metal::MTLBlendFactor::OneMinusSourceAlpha);
+    attachment.set_destination_alpha_blend_factor(metal::MTLBlendFactor::OneMinusSourceAlpha);
+
+    device
+        .new_render_pipeline_state(&pipeline_state_descriptor)
+        .unwrap()
+}
+
+struct CommandEncoder {
+    buffer: metal::Buffer,
+    rps: metal::RenderPipelineState,
+}
+
+impl CommandEncoder {
+    pub fn new(device: &metal::DeviceRef, library: &metal::LibraryRef) -> Self {
+        let buffer = {
+            let vertex_data = [
+                0.0f32, 0.5, 1.0, 0.0, 0.0, -0.5, -0.5, 0.0, 1.0, 0.0, 0.5, 0.5, 0.0, 0.0, 1.0,
+            ];
+    
+            device.new_buffer_with_data(
+                vertex_data.as_ptr() as *const _,
+                (vertex_data.len() * mem::size_of::<f32>()) as u64,
+                MTLResourceOptions::CPUCacheModeDefaultCache | MTLResourceOptions::StorageModeManaged,
+            )
+        };
+        let rps = prepare_pipeline_state(device, library, "triangle_vertex", "triangle_fragment");
+
+        Self { buffer, rps }
+    }
+}
+
+impl std::fmt::Debug for CommandEncoder {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // todo!()
+        f.debug_struct("CommandEncoder").finish()
+    }
+}
+impl gpucanvas::CommandEncoder for CommandEncoder {
+    fn encode(&self, encoder: &metal::RenderCommandEncoderRef) {
+        
+    }
+}
+
 pub fn quantize(a: f32, d: f32) -> f32 {
     (a / d + 0.5).trunc() * d
 }
@@ -134,55 +201,55 @@ fn main() {
         canvas.start_capture();
     }
 
-    let red_rect = {
-        let render_with_canvas = false;
+    // let red_rect = {
+    //     let render_with_canvas = false;
 
-        let width = 100;
-        let height = 100;
-        let red_rect = canvas
-            .create_image_empty(width, height, gpucanvas::PixelFormat::Rgba8, ImageFlags::FLIP_Y)
-            .unwrap();
+    //     let width = 100;
+    //     let height = 100;
+    //     let red_rect = canvas
+    //         .create_image_empty(width, height, gpucanvas::PixelFormat::Rgba8, ImageFlags::FLIP_Y)
+    //         .unwrap();
 
-        if render_with_canvas {
-            canvas.save();
-            canvas.reset();
-            println!("red_image start");
-            canvas.set_label(red_rect, "red_rect");
+    //     if render_with_canvas {
+    //         canvas.save();
+    //         canvas.reset();
+    //         println!("red_image start");
+    //         canvas.set_label(red_rect, "red_rect");
 
-            println!("red_rect_Id {:?}, size: {:?}", red_rect, canvas.image_size(red_rect));
+    //         println!("red_rect_Id {:?}, size: {:?}", red_rect, canvas.image_size(red_rect));
 
-            // let image_id = canvas.text_context.textures[0].image_id;
-            canvas.push_render_target(gpucanvas::RenderTarget::Image(red_rect));
-            let mut path = Path::new();
-            path.rect(20.0, 20.0, 80.0, 80.0);
+    //         // let image_id = canvas.text_context.textures[0].image_id;
+    //         canvas.push_render_target(gpucanvas::RenderTarget::Image(red_rect));
+    //         let mut path = Path::new();
+    //         path.rect(20.0, 20.0, 80.0, 80.0);
 
-            canvas.fill_path(&mut path, Paint::color(Color::yellow()));
+    //         canvas.fill_path(&mut path, Paint::color(Color::yellow()));
 
-            canvas.flush();
-            canvas.restore();
-            println!("red_image end");
-            canvas.pop_render_target();
-        } else {
-            let texture = canvas.get_image(red_rect).unwrap();
-            use rgb::RGBA8;
+    //         canvas.flush();
+    //         canvas.restore();
+    //         println!("red_image end");
+    //         canvas.pop_render_target();
+    //     } else {
+    //         let texture = canvas.get_image(red_rect).unwrap();
+    //         use rgb::RGBA8;
 
-            let data = vec![
-                RGBA8 {
-                    r: 0,
-                    g: 100,
-                    b: 100,
-                    a: 255
-                };
-                (width * height) as usize
-            ];
-            let reg = metal::MTLRegion::new_2d(0, 0, width as _, height as _);
-            texture
-                .tex()
-                .replace_region(reg, 0, data.as_ptr() as _, (4 * width) as u64);
-        }
+    //         let data = vec![
+    //             RGBA8 {
+    //                 r: 0,
+    //                 g: 100,
+    //                 b: 100,
+    //                 a: 255
+    //             };
+    //             (width * height) as usize
+    //         ];
+    //         let reg = metal::MTLRegion::new_2d(0, 0, width as _, height as _);
+    //         texture
+    //             .tex()
+    //             .replace_region(reg, 0, data.as_ptr() as _, (4 * width) as u64);
+    //     }
 
-        red_rect
-    };
+    //     red_rect
+    // };
 
     events_loop.run(move |event, _, control_flow| {
         autoreleasepool(|| {
@@ -399,7 +466,7 @@ fn main() {
                     // draw_text(&mut canvas, &fonts, "tea", 50.0, 200.0, 100.0, 100.0);
                     draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
                     // draw_image(&mut canvas, red_rect, 100.0, 100.0);
-                    blit(&mut canvas, red_rect, 10.0, 10.0);
+                    // blit(&mut canvas, red_rect, 10.0, 10.0);
                     // draw_clear_rect2(&mut canvas, 0, 0, 200, 150);
 
                     // if true {
@@ -451,18 +518,18 @@ fn main() {
     })
 }
 
-fn blit<T: Renderer>(canvas: &mut Canvas<T>, image: ImageId, x: f32, y: f32) {
-    canvas.save();
-    canvas.blit(image, (x as _, y as _));
+// fn blit<T: Renderer>(canvas: &mut Canvas<T>, image: ImageId, x: f32, y: f32) {
+//     canvas.save();
+//     canvas.blit(image, (x as _, y as _));
 
-    // let (w, h) = canvas.image_size(image).unwrap();
-    // let img_paint = Paint::image(image, x, y, w as _, h as _, 0.0, 1.0);
+//     // let (w, h) = canvas.image_size(image).unwrap();
+//     // let img_paint = Paint::image(image, x, y, w as _, h as _, 0.0, 1.0);
 
-    // let mut path = Path::new();
-    // path.rounded_rect(x, y, w as _, h as _, 5.0);
-    // canvas.fill_path(&mut path, img_paint);
-    canvas.restore();
-}
+//     // let mut path = Path::new();
+//     // path.rounded_rect(x, y, w as _, h as _, 5.0);
+//     // canvas.fill_path(&mut path, img_paint);
+//     canvas.restore();
+// }
 
 fn draw_image<T: Renderer>(canvas: &mut Canvas<T>, image: ImageId, x: f32, y: f32) {
     canvas.save();
