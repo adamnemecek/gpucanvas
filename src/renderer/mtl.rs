@@ -1516,55 +1516,55 @@ impl Renderer for Mtl {
                 }
                 CommandType::CustomCommand { command_encoder } => {
                     // encoder.pop_debug_group();
-                    encoder.end_encoding();
+                    // encoder.end_encoding();
 
-                    let texture = match self.render_target {
-                        RenderTarget::None => todo!(),
-                        RenderTarget::Screen => {
-                            // self.layer.next_drawable().unwrap().texture()
-                            self.layer.next_drawable().and_then(|x| Some(x.texture()))
-                        }
-                        RenderTarget::Image(id) => {
-                            // images.get(id).unwrap().tex()
-                            images.get(id).and_then(|x| Some(x.tex()))
-                            // todo!()
-                        }
-                    }
-                    .unwrap();
+                    // let texture = match self.render_target {
+                    //     RenderTarget::None => todo!(),
+                    //     RenderTarget::Screen => {
+                    //         // self.layer.next_drawable().unwrap().texture()
+                    //         self.layer.next_drawable().and_then(|x| Some(x.texture()))
+                    //     }
+                    //     RenderTarget::Image(id) => {
+                    //         // images.get(id).unwrap().tex()
+                    //         images.get(id).and_then(|x| Some(x.tex()))
+                    //         // todo!()
+                    //     }
+                    // }
+                    // .unwrap();
 
-                    encoder = new_render_command_encoder(
-                        &texture,
-                        &command_buffer,
-                        clear_color,
-                        &mut self.stencil_texture,
-                        &self.vertex_buffer,
-                        // &self.view_size_buffer,
-                        self.view_size,
-                        // &self.uniform_buffer,
-                        // self.clear_buffer_on_flush,
-                    );
+                    // encoder = new_render_command_encoder(
+                    //     &texture,
+                    //     &command_buffer,
+                    //     clear_color,
+                    //     &mut self.stencil_texture,
+                    //     &self.vertex_buffer,
+                    //     // &self.view_size_buffer,
+                    //     self.view_size,
+                    //     // &self.uniform_buffer,
+                    //     // self.clear_buffer_on_flush,
+                    // );
 
-                    #[cfg(debug_assertions)]
-                    encoder.push_debug_group("custom_command");
-                    // encoder.set_depth_stencil_state(&self.default_stencil_state);
+                    // #[cfg(debug_assertions)]
+                    // encoder.push_debug_group("custom_command");
+                    // // encoder.set_depth_stencil_state(&self.default_stencil_state);
 
                     command_encoder.encode(encoder);
 
-                    #[cfg(debug_assertions)]
-                    encoder.pop_debug_group();
-                    encoder.end_encoding();
+                    // #[cfg(debug_assertions)]
+                    // encoder.pop_debug_group();
+                    // encoder.end_encoding();
 
-                    encoder = new_render_command_encoder(
-                        &texture,
-                        &command_buffer,
-                        clear_color,
-                        &mut self.stencil_texture,
-                        &self.vertex_buffer,
-                        // &self.view_size_buffer,
-                        self.view_size,
-                        // &self.uniform_buffer,
-                        // self.clear_buffer_on_flush,
-                    );
+                    // encoder = new_render_command_encoder(
+                    //     &texture,
+                    //     &command_buffer,
+                    //     clear_color,
+                    //     &mut self.stencil_texture,
+                    //     &self.vertex_buffer,
+                    //     // &self.view_size_buffer,
+                    //     self.view_size,
+                    //     // &self.uniform_buffer,
+                    //     // self.clear_buffer_on_flush,
+                    // );
                     // self.custom_command(encoder, &command_encoder);
                     // command_encoder.encode(encoder);
                 }
