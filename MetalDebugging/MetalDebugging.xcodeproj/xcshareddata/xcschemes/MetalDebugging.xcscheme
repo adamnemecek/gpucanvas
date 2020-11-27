@@ -42,7 +42,7 @@
       allowLocationSimulation = "YES">
       <PathRunnable
          runnableDebuggingMode = "0"
-         FilePath = "/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas/target/debug/examples/mtlcustomcommand">
+         FilePath = "/Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas/target/debug/examples/mtlsimple">
       </PathRunnable>
    </LaunchAction>
    <ProfileAction
