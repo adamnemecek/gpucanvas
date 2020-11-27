@@ -51,6 +51,26 @@ pub fn clear_stencil_pipeline_state(
 
     desc.set_vertex_function(Some(&vertex));
     desc.set_fragment_function(None);
+    desc.set_label("clear_stencil");
+
+    let vertex_descriptor = {
+        let desc = metal::VertexDescriptor::new();
+
+        let attrs = desc.attributes().object_at(0).unwrap();
+        attrs.set_format(metal::MTLVertexFormat::Float2);
+        attrs.set_buffer_index(0);
+        attrs.set_offset(0);
+
+        let layout = desc.layouts().object_at(0).unwrap();
+        // layout.set_stride(std::mem::size_of::<Vertex>() as u64);
+        layout.set_step_rate(1);
+        layout.set_stride(8);
+        layout.set_step_function(metal::MTLVertexStepFunction::PerVertex);
+
+        desc
+    };
+
+    desc.set_vertex_descriptor(Some(&vertex_descriptor));
 
     let color_attachment_desc = desc.color_attachments().object_at(0).unwrap();
     color_attachment_desc.set_pixel_format(pixel_format);
@@ -60,8 +80,6 @@ pub fn clear_stencil_pipeline_state(
     // color_attachment_desc.set_destination_rgb_blend_factor(blend_func.dst_rgb);
     // color_attachment_desc.set_destination_alpha_blend_factor(blend_func.dst_alpha);
     color_attachment_desc.set_write_mask(metal::MTLColorWriteMask::empty());
-
-    desc.set_label("clear_stencil");
 
     device.new_render_pipeline_state(&desc).unwrap()
 }
