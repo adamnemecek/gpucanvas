@@ -39,10 +39,7 @@ fn prepare_pipeline_state<'a>(
     let pipeline_state_descriptor = RenderPipelineDescriptor::new();
     pipeline_state_descriptor.set_vertex_function(Some(&vert));
     pipeline_state_descriptor.set_fragment_function(Some(&frag));
-    let attachment = pipeline_state_descriptor
-        .color_attachments()
-        .object_at(0)
-        .unwrap();
+    let attachment = pipeline_state_descriptor.color_attachments().object_at(0).unwrap();
     attachment.set_pixel_format(MTLPixelFormat::BGRA8Unorm);
 
     attachment.set_blending_enabled(true);
@@ -53,9 +50,7 @@ fn prepare_pipeline_state<'a>(
     attachment.set_destination_rgb_blend_factor(metal::MTLBlendFactor::OneMinusSourceAlpha);
     attachment.set_destination_alpha_blend_factor(metal::MTLBlendFactor::OneMinusSourceAlpha);
 
-    device
-        .new_render_pipeline_state(&pipeline_state_descriptor)
-        .unwrap()
+    device.new_render_pipeline_state(&pipeline_state_descriptor).unwrap()
 }
 
 struct CommandEncoder {
@@ -69,7 +64,7 @@ impl CommandEncoder {
             let vertex_data = [
                 0.0f32, 0.5, 1.0, 0.0, 0.0, -0.5, -0.5, 0.0, 1.0, 0.0, 0.5, 0.5, 0.0, 0.0, 1.0,
             ];
-    
+
             device.new_buffer_with_data(
                 vertex_data.as_ptr() as *const _,
                 (vertex_data.len() * mem::size_of::<f32>()) as u64,
@@ -92,13 +87,7 @@ impl gpucanvas::CommandEncoder for CommandEncoder {
     fn encode(&self, encoder: &metal::RenderCommandEncoderRef) {
         encoder.set_render_pipeline_state(&self.rps);
         encoder.set_vertex_buffer(0, Some(&self.buffer), 0);
-        encoder.draw_primitives_instanced(
-            metal::MTLPrimitiveType::TriangleStrip,
-            0,
-            4,
-            1,
-        );
-
+        encoder.draw_primitives_instanced(metal::MTLPrimitiveType::TriangleStrip, 0, 4, 1);
     }
 }
 
@@ -477,8 +466,13 @@ fn main() {
                     // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                     // draw_image(&mut canvas, images[0], 5.0, 300.0);
                     // draw_text(&mut canvas, &fonts, "tea", 50.0, 200.0, 100.0, 100.0);
+
                     draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
+
                     canvas.custom_encoder(encoder.clone());
+                    draw_text(&mut canvas, &fonts, "t", 200.0, 200.0, 100.0, 100.0);
+                    // draw_text(&mut canvas, &fonts, "t", 200.0, 200.0, 100.0, 100.0);
+
                     // draw_image(&mut canvas, red_rect, 100.0, 100.0);
                     // blit(&mut canvas, red_rect, 10.0, 10.0);
                     // draw_clear_rect2(&mut canvas, 0, 0, 200, 150);
