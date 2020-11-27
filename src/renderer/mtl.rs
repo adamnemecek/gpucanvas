@@ -36,6 +36,10 @@ pub use mtl_ext::{BlitCommandEncoderExt, GPUVecExt, MtlTextureExt};
 mod buffers_cache;
 pub use buffers_cache::*;
 
+
+pub fn clear_stencil_pipeline_state(device: &metal::DeviceRef) {
+    todo!()
+}
 // lazy_static! {
 //     static ref BUFFER_CACHE: BuffersCache = BuffersCache::new(&metal::Device::system_default().unwrap(), 3);
 //     // static ref NUMBER: u32 = times_two(21);
@@ -1548,8 +1552,8 @@ impl Renderer for Mtl {
                     //     // self.clear_buffer_on_flush,
                     // );
 
-                    // #[cfg(debug_assertions)]
-                    // encoder.push_debug_group("custom_command");
+                    #[cfg(debug_assertions)]
+                    encoder.push_debug_group("custom_command");
                     // // encoder.set_depth_stencil_state(&self.default_stencil_state);
 
                     command_encoder.encode(encoder);
@@ -1561,8 +1565,8 @@ impl Renderer for Mtl {
                     //     .tex()
                     //     .replace_region(reg, 0, data.as_ptr() as _, (width) as u64);
 
-                    // #[cfg(debug_assertions)]
-                    // encoder.pop_debug_group();
+                    #[cfg(debug_assertions)]
+                    encoder.pop_debug_group();
                     // encoder.end_encoding();
 
                     // encoder = new_render_command_encoder(

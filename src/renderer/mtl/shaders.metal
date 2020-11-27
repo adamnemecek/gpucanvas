@@ -104,6 +104,17 @@ vertex RasterizerData vertexShader(Vertex vert [[stage_in]],
     return out;
 }
 
+// vertex StencilClear vertexClearStencil() {
+
+// }
+
+
+// fragment float4 fragmentClearStencil(
+
+// ) {
+
+// }
+
 // Fragment function (No AA)
 // fragment float4 fragmentShader(
 //   RasterizerData in [[stage_in]],
