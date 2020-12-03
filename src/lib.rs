@@ -851,7 +851,7 @@ where
         self.append_cmd(Command::new(cmd));
     }
 
-    pub fn gpu_triangle(&mut self, ) {
+    pub fn gpu_triangle(&mut self) {
         let cmd = CommandType::GPUTriangle;
         self.append_cmd(Command::new(cmd));
     }
