@@ -578,9 +578,13 @@ where
     ///   [a c e]
     ///   [b d f]
     ///   [0 0 1]
-    pub fn set_transform(&mut self, a: f32, b: f32, c: f32, d: f32, e: f32, f: f32) {
-        let transform = Transform2D([a, b, c, d, e, f]);
-        self.state_mut().transform.premultiply(&transform);
+    // pub fn set_transform(&mut self, a: f32, b: f32, c: f32, d: f32, e: f32, f: f32) {
+    //     let transform = Transform2D([a, b, c, d, e, f]);
+    //     self.state_mut().transform.premultiply(&transform);
+    // }
+    pub fn set_transform(&mut self, transform: Transform2D) {
+        // self.state_mut().transform.premultiply(&transform)
+        self.state_mut().transform = transform;
     }
 
     /// Resets current transform to a identity matrix.
