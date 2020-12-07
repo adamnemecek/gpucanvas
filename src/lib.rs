@@ -566,9 +566,11 @@ where
 
     // Transforms
 
-    /// Resets current transform to a identity matrix.
-    pub fn reset_transform(&mut self) {
-        self.state_mut().transform = Transform2D::identity();
+    /// Returns the current transformation matrix
+    ///
+    /// TODO: It's not ok that this method returns Transform2D while set_transform accepts 6 floats - make it consistant
+    pub fn transform(&self) -> Transform2D {
+        self.state().transform
     }
 
     /// Premultiplies current coordinate system by specified matrix.
@@ -579,6 +581,11 @@ where
     pub fn set_transform(&mut self, a: f32, b: f32, c: f32, d: f32, e: f32, f: f32) {
         let transform = Transform2D([a, b, c, d, e, f]);
         self.state_mut().transform.premultiply(&transform);
+    }
+
+    /// Resets current transform to a identity matrix.
+    pub fn reset_transform(&mut self) {
+        self.state_mut().transform = Transform2D::identity();
     }
 
     /// Translates the current coordinate system.
@@ -626,13 +633,6 @@ where
         let mut t = Transform2D::identity();
         t.scale(x, y);
         self.state_mut().transform.premultiply(&t);
-    }
-
-    /// Returns the current transformation matrix
-    ///
-    /// TODO: It's not ok that this method returns Transform2D while set_transform accepts 6 floats - make it consistant
-    pub fn transform(&self) -> Transform2D {
-        self.state().transform
     }
 
     // Scissoring
