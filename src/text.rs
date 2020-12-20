@@ -5,7 +5,7 @@ use std::path::Path as FilePath;
 
 use fnv::{FnvBuildHasher, FnvHashMap, FnvHasher};
 use generational_arena::{Arena, Index};
-use harfbuzz_rs as hb;
+// use harfbuzz_rs as hb;
 use lru::LruCache;
 
 use unicode_bidi::BidiInfo;
@@ -368,9 +368,11 @@ fn shape_run(
             }
 
             let hb_direction = if levels[run.start].is_rtl() {
-                hb::Direction::Rtl
+                // hb::Direction::Rtl
+                rustybuzz::Direction::RightToLeft
             } else {
-                hb::Direction::Ltr
+                // hb::Direction::Ltr
+                rustybuzz::Direction::LeftToRight
             };
 
             let mut words = Vec::new();
@@ -429,7 +431,7 @@ fn shape_run(
 
 fn shape_word(
     word: &str,
-    hb_direction: hb::Direction,
+    hb_direction: rustybuzz::Direction,
     context: &mut TextContext,
     paint: &Paint,
 ) -> Result<ShapedWord, ErrorKind> {
@@ -439,12 +441,24 @@ fn shape_word(
         // Call harfbuzz
         let output = {
             // TODO: It may be faster if this is created only once and stored inside the Font struct
-            let face = hb::Face::new(font.data().clone(), 0);
-            let hb_font = hb::Font::new(face);
+            // let face = hb::Face::new(font.data().clone(), 0);
+            // let hb_font = hb::Font::new(face);
+            let face = match rustybuzz::Face::from_slice(&font.data(), 0) {
+                Some(v) => v,
+                None => {
+                    eprintln!("Error: malformed font.");
+                    std::process::exit(1);
+                }
+            };
 
-            let buffer = hb::UnicodeBuffer::new().add_str(word).set_direction(hb_direction);
+            // let buffer = hb::UnicodeBuffer::new().add_str(word).set_direction(hb_direction);
+            let mut buffer = rustybuzz::UnicodeBuffer::new();
+            buffer.push_str(word);
+            buffer.set_direction(hb_direction);
 
-            hb::shape(&hb_font, buffer, &[])
+
+            // hb::shape(&hb_font, buffer, &[])
+            rustybuzz::shape(&face, &[], buffer)
         };
 
         // let output = {
@@ -455,8 +469,10 @@ fn shape_word(
         //     rustybuzz::shape(&rb_font, buffer, &[])
         // };
 
-        let positions = output.get_glyph_positions();
-        let infos = output.get_glyph_infos();
+        // let positions = output.get_glyph_positions();
+        // let infos = output.get_glyph_infos();
+        let positions = output.glyph_positions();
+        let infos = output.glyph_infos();
 
         let mut shaped_word = ShapedWord {
             glyphs: Vec::with_capacity(positions.len()),

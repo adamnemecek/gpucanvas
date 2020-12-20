@@ -192,7 +192,8 @@ fn main() {
                 let now = Instant::now();
                 let dt = (now - prevt).as_secs_f32();
 
-                if dt > 1.0 / 60.0 {
+                // if dt > 1.0 / 60.0 {
+                if true {
                     prevt = now;
                     // println!("_dt {:?} ", _dt);
 
