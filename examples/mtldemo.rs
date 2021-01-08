@@ -281,7 +281,7 @@ fn main() {
                     draw_label(&mut canvas, &fonts, "Diameter", x, y, 280.0, 20.0);
                     y += 25.0;
                     draw_edit_box_num(&mut canvas, &fonts, "123.00", "px", x + 180.0, y, 100.0, 28.0);
-                    draw_slider(&mut canvas, 0.4, x, y, 170.0, 28.0);
+                    draw_slider(&mut canvas, 0.4, 0.0, y + 200.0, 170.0, 28.0);
                     y += 55.0;
 
                     draw_button(
@@ -1272,41 +1272,42 @@ fn draw_thumbnails<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, 
     canvas.fill_path(&mut path, fade_paint);
 
     // Scroll bar
-    let shadow_paint = Paint::box_gradient(
-        x + w - 12.0 + 1.0,
-        y + 4.0 + 1.0,
-        8.0,
-        h - 8.0,
-        3.0,
-        4.0,
-        Color::rgba(0, 0, 0, 32),
-        Color::rgba(0, 0, 0, 92),
-    );
-    let mut path = Path::new();
-    path.rounded_rect(x + w - 12.0, y + 4.0, 8.0, h - 8.0, 3.0);
-    canvas.fill_path(&mut path, shadow_paint);
+    if false {
+        let shadow_paint = Paint::box_gradient(
+            x + w - 12.0 + 1.0,
+            y + 4.0 + 1.0,
+            8.0,
+            h - 8.0,
+            3.0,
+            4.0,
+            Color::rgba(0, 0, 0, 32),
+            Color::rgba(0, 0, 0, 92),
+        );
+        let mut path = Path::new();
+        path.rounded_rect(x + w - 12.0, y + 4.0, 8.0, h - 8.0, 3.0);
+        canvas.fill_path(&mut path, shadow_paint);
 
-    let scrollh = (h / stackh) * (h - 8.0);
-    let shadow_paint = Paint::box_gradient(
-        x + w - 12.0 - 1.0,
-        y + 4.0 + (h - 8.0 - scrollh) * u - 1.0,
-        8.0,
-        scrollh,
-        3.0,
-        4.0,
-        Color::rgba(220, 220, 220, 255),
-        Color::rgba(128, 128, 128, 255),
-    );
-    let mut path = Path::new();
-    path.rounded_rect(
-        x + w - 12.0 + 1.0,
-        y + 4.0 + 1.0 + (h - 8.0 - scrollh) * u,
-        8.0 - 2.0,
-        scrollh - 2.0,
-        2.0,
-    );
-    canvas.fill_path(&mut path, shadow_paint);
-
+        let scrollh = (h / stackh) * (h - 8.0);
+        let shadow_paint = Paint::box_gradient(
+            x + w - 12.0 - 1.0,
+            y + 4.0 + (h - 8.0 - scrollh) * u - 1.0,
+            8.0,
+            scrollh,
+            3.0,
+            4.0,
+            Color::rgba(220, 220, 220, 255),
+            Color::rgba(128, 128, 128, 255),
+        );
+        let mut path = Path::new();
+        path.rounded_rect(
+            x + w - 12.0 + 1.0,
+            y + 4.0 + 1.0 + (h - 8.0 - scrollh) * u,
+            8.0 - 2.0,
+            scrollh - 2.0,
+            2.0,
+        );
+        canvas.fill_path(&mut path, shadow_paint);
+    }
     canvas.restore();
 }
 

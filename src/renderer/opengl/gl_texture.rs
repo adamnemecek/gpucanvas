@@ -90,10 +90,12 @@ impl GlTexture {
             }
         } else {
             if flags.contains(ImageFlags::NEAREST) {
+                println!("nearest");
                 unsafe {
                     gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::NEAREST as i32);
                 }
             } else {
+                println!("linear");
                 unsafe {
                     gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
                 }

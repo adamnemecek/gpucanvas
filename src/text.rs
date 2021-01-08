@@ -456,7 +456,6 @@ fn shape_word(
             buffer.push_str(word);
             buffer.set_direction(hb_direction);
 
-
             // hb::shape(&hb_font, buffer, &[])
             rustybuzz::shape(&face, &[], buffer)
         };

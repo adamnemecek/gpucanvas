@@ -399,7 +399,7 @@ fn main() {
                     // draw_text(&mut canvas, &fonts, "tea", 50.0, 200.0, 100.0, 100.0);
                     draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
                     // draw_image(&mut canvas, red_rect, 100.0, 100.0);
-                    blit(&mut canvas, red_rect, 10.0, 10.0);
+                    // blit(&mut canvas, red_rect, 10.0, 10.0);
                     // draw_clear_rect2(&mut canvas, 0, 0, 200, 150);
 
                     // if true {
