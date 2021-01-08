@@ -94,7 +94,7 @@ impl MtlTexture {
                 sampler_desc.set_mip_filter(metal::MTLSamplerMipFilter::Nearest);
             }
             label.push_str("nearest, ");
-            println!("nearest");
+            // println!("nearest");
         } else {
             sampler_desc.set_min_filter(metal::MTLSamplerMinMagFilter::Linear);
             sampler_desc.set_mag_filter(metal::MTLSamplerMinMagFilter::Linear);
@@ -102,7 +102,7 @@ impl MtlTexture {
                 sampler_desc.set_mip_filter(metal::MTLSamplerMipFilter::Linear);
             }
             label.push_str("linear, ");
-            println!("linear");
+            // println!("linear");
         }
 
         if repeatx {

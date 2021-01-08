@@ -23,7 +23,8 @@ mod font;
 use font::Font;
 pub use font::FontMetrics;
 
-const GLYPH_PADDING: u32 = 2;
+const GLYPH_PADDING: u32 = 1;
+const GLYPH_MARGIN: u32 = 1;
 const TEXTURE_SIZE: usize = 512;
 const LRU_CACHE_CAPACITY: usize = 1000;
 
@@ -700,7 +701,7 @@ fn render_glyph<T: Renderer>(
     mode: RenderMode,
     glyph: &ShapedGlyph,
 ) -> Result<RenderedGlyph, ErrorKind> {
-    let padding = GLYPH_PADDING;
+    let padding = GLYPH_PADDING + GLYPH_MARGIN;
 
     let line_width = if mode == RenderMode::Stroke {
         paint.line_width
@@ -823,19 +824,28 @@ fn render_glyph<T: Renderer>(
 
     canvas.restore();
 
-    let g = RenderedGlyph {
-        // width: ((width as f32) * x_factor) as u32,
-        width,
-        height,
-        // atlas_x: (x_factor * dst_x as f32) as u32,
-        atlas_x: dst_x as u32,
-        atlas_y: dst_y as u32,
+    // let g = RenderedGlyph {
+    //     // width: ((width as f32) * x_factor) as u32,
+    //     width,
+    //     height,
+    //     // atlas_x: (x_factor * dst_x as f32) as u32,
+    //     atlas_x: dst_x as u32,
+    //     atlas_y: dst_y as u32,
+    //     texture_index: dst_index,
+    //     padding,
+    // };
+    // //adam
+    // // println!("shaped_glyph: {:#?}, rendered_glyph: {:#?}", glyph.c, g);
+    // Ok(g)
+
+    Ok(RenderedGlyph {
+        width: width - 2 * GLYPH_MARGIN,
+        height: height - 2 * GLYPH_MARGIN,
+        atlas_x: dst_x as u32 + GLYPH_MARGIN,
+        atlas_y: dst_y as u32 + GLYPH_MARGIN,
         texture_index: dst_index,
-        padding,
-    };
-    //adam
-    // println!("shaped_glyph: {:#?}, rendered_glyph: {:#?}", glyph.c, g);
-    Ok(g)
+        padding: padding - GLYPH_MARGIN,
+    })
 }
 
 fn find_texture_or_alloc<T: Renderer>(
