@@ -397,6 +397,7 @@ fn main() {
                     // draw_colorwheel(&mut canvas, 400.0, 200.0, 200.0, 200.0, 5.0);
                     // draw_image(&mut canvas, images[0], 5.0, 300.0);
                     // draw_text(&mut canvas, &fonts, "tea", 50.0, 200.0, 100.0, 100.0);
+                    stroke_rect(&mut canvas, 0.0, 0.0, 100.0, 100.0);
                     draw_text(&mut canvas, &fonts, "t", 0.0, 0.0, 100.0, 100.0);
                     // draw_image(&mut canvas, red_rect, 100.0, 100.0);
                     // blit(&mut canvas, red_rect, 10.0, 10.0);
@@ -537,6 +538,29 @@ fn draw_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32
     );
 
     canvas.fill_path(&mut path, paint);
+}
+
+fn stroke_rect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32) {
+    let mut path = Path::new();
+    // path.rounded_rect(
+    //     x,y,w,h,5.0
+    // );
+    path.rect(x, y, w, h);
+    let ax = 10.0;
+    let ay = 20.0;
+    let bx = 10.0;
+    let by = 20.0;
+
+    let paint = Paint::linear_gradient(
+        ax,
+        ay,
+        bx,
+        by,
+        Color::hsla(0.6 / (PI * 2.0), 1.0, 0.55, 1.0),
+        Color::hsla(0.6 / (PI * 2.0), 1.0, 0.55, 1.0),
+    );
+
+    canvas.stroke_path(&mut path, paint);
 }
 
 fn draw_roundrect<T: Renderer>(canvas: &mut Canvas<T>, x: f32, y: f32, w: f32, h: f32, r: f32, t: f32) {
