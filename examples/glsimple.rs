@@ -44,7 +44,7 @@ fn main() {
 
     //let windowed_context = ContextBuilder::new().with_gl(GlRequest::Specific(Api::OpenGlEs, (2, 0))).with_vsync(false).build_windowed(wb, &el).unwrap();
     //let windowed_context = ContextBuilder::new().with_vsync(false).with_multisampling(8).build_windowed(wb, &el).unwrap();
-    let windowed_context = ContextBuilder::new().with_vsync(false).build_windowed(wb, &el).unwrap();
+    let windowed_context = ContextBuilder::new().with_vsync(true).build_windowed(wb, &el).unwrap();
     let windowed_context = unsafe { windowed_context.make_current().unwrap() };
 
     let renderer = OpenGl::new(|s| windowed_context.get_proc_address(s) as *const _).expect("Cannot create renderer");
@@ -281,7 +281,11 @@ fn main() {
                 // );
 
                 // draw_thumbnails(&mut canvas, 365.0, popy - 30.0, 160.0, 300.0, &images, t);
-
+                // for i in 0..100 {
+                //     for j in 0..10 {
+                //         draw_rect(&mut canvas, i as f32 * 3.0 , j as f32 * 3.0, 1.0, 1.0);
+                //     }
+                // }
                 // /*
                 // draw_spinner(&mut canvas, 15.0, 285.0, 10.0, t);
                 // */

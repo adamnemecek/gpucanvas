@@ -32,8 +32,8 @@ ngds = { git = "https://github.com/adamnemecek/ngds", branch = "main" }
 
 # metal features
 memoffset = "*"
-metal = { git = "https://github.com/gfx-rs/metal-rs/", rev = "c3e2973" }
-metalgear = { git = "https://github.com/adamnemecek/metalgear", rev = "a1ea707" }
+metal = { git = "https://github.com/gfx-rs/metal-rs/", rev = "439c986" }
+metalgear = { git = "https://github.com/adamnemecek/metalgear", rev = "cafee6a" }
 static_assertions = "*"
 winit = "0.24"
 cocoa = "0.20"

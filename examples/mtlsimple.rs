@@ -58,6 +58,8 @@ fn main() {
     let layer = MetalLayer::new();
     layer.set_device(&device);
     layer.set_pixel_format(MTLPixelFormat::BGRA8Unorm);
+    println!("display sync: {:?}", layer.display_sync_enabled());
+    layer.set_display_sync_enabled(true);
     layer.set_presents_with_transaction(false);
 
     unsafe {
@@ -110,7 +112,7 @@ fn main() {
     //     .collect();
 
     // let mut first = true;
-    let capture = true;
+    let capture = false;
     let stop_frame = 2;
 
     //canvas.add_font("/usr/share/fonts/noto/NotoSansArabic-Regular.ttf").expect("Cannot add font");
@@ -120,8 +122,8 @@ fn main() {
 
     // let mut screenshot_image_id = None;
 
-    // let start = Instant::now();
-    // let mut prevt = start;
+    let start = Instant::now();
+    let mut prevt = start;
 
     let mut mousex = 0.0;
     let mut mousey = 0.0;
@@ -253,9 +255,9 @@ fn main() {
                 Event::RedrawRequested(_) => {
                     // println!("frame: {}", canvas.frame());
 
-                    // let now = Instant::now();
-                    // let dt = (now - prevt).as_secs_f32();
-                    // prevt = now;
+                    let now = Instant::now();
+                    let dt = (now - prevt).as_secs_f32();
+                    prevt = now;
 
                     // perf.update(dt);
 

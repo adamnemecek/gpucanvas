@@ -114,7 +114,7 @@ fn main() {
     let mut mousey = 0.0;
     let mut dragging = false;
 
-    let capture = true;
+    let capture = false;
     let stop_frame = 2;
 
     let mut perf = PerfGraph::new();
@@ -190,14 +190,14 @@ fn main() {
             },
             Event::RedrawRequested(_) => {
                 let now = Instant::now();
-                let dt = (now - prevt).as_secs_f32();
-
+                let dt = (now - prevt);
+                let boundary = std::time::Duration::from_millis(60);
                 // if dt > 1.0 / 60.0 {
-                if true {
+                if dt > boundary {
                     prevt = now;
                     // println!("_dt {:?} ", _dt);
 
-                    perf.update(dt);
+                    perf.update(dt.as_secs_f32());
 
                     // let dpi_factor = windowed_context.window().scale_factor();
                     // let size = windowed_context.window().inner_size();

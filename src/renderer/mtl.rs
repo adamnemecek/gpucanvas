@@ -1572,9 +1572,11 @@ impl Renderer for Mtl {
             // self.clear_buffer_on_flush,
         );
 
+        #[cfg(debug_assertions)]
         encoder.push_debug_group(&format!("frame: {:?}", self.frame));
 
         let mut pixel_format = target_texture.pixel_format();
+        #[cfg(debug_assertions)]
         encoder.push_debug_group(&format!("target: {:?}", self.render_target));
         // let mut data: Vec<u8> = Vec::with_capacity(500 * 500);
         // for data in data.iter_mut() {
@@ -1789,6 +1791,7 @@ impl Renderer for Mtl {
                         // println!("skipping target setting");
                         continue;
                     }
+                    #[cfg(debug_assertions)]
                     encoder.pop_debug_group();
 
                     target_set += 1;
@@ -1836,14 +1839,17 @@ impl Renderer for Mtl {
                         // &self.uniform_buffer,
                         // self.clear_buffer_on_flush,
                     );
+                    #[cfg(debug_assertions)]
                     encoder.push_debug_group(&format!("target: {:?}", target));
                 }
             }
         }
         // println!("loop end");
         // pop the target debug group
+        #[cfg(debug_assertions)]
         encoder.pop_debug_group();
         // pop the frame debug group
+        #[cfg(debug_assertions)]
         encoder.pop_debug_group();
 
         encoder.end_encoding();

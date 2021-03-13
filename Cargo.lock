@@ -870,8 +870,8 @@ dependencies = [
 
 [[package]]
 name = "metal"
-version = "0.20.0"
-source = "git+https://github.com/gfx-rs/metal-rs/?rev=c3e2973#c3e29735bf843449ce9585e0911b09e510480e95"
+version = "0.21.0"
+source = "git+https://github.com/gfx-rs/metal-rs/?rev=439c986#439c986eb7a9b91e88b61def2daa66e4043fcbef"
 dependencies = [
  "bitflags",
  "block",
@@ -884,7 +884,7 @@ dependencies = [
 [[package]]
 name = "metalgear"
 version = "0.1.0"
-source = "git+https://github.com/adamnemecek/metalgear?rev=a1ea707#a1ea707070406518751c3edc8204fc59e3cdd752"
+source = "git+https://github.com/adamnemecek/metalgear?rev=cafee6a#cafee6af1f80771c45f48625a333cc5b985b1de6"
 dependencies = [
  "cocoa-foundation",
  "metal",

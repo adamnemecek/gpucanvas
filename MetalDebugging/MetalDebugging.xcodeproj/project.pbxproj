@@ -18,12 +18,12 @@
 /* Begin PBXLegacyTarget section */
 		37FD8CD124D5EB61005F668B /* MetalDebugging */ = {
 			isa = PBXLegacyTarget;
-			buildArgumentsString = "build --example mtlcustomcommand";
+			buildArgumentsString = "build --example mtlsimple --release";
 			buildConfigurationList = 37FD8CD424D5EB61005F668B /* Build configuration list for PBXLegacyTarget "MetalDebugging" */;
 			buildPhases = (
 			);
 			buildToolPath = /Users/adamnemecek/.cargo/bin/cargo;
-			buildWorkingDirectory = /Users/adamnemecek/Code/ngrid/main/vendor/ngrid10deps/gpucanvas;
+			buildWorkingDirectory = /Users/adamnemecek/Code/gpucanvas/MetalDebugging;
 			dependencies = (
 			);
 			name = MetalDebugging;
