@@ -27,6 +27,9 @@ pub use mtl_texture::MtlTexture;
 mod rps_cache;
 pub use rps_cache::{RPSCache, RPS};
 
+mod mtl_logging;
+pub use mtl_logging::*;
+
 mod mtl_stencil_texture;
 pub use mtl_stencil_texture::MtlStencilTexture;
 
@@ -1293,7 +1296,7 @@ fn unlock() {
     }
 }
 
-fn should_render() -> bool {
+pub fn should_render() -> bool {
     unsafe { SHOULD_RENDER }
 }
 
